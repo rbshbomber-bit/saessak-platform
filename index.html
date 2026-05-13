@@ -2016,15 +2016,34 @@ function incUsage(kind){
   } catch(e){}
 }
 
-// ===== listings.json 외부 로드 (있으면 덮어씀, 실패 시 인라인 데이터 사용) =====
+// ===== 공고 데이터 로드 (1차: K-Startup API, 2차: listings.json, 3차: 인라인) =====
 async function tryLoadListingsJson(){
+  // 1차 시도: /api/listings (K-Startup 실시간 공고)
+  try {
+    const resp = await fetch("/api/listings", { cache: "default" });
+    if(resp.ok){
+      const data = await resp.json();
+      if(data?.ok && Array.isArray(data.listings) && data.listings.length > 0){
+        LISTINGS = data.listings;
+        console.log(`[K-Startup] ${LISTINGS.length}건 실시간 로드 완료 (${data.updatedAt})`);
+        renderAll();
+        return;
+      } else {
+        console.warn("[K-Startup] API 응답에 listings 없음 또는 ok=false:", data?.error);
+      }
+    }
+  } catch(e){
+    console.warn("[K-Startup] /api/listings 호출 실패:", e.message);
+  }
+
+  // 2차 폴백: static listings.json
   try {
     const resp = await fetch("listings.json", { cache: "no-store" });
     if(!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     if(Array.isArray(data?.listings) && data.listings.length > 0){
       LISTINGS = data.listings;
-      console.log(`[listings.json] ${LISTINGS.length}건 로드 완료 (v${data._meta?.version || "?"})`);
+      console.log(`[listings.json] ${LISTINGS.length}건 폴백 로드 완료 (v${data._meta?.version || "?"})`);
       renderAll();
     }
   } catch(e){
