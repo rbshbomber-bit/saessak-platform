@@ -81,14 +81,77 @@ header.site {
 }
 .brand .name { font-size: 16px; letter-spacing: -.02em; }
 .brand .name .accent { color: var(--sage-deep); }
-.nav-links { display: flex; gap: 24px; font-size: 14px; color: var(--ink-2); }
-.nav-links a:hover { color: var(--sage-deep); }
+.nav-links { display: flex; gap: 24px; font-size: 14px; color: var(--ink-2); align-items: center; }
+.nav-links > a, .nav-links .dropdown { white-space: nowrap; }
+.nav-links a { transition: color .15s; }
+.nav-links > a:hover, .nav-links .dropdown-trigger:hover { color: var(--sage-deep); }
 .nav-links .new {
   background: var(--sage); color: white;
   font-size: 9px; font-weight: 700;
   padding: 1px 5px; border-radius: 4px;
   margin-left: 4px; vertical-align: top;
   letter-spacing: .05em;
+}
+
+/* 드롭다운 메뉴 */
+.nav-links .dropdown { position: relative; }
+.nav-links .dropdown-trigger {
+  background: none; border: none; padding: 0;
+  font: inherit; color: var(--ink-2); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 14px;
+}
+.nav-links .dropdown-trigger .caret {
+  font-size: 9px; color: var(--ink-3);
+  transition: transform .2s;
+}
+.nav-links .dropdown.open .dropdown-trigger .caret {
+  transform: rotate(180deg);
+}
+.nav-links .dropdown.open .dropdown-trigger {
+  color: var(--sage-deep);
+}
+.nav-links .dropdown-menu {
+  position: absolute; top: calc(100% + 12px); left: -16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(20, 24, 31, .12);
+  padding: 8px;
+  min-width: 240px;
+  opacity: 0; visibility: hidden; transform: translateY(-8px);
+  transition: opacity .18s, transform .18s, visibility 0s linear .18s;
+  z-index: 100;
+}
+.nav-links .dropdown.open .dropdown-menu {
+  opacity: 1; visibility: visible; transform: translateY(0);
+  transition: opacity .18s, transform .18s, visibility 0s;
+}
+.nav-links .dropdown-menu a {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px; color: var(--ink-2);
+  text-decoration: none;
+}
+.nav-links .dropdown-menu a:hover {
+  background: var(--bg-2); color: var(--sage-deep);
+}
+.nav-links .dropdown-menu a .ico-han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  color: var(--sage-deep); font-weight: 500;
+  margin-right: 4px;
+}
+.nav-links .dropdown-menu a .meta {
+  font-size: 11px; color: var(--ink-3); font-weight: 500;
+}
+.nav-links .dropdown-menu a .meta.token {
+  background: var(--sage-soft); color: var(--sage-deep);
+  padding: 2px 8px; border-radius: 999px; font-weight: 700;
+}
+.nav-links .dropdown-menu .divider {
+  height: 1px; background: var(--line); margin: 6px 8px;
 }
 .nav-cta {
   font-size: 14px; font-weight: 600;
@@ -573,14 +636,33 @@ footer.site a:hover { color: var(--ink); }
     </a>
     <nav class="nav-links">
       <a href="#listings">공고</a>
-      <a href="#ai-matching">AI 매칭</a>
-      <a href="#ai-planner">사업계획서 AI</a>
-      <a href="compare.html">비교 분석<span class="new">NEW</span></a>
-      <a href="simulate.html">심사 시뮬레이션<span class="new">NEW</span></a>
-      <a href="slides.html">발표 슬라이드<span class="new">NEW</span></a>
-      <a href="lib.html">합격 라이브러리</a>
-      <a href="mentor.html">1:1 멘토링</a>
-      <a href="#tracker">트래커</a>
+
+      <div class="dropdown" data-dropdown>
+        <button class="dropdown-trigger" type="button">
+          AI 도구 <span class="caret">▾</span>
+        </button>
+        <div class="dropdown-menu">
+          <a href="#ai-matching"><span><span class="ico-han">配</span>AI 매칭 추천</span><span class="meta">즉시</span></a>
+          <a href="#ai-planner"><span><span class="ico-han">劃</span>사업계획서 AI</span><span class="meta token">20토큰</span></a>
+          <div class="divider"></div>
+          <a href="compare.html"><span><span class="ico-han">較</span>비교 분석<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">10토큰</span></a>
+          <a href="simulate.html"><span><span class="ico-han">審</span>심사 시뮬레이션<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">50토큰</span></a>
+          <a href="slides.html"><span><span class="ico-han">演</span>발표 슬라이드<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">30토큰</span></a>
+          <div class="divider"></div>
+          <a href="mentor.html"><span><span class="ico-han">指導</span>1:1 AI 멘토링</span><span class="meta token">30토큰</span></a>
+        </div>
+      </div>
+
+      <div class="dropdown" data-dropdown>
+        <button class="dropdown-trigger" type="button">
+          리소스 <span class="caret">▾</span>
+        </button>
+        <div class="dropdown-menu">
+          <a href="lib.html"><span><span class="ico-han">藏</span>합격 라이브러리</span><span class="meta">12건</span></a>
+          <a href="#tracker"><span><span class="ico-han">記</span>신청 트래커</span><span class="meta">무료</span></a>
+        </div>
+      </div>
+
       <a href="#pricing">요금</a>
     </nav>
     <div class="auth-area" id="auth-area">
@@ -2065,6 +2147,37 @@ async function tryLoadListingsJson(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ===== 드롭다운 메뉴 (AI 도구 / 리소스) =====
+  const dropdowns = document.querySelectorAll("[data-dropdown]");
+  dropdowns.forEach(dd => {
+    const trigger = dd.querySelector(".dropdown-trigger");
+    if (!trigger) return;
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const wasOpen = dd.classList.contains("open");
+      // 다른 드롭다운 닫기
+      dropdowns.forEach(x => x.classList.remove("open"));
+      // 현재 토글
+      if (!wasOpen) dd.classList.add("open");
+    });
+  });
+  // 메뉴 내부 링크 클릭 시 닫기
+  document.querySelectorAll(".dropdown-menu a").forEach(a => {
+    a.addEventListener("click", () => {
+      dropdowns.forEach(x => x.classList.remove("open"));
+    });
+  });
+  // 바깥 클릭 시 닫기
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-dropdown]")) {
+      dropdowns.forEach(x => x.classList.remove("open"));
+    }
+  });
+  // ESC 누르면 닫기
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") dropdowns.forEach(x => x.classList.remove("open"));
+  });
+
   loadStorage();
   updateAuthUI();
   tryLoadListingsJson();
