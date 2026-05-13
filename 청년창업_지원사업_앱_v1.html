@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>청년창업 지원사업 — 강화 포커스 (v1)</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --ink: #161b22;
+    --ink-2: #4b5563;
+    --ink-3: #6b7280;
+    --line: #e5e7eb;
+    --accent: #0f766e;
+    --accent-2: #14b8a6;
+    --warn: #b45309;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --chip-bg: #ecfdf5;
+    --chip-ink: #065f46;
+    --national: #eff6ff;
+    --national-ink: #1e40af;
+    --ganghwa: #fef3c7;
+    --ganghwa-ink: #92400e;
+    --incheon: #ede9fe;
+    --incheon-ink: #5b21b6;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.06);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--ink); margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo",
+                 "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 80px;
+  }
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--bg);
+    padding: 14px 16px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 {
+    font-size: 18px; font-weight: 700; margin: 0 0 2px; letter-spacing: -.02em;
+  }
+  header .sub {
+    font-size: 12px; color: var(--ink-3);
+  }
+  .search {
+    margin-top: 10px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .search input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font-size: 14px; color: var(--ink);
+  }
+  .filters {
+    display: flex; gap: 6px; overflow-x: auto;
+    padding: 10px 16px 6px;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto;
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--ink-2);
+    font-size: 12px; font-weight: 500;
+    padding: 7px 12px; border-radius: 999px;
+    cursor: pointer; user-select: none;
+    white-space: nowrap;
+  }
+  .chip.active {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
+  main { padding: 8px 14px 0; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .empty {
+    text-align: center; color: var(--ink-3);
+    padding: 40px 20px; font-size: 13px;
+  }
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin: 10px 0;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .card .row1 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+  .tag {
+    font-size: 11px; padding: 3px 8px; border-radius: 999px;
+    font-weight: 600;
+  }
+  .tag.ganghwa  { background: var(--ganghwa); color: var(--ganghwa-ink); }
+  .tag.incheon  { background: var(--incheon); color: var(--incheon-ink); }
+  .tag.national { background: var(--national); color: var(--national-ink); }
+  .tag.field    { background: var(--chip-bg); color: var(--chip-ink); }
+  .card h3 {
+    margin: 4px 0 6px; font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+  }
+  .card .meta {
+    font-size: 12px; color: var(--ink-3); margin-bottom: 8px;
+  }
+  .card .ddl {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 4px 8px; border-radius: 6px;
+    background: #fef2f2; color: var(--bad);
+    margin-right: 6px;
+  }
+  .card .ddl.soon { background: #fffbeb; color: var(--warn); }
+  .card .ddl.normal { background: #f0fdf4; color: var(--good); }
+  .card .money {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 4px 8px; border-radius: 6px;
+    background: #f1f5f9; color: var(--ink-2);
+  }
+  .card .actions {
+    display: flex; gap: 6px; margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-size: 12px; font-weight: 600;
+    padding: 7px 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--ink-2); cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.saved   { background: var(--accent-2); color: white; border-color: var(--accent-2); }
+  .btn.outlink { color: var(--ink-3); }
+  .why {
+    margin-top: 10px; padding: 10px;
+    background: #f9fafb; border-radius: 10px;
+    font-size: 12.5px; color: var(--ink-2);
+    border-left: 3px solid var(--accent);
+  }
+  .why b { color: var(--ink); }
+  /* AI 매칭 폼 */
+  .form {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 14px;
+    box-shadow: var(--shadow);
+    margin: 12px 0;
+  }
+  .form h2 {
+    font-size: 14px; font-weight: 700; margin: 0 0 10px;
+  }
+  .form .field { margin-bottom: 10px; }
+  .form label {
+    display: block; font-size: 12px; color: var(--ink-3);
+    margin-bottom: 4px; font-weight: 500;
+  }
+  .form input, .form select, .form textarea {
+    width: 100%; font-size: 14px;
+    padding: 9px 10px; border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fafbfc; color: var(--ink);
+    font-family: inherit;
+  }
+  .form textarea { resize: vertical; min-height: 60px; }
+  .form .row { display: flex; gap: 8px; }
+  .form .row > * { flex: 1; }
+  .form .submit {
+    width: 100%; margin-top: 6px;
+    padding: 12px; font-size: 14px; font-weight: 700;
+    background: var(--accent); color: white;
+    border: 0; border-radius: 10px; cursor: pointer;
+  }
+  .form .submit:disabled { opacity: .55; cursor: wait; }
+  .loading {
+    text-align: center; padding: 24px; color: var(--ink-3); font-size: 13px;
+  }
+  /* Tracker stages */
+  .stage-pills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+  .stage-pill {
+    font-size: 11px; padding: 4px 8px;
+    border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink-3);
+    cursor: pointer;
+  }
+  .stage-pill.on { background: var(--accent); color: white; border-color: var(--accent); }
+  /* Bottom nav */
+  nav.tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav.tabbar button {
+    border: 0; background: transparent;
+    padding: 12px 4px 14px;
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-3); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  nav.tabbar button.active { color: var(--accent); }
+  nav.tabbar .ic {
+    font-size: 18px; line-height: 1;
+  }
+  .footer-note {
+    text-align: center; font-size: 11px; color: var(--ink-3);
+    padding: 20px 16px 10px;
+  }
+  @media (min-width: 720px) {
+    main { max-width: 720px; margin: 0 auto; padding: 8px 24px 0; }
+    header { max-width: 720px; margin: 0 auto; }
+    .filters { max-width: 720px; margin: 0 auto; }
+    nav.tabbar { max-width: 720px; margin: 0 auto; border-radius: 16px 16px 0 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>청년창업 지원사업 · 강화 포커스</h1>
+  <div class="sub">v1 — 강화·인천·전국 통합 / 전국 확장 가능 구조</div>
+  <div class="search">
+    <span style="color:var(--ink-3);font-size:14px;">🔍</span>
+    <input id="search-input" placeholder="공고명·주관기관 검색" />
+  </div>
+</header>
+
+<div class="filters" id="region-filters">
+  <button class="chip active" data-region="all">전체</button>
+  <button class="chip" data-region="ganghwa">강화</button>
+  <button class="chip" data-region="incheon">인천</button>
+  <button class="chip" data-region="national">전국</button>
+</div>
+
+<main>
+  <!-- 공고 패널 -->
+  <section class="panel active" id="panel-list">
+    <div id="list-container"></div>
+  </section>
+
+  <!-- AI 매칭 패널 -->
+  <section class="panel" id="panel-match">
+    <div class="form">
+      <h2>AI 매칭 — 내 프로필 입력</h2>
+      <div class="field">
+        <label>나이</label>
+        <input id="m-age" type="number" placeholder="예: 39" value="39" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>지역</label>
+          <select id="m-region">
+            <option value="강화도">강화도</option>
+            <option value="인천">인천</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>관심 분야</label>
+          <select id="m-field">
+            <option value="농업·로컬">농업·로컬</option>
+            <option value="웰니스·헬스케어">웰니스·헬스케어</option>
+            <option value="딥테크·AI">딥테크·AI</option>
+            <option value="제조·소상공인">제조·소상공인</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>한 줄 메모 (선택)</label>
+        <textarea id="m-note" placeholder="예: 약사 출신, 강화도 거주, 시니어 복약관리 AI 챗봇 아이템 검토 중"></textarea>
+      </div>
+      <button class="submit" id="m-run">AI에게 매칭 요청</button>
+    </div>
+    <div id="match-result"></div>
+  </section>
+
+  <!-- 트래커 패널 -->
+  <section class="panel" id="panel-tracker">
+    <div id="tracker-container"></div>
+  </section>
+
+  <div class="footer-note">
+    공고 데이터는 데모용 샘플 + 공개 출처 기반 요약입니다.<br />
+    실제 신청 전 반드시 출처 링크에서 원문을 확인하세요.
+  </div>
+</main>
+
+<nav class="tabbar">
+  <button class="active" data-tab="list">
+    <span class="ic">📋</span><span>공고</span>
+  </button>
+  <button data-tab="match">
+    <span class="ic">✨</span><span>AI 매칭</span>
+  </button>
+  <button data-tab="tracker">
+    <span class="ic">🎯</span><span>트래커 <span id="tracker-count"></span></span>
+  </button>
+</nav>
+
+<script>
+// ===== 데이터 =====
+// 지역코드: ganghwa / incheon / national  (전국 확장 시 이 필드만 추가)
+const LISTINGS = [
+  {
+    id: "ghw-young-farmer",
+    region: "ganghwa", regionLabel: "강화",
+    title: "강화군 청년농업인 영농정착 지원사업",
+    org: "강화군청 농업기술센터",
+    field: "농업·로컬",
+    age: "만 18~49세",
+    money: "월 최대 110만원 / 최장 3년",
+    deadline: "2026-06-30",
+    summary: "강화 거주 청년농업인 신규 영농정착 지원. 영농경력 3년 이하.",
+    url: "https://www.ganghwa.go.kr/"
+  },
+  {
+    id: "ghw-succession-farm",
+    region: "ganghwa", regionLabel: "강화",
+    title: "후계농업경영인 육성자금 (강화)",
+    org: "강화군청 + 농협",
+    field: "농업·로컬",
+    age: "만 18~49세",
+    money: "최대 5억원 융자 (1%대)",
+    deadline: "2026-08-15",
+    summary: "강화 정착 후계농 대상 시설·농지 매입 융자. 2년 이상 영농계획 필요.",
+    url: "https://www.ganghwa.go.kr/"
+  },
+  {
+    id: "ghw-small-biz",
+    region: "ganghwa", regionLabel: "강화",
+    title: "강화군 소상공인 창업 지원금",
+    org: "강화군 일자리경제과",
+    field: "제조·소상공인",
+    age: "제한 없음 (청년 가산)",
+    money: "최대 500만원",
+    deadline: "2026-05-30",
+    summary: "강화 내 신규 점포 개설·인테리어·간판 지원. 청년 창업 시 가산점.",
+    url: "https://www.ganghwa.go.kr/"
+  },
+  {
+    id: "ghw-saemaul-youth",
+    region: "ganghwa", regionLabel: "강화",
+    title: "강화 청년 새마을 활동가 모집",
+    org: "강화군 새마을협의회",
+    field: "기타",
+    age: "만 18~45세",
+    money: "활동비 + 가산점",
+    deadline: "2026-07-20",
+    summary: "청년 새마을지도자 후보 인력풀. 지역 봉사·관계 실적 적립 가능.",
+    url: "https://www.saemaul.or.kr/"
+  },
+  {
+    id: "ic-pre-startup-school",
+    region: "incheon", regionLabel: "인천",
+    title: "인천 청년창업사관학교 (15기)",
+    org: "인천창조경제혁신센터",
+    field: "딥테크·AI",
+    age: "만 39세 이하",
+    money: "최대 1억원 + 입주 + 멘토링",
+    deadline: "2026-06-10",
+    summary: "AI·딥테크·웰니스 등 유망 분야 청년 스타트업 1년 집중 육성.",
+    url: "https://www.k-startup.go.kr/"
+  },
+  {
+    id: "ic-local-creator",
+    region: "incheon", regionLabel: "인천",
+    title: "인천 로컬크리에이터 양성사업",
+    org: "인천테크노파크",
+    field: "농업·로컬",
+    age: "제한 없음 (청년 우대)",
+    money: "최대 3,000만원",
+    deadline: "2026-05-28",
+    summary: "지역 자원(섬·해양·농산물) 활용 비즈니스 모델 양성. 강화·옹진 우대.",
+    url: "https://www.itp.or.kr/"
+  },
+  {
+    id: "ic-youth-mall",
+    region: "incheon", regionLabel: "인천",
+    title: "인천 청년몰 입점 지원",
+    org: "소상공인시장진흥공단 인천",
+    field: "제조·소상공인",
+    age: "만 39세 이하",
+    money: "임대료 + 인테리어 지원",
+    deadline: "2026-09-30",
+    summary: "신포·부평·강화 일대 청년몰 입점 청년 사업가 모집.",
+    url: "https://www.semas.or.kr/"
+  },
+  {
+    id: "nat-pre-pkg",
+    region: "national", regionLabel: "전국",
+    title: "예비창업패키지 2026",
+    org: "창업진흥원 / K-Startup",
+    field: "딥테크·AI",
+    age: "제한 없음 (청년 가산)",
+    money: "최대 1억원 사업화 자금",
+    deadline: "2026-06-25",
+    summary: "예비창업자(사업자등록 전) 대상 사업화 자금 + 멘토링 + 교육.",
+    url: "https://www.k-startup.go.kr/"
+  },
+  {
+    id: "nat-early-pkg",
+    region: "national", regionLabel: "전국",
+    title: "초기창업패키지 2026 (AI 특화)",
+    org: "창업진흥원 / K-Startup",
+    field: "딥테크·AI",
+    age: "창업 3년 이내",
+    money: "최대 1억원",
+    deadline: "2026-07-05",
+    summary: "AI·빅데이터 분야 초기 스타트업 사업화 + 시제품 고도화. 205억 배정.",
+    url: "https://www.k-startup.go.kr/"
+  },
+  {
+    id: "nat-cys-school",
+    region: "national", regionLabel: "전국",
+    title: "청년창업사관학교 17기",
+    org: "중소벤처기업진흥공단",
+    field: "딥테크·AI",
+    age: "만 39세 이하",
+    money: "최대 1억원 + 1년 입주",
+    deadline: "2026-06-15",
+    summary: "전국 14개 거점. AI·로봇·딥테크 청년 스타트업 집중 육성.",
+    url: "https://start.kosmes.or.kr/"
+  },
+  {
+    id: "nat-agri-conv",
+    region: "national", regionLabel: "전국",
+    title: "농촌융복합산업 청년창업가 육성",
+    org: "농림축산식품부",
+    field: "농업·로컬",
+    age: "만 18~49세",
+    money: "최대 5,000만원 + 컨설팅",
+    deadline: "2026-07-31",
+    summary: "농업+가공+체험 융복합 비즈니스. 강화·옹진 같은 도서지역 우대.",
+    url: "https://www.mafra.go.kr/"
+  },
+  {
+    id: "nat-wellness-deeptech",
+    region: "national", regionLabel: "전국",
+    title: "딥테크 창업패키지 — 헬스케어·웰니스",
+    org: "중기부 / K-Startup",
+    field: "웰니스·헬스케어",
+    age: "창업 7년 이내",
+    money: "최대 3억원",
+    deadline: "2026-08-20",
+    summary: "AI 헬스케어·디지털 복약·시니어 케어 분야 우대.",
+    url: "https://www.k-startup.go.kr/"
+  },
+  {
+    id: "nat-rural-relocation",
+    region: "national", regionLabel: "전국",
+    title: "청년농촌 정착지원 + 창업자금",
+    org: "농협중앙회 + 농식품부",
+    field: "농업·로컬",
+    age: "만 18~45세",
+    money: "정착금 + 최대 3억 융자",
+    deadline: "2026-09-10",
+    summary: "도시→농촌(강화 포함) 이주 청년 대상. 영농+창업 결합 패키지.",
+    url: "https://www.nonghyup.com/"
+  }
+];
+
+// ===== 상태 =====
+const state = {
+  tab: "list",
+  region: "all",
+  search: "",
+  saved: {},        // { id: { stage: "interest" } }
+  matchResult: null
+};
+const STORAGE_KEY = "cheongchang_app_v1";
+
+function loadStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const data = JSON.parse(raw);
+      state.saved = data.saved || {};
+    }
+  } catch(e){}
+}
+function saveStorage(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ saved: state.saved }));
+  } catch(e){}
+}
+
+// ===== 유틸 =====
+const TODAY = new Date("2026-05-12");
+function daysLeft(deadlineStr){
+  const d = new Date(deadlineStr);
+  return Math.ceil((d - TODAY) / (1000*60*60*24));
+}
+function ddlClass(days){
+  if(days < 0) return "";
+  if(days <= 14) return "soon";
+  if(days <= 45) return "normal";
+  return "normal";
+}
+function ddlLabel(days){
+  if(days < 0) return "마감";
+  if(days === 0) return "오늘 마감";
+  return `D-${days}`;
+}
+
+// ===== 렌더링 =====
+function renderList(){
+  const c = document.getElementById("list-container");
+  const filtered = LISTINGS.filter(x => {
+    if(state.region !== "all" && x.region !== state.region) return false;
+    if(state.search){
+      const s = state.search.toLowerCase();
+      if(!(x.title.toLowerCase().includes(s) ||
+           x.org.toLowerCase().includes(s) ||
+           x.summary.toLowerCase().includes(s))) return false;
+    }
+    return true;
+  });
+  if(filtered.length === 0){
+    c.innerHTML = `<div class="empty">조건에 맞는 공고가 없어요.</div>`;
+    return;
+  }
+  // sort: deadline asc
+  filtered.sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+  c.innerHTML = filtered.map(x => cardHTML(x)).join("");
+  attachCardActions();
+}
+
+function cardHTML(x, extra){
+  const days = daysLeft(x.deadline);
+  const isSaved = !!state.saved[x.id];
+  return `
+    <div class="card" data-id="${x.id}">
+      <div class="row1">
+        <span class="tag ${x.region}">${x.regionLabel}</span>
+        <span class="tag field">${x.field}</span>
+      </div>
+      <h3>${x.title}</h3>
+      <div class="meta">${x.org} · ${x.age}</div>
+      <div>
+        <span class="ddl ${ddlClass(days)}">${ddlLabel(days)} · ${x.deadline}</span>
+        <span class="money">${x.money}</span>
+      </div>
+      <div class="meta" style="margin-top:8px;color:var(--ink-2)">${x.summary}</div>
+      ${extra ? `<div class="why">${extra}</div>` : ""}
+      <div class="actions">
+        <button class="btn ${isSaved ? "saved" : "primary"}" data-action="save">
+          ${isSaved ? "✓ 저장됨" : "+ 트래커에 추가"}
+        </button>
+        <button class="btn outlink" data-action="open">출처 열기 ↗</button>
+      </div>
+    </div>
+  `;
+}
+
+function attachCardActions(){
+  document.querySelectorAll(".card").forEach(cardEl => {
+    const id = cardEl.dataset.id;
+    cardEl.querySelectorAll("[data-action]").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const a = btn.dataset.action;
+        if(a === "save"){
+          if(state.saved[id]){
+            delete state.saved[id];
+          } else {
+            state.saved[id] = { stage: "interest", addedAt: new Date().toISOString() };
+          }
+          saveStorage();
+          renderAll();
+        } else if(a === "open"){
+          const item = LISTINGS.find(x=>x.id===id);
+          if(item && item.url){
+            window.open(item.url, "_blank", "noopener");
+          }
+        } else if(a === "stage"){
+          const stage = btn.dataset.stage;
+          if(state.saved[id]) state.saved[id].stage = stage;
+          saveStorage();
+          renderTracker();
+        } else if(a === "remove"){
+          delete state.saved[id];
+          saveStorage();
+          renderAll();
+        }
+      });
+    });
+  });
+}
+
+// ===== 트래커 =====
+const STAGES = [
+  { key: "interest", label: "관심" },
+  { key: "preparing", label: "준비중" },
+  { key: "submitted", label: "제출" },
+  { key: "waiting",   label: "결과대기" },
+  { key: "passed",    label: "통과" },
+  { key: "rejected",  label: "탈락" }
+];
+
+function renderTracker(){
+  const c = document.getElementById("tracker-container");
+  const ids = Object.keys(state.saved);
+  document.getElementById("tracker-count").textContent =
+    ids.length ? `(${ids.length})` : "";
+  if(ids.length === 0){
+    c.innerHTML = `
+      <div class="empty">
+        아직 저장한 공고가 없어요.<br />
+        공고 탭에서 <b>+ 트래커에 추가</b>를 눌러 시작해.
+      </div>`;
+    return;
+  }
+  const items = ids
+    .map(id => ({ item: LISTINGS.find(x => x.id === id), saved: state.saved[id] }))
+    .filter(x => x.item)
+    .sort((a,b)=> new Date(a.item.deadline) - new Date(b.item.deadline));
+  c.innerHTML = items.map(({item, saved}) => {
+    const days = daysLeft(item.deadline);
+    const pills = STAGES.map(s => `
+      <span class="stage-pill ${saved.stage===s.key?"on":""}"
+            data-action="stage" data-stage="${s.key}">${s.label}</span>
+    `).join("");
+    return `
+      <div class="card" data-id="${item.id}">
+        <div class="row1">
+          <span class="tag ${item.region}">${item.regionLabel}</span>
+          <span class="tag field">${item.field}</span>
+        </div>
+        <h3>${item.title}</h3>
+        <div class="meta">${item.org}</div>
+        <div>
+          <span class="ddl ${ddlClass(days)}">${ddlLabel(days)} · ${item.deadline}</span>
+          <span class="money">${item.money}</span>
+        </div>
+        <div class="stage-pills">${pills}</div>
+        <div class="actions">
+          <button class="btn outlink" data-action="open">출처 열기 ↗</button>
+          <button class="btn" data-action="remove">삭제</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+  attachCardActions();
+}
+
+// ===== AI 매칭 =====
+async function runMatch(){
+  const btn = document.getElementById("m-run");
+  const out = document.getElementById("match-result");
+  const age = document.getElementById("m-age").value || "미지정";
+  const region = document.getElementById("m-region").value;
+  const field = document.getElementById("m-field").value;
+  const note = document.getElementById("m-note").value || "";
+
+  btn.disabled = true;
+  btn.textContent = "매칭 중...";
+  out.innerHTML = `<div class="loading">AI가 ${LISTINGS.length}개 공고를 분석 중...</div>`;
+
+  const prompt = `당신은 한국 청년창업 지원사업 큐레이션 전문가입니다.
+다음 사용자 프로필에 가장 적합한 공고 3~5개를 골라주세요.
+
+[사용자 프로필]
+- 나이: ${age}세
+- 지역: ${region}
+- 관심분야: ${field}
+- 메모: ${note || "(없음)"}
+
+[작업]
+첨부된 공고 목록 중 적합도 높은 순으로 3~5개를 선택하세요.
+각 공고에 대해 "왜 이 사람에게 맞는지" 1~2문장으로 설명하세요.
+
+[출력 형식]
+반드시 아래 JSON만 출력하세요. 다른 텍스트 금지.
+{
+  "matches": [
+    { "id": "공고의 id 필드", "reason": "왜 적합한지 1~2문장" }
+  ]
+}`;
+
+  try {
+    const resp = await window.cowork.askClaude(prompt, [{ listings: LISTINGS }]);
+    // resp could be string. Try to extract JSON.
+    let text = typeof resp === "string" ? resp : (resp?.text || JSON.stringify(resp));
+    const m = text.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("JSON not found in response");
+    const parsed = JSON.parse(m[0]);
+    if(!Array.isArray(parsed.matches)) throw new Error("matches missing");
+
+    state.matchResult = parsed.matches;
+    out.innerHTML = `
+      <div style="margin:14px 0 6px;font-size:13px;color:var(--ink-3)">
+        ${parsed.matches.length}개 매칭 — 적합도 순
+      </div>
+    ` + parsed.matches.map(m => {
+      const item = LISTINGS.find(x => x.id === m.id);
+      if(!item) return "";
+      return cardHTML(item, `<b>AI 추천 이유:</b> ${m.reason}`);
+    }).join("");
+    attachCardActions();
+  } catch(e){
+    console.error(e);
+    out.innerHTML = `
+      <div class="empty">
+        매칭 실패 — 다시 시도해줘.<br />
+        <small style="color:var(--ink-3)">${(e.message||"")}</small>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "AI에게 매칭 요청";
+  }
+}
+
+// ===== 탭/필터/검색 이벤트 =====
+function setTab(tab){
+  state.tab = tab;
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-"+tab).classList.add("active");
+  document.querySelectorAll("nav.tabbar button").forEach(b => {
+    b.classList.toggle("active", b.dataset.tab === tab);
+  });
+  // 지역 필터는 공고 탭에서만 의미 있음
+  document.getElementById("region-filters").style.display =
+    tab === "list" ? "flex" : "none";
+  if(tab === "tracker") renderTracker();
+}
+
+function renderAll(){
+  renderList();
+  renderTracker();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadStorage();
+
+  document.querySelectorAll("nav.tabbar button").forEach(b => {
+    b.addEventListener("click", () => setTab(b.dataset.tab));
+  });
+  document.querySelectorAll("#region-filters .chip").forEach(c => {
+    c.addEventListener("click", () => {
+      document.querySelectorAll("#region-filters .chip").forEach(x=>x.classList.remove("active"));
+      c.classList.add("active");
+      state.region = c.dataset.region;
+      renderList();
+    });
+  });
+  document.getElementById("search-input").addEventListener("input", e => {
+    state.search = e.target.value;
+    renderList();
+  });
+  document.getElementById("m-run").addEventListener("click", runMatch);
+
+  renderAll();
+});
+</script>
+</body>
+</html>

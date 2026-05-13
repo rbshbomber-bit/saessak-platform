@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>이용약관 · 개인정보처리방침 · AI 면책 — 새싹지원사업</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6;
+  --bg-2: #f4f1ea;
+  --card: #ffffff;
+  --ink: #14181f;
+  --ink-2: #3a4250;
+  --ink-3: #6c7280;
+  --line: #e6e3da;
+  --sage: #8da888;
+  --sage-deep: #5c7a5a;
+  --sage-soft: #d8e3d4;
+  --warn: #b45309;
+  --bad: #b91c1c;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 15px; line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--sage-deep); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.back { font-size: 13px; color: var(--ink-2); }
+
+main { padding: 48px 0 80px; }
+.doc-head { margin-bottom: 40px; }
+.doc-head h1 { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+.doc-head .meta { color: var(--ink-3); font-size: 13px; }
+
+.toc {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 40px;
+}
+.toc h3 { margin: 0 0 12px; font-size: 14px; font-weight: 800; }
+.toc ol { margin: 0; padding-left: 20px; font-size: 14px; }
+.toc li { padding: 4px 0; }
+
+.section-doc { margin-bottom: 56px; }
+.section-doc h2 {
+  font-size: 22px; font-weight: 800;
+  border-bottom: 2px solid var(--sage);
+  padding-bottom: 8px;
+  margin: 0 0 18px;
+  scroll-margin-top: 80px;
+}
+.section-doc h3 {
+  font-size: 16px; font-weight: 700;
+  margin: 24px 0 8px;
+  color: var(--ink);
+}
+.section-doc p { margin: 8px 0; color: var(--ink-2); }
+.section-doc ul, .section-doc ol { color: var(--ink-2); padding-left: 24px; }
+.section-doc li { margin: 4px 0; }
+.section-doc b, .section-doc strong { color: var(--ink); }
+
+.notice {
+  background: #fef3c7; border-left: 4px solid var(--warn);
+  padding: 14px 18px; border-radius: 8px;
+  margin: 16px 0; font-size: 14px;
+}
+.notice b { color: var(--warn); }
+
+.critical {
+  background: #fef2f2; border-left: 4px solid var(--bad);
+  padding: 14px 18px; border-radius: 8px;
+  margin: 16px 0; font-size: 14px;
+}
+.critical b { color: var(--bad); }
+
+.ok-box {
+  background: var(--sage-soft); border-left: 4px solid var(--sage);
+  padding: 14px 18px; border-radius: 8px;
+  margin: 16px 0; font-size: 14px;
+}
+
+footer.site { border-top: 1px solid var(--line); padding: 32px 0; font-size: 13px; color: var(--ink-3); }
+footer.site .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="청년창업_지원사업_웹사이트_v3.html">
+      <span class="logo-img"></span>
+      <span class="name"><span class="accent">새싹</span>지원사업</span>
+    </a>
+    <a class="back" href="청년창업_지원사업_웹사이트_v3.html">← 메인으로</a>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="doc-head">
+      <h1>이용약관 · 개인정보처리방침 · AI 면책 조항</h1>
+      <div class="meta">최종 개정: 2026년 5월 12일 · 시행일: 2026년 5월 12일 · 베타 운영 중</div>
+    </div>
+
+    <nav class="toc">
+      <h3>목차</h3>
+      <ol>
+        <li><a href="#terms">제1부. 이용약관</a></li>
+        <li><a href="#ai-disclaimer">제2부. AI 서비스 면책 조항</a></li>
+        <li><a href="#refund">제3부. 환불·청약철회 정책</a></li>
+        <li><a href="#privacy">제4부. 개인정보처리방침</a></li>
+        <li><a href="#dispute">제5부. 분쟁 해결</a></li>
+      </ol>
+    </nav>
+
+    <!-- 제1부 이용약관 -->
+    <section class="section-doc" id="terms">
+      <h2>제1부. 이용약관</h2>
+
+      <h3>제1조 (목적)</h3>
+      <p>본 약관은 "새싹지원사업"(이하 "회사")가 제공하는 청년창업 지원사업 큐레이션, AI 매칭, 사업계획서 AI 생성, 신청 트래커 등 일체의 서비스(이하 "서비스") 이용에 관한 회사와 이용자의 권리·의무·책임 사항을 규정함을 목적으로 합니다.</p>
+
+      <h3>제2조 (정의)</h3>
+      <ul>
+        <li><b>"서비스"</b>란 회사가 운영하는 웹사이트, 모바일 페이지, AI 기반 도구 일체를 의미합니다.</li>
+        <li><b>"이용자"</b>란 본 약관에 동의하고 서비스를 이용하는 회원·비회원을 포함합니다.</li>
+        <li><b>"AI 결과물"</b>이란 사업계획서 AI, AI 매칭 등 회사의 AI 서비스가 생성한 텍스트·데이터를 의미합니다.</li>
+        <li><b>"토큰"</b>이란 유료 AI 기능 사용을 위해 이용자가 보유하는 가상의 사용 단위를 의미합니다. 현금 환급은 불가합니다.</li>
+      </ul>
+
+      <h3>제3조 (약관의 효력 및 변경)</h3>
+      <p>본 약관은 서비스를 이용하고자 하는 모든 이용자에게 효력이 발생합니다. 회사는 관련 법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있으며, 개정 시 적용일자 7일 전(이용자에게 불리한 변경의 경우 30일 전)부터 공지합니다.</p>
+
+      <h3>제4조 (회원가입)</h3>
+      <ul>
+        <li>회원가입은 이용자가 본 약관에 동의하고 회사가 정한 양식에 따라 정보를 기재함으로써 신청됩니다.</li>
+        <li><b>만 14세 미만의 아동은 회원가입이 제한됩니다.</b></li>
+        <li>이용자는 가입 시 본인의 정확한 정보를 제공해야 하며, 허위 정보로 인한 불이익은 이용자가 부담합니다.</li>
+      </ul>
+
+      <h3>제5조 (서비스의 제공)</h3>
+      <p>회사는 다음 서비스를 제공합니다.</p>
+      <ul>
+        <li>전국 청년창업 지원사업 정보 큐레이션 (무료)</li>
+        <li>AI 기반 공고 매칭 추천 (무료)</li>
+        <li>신청 트래커 (무료, 브라우저 로컬 저장)</li>
+        <li>사업계획서 AI 자동 생성 (토큰 차감, 1회 20 토큰)</li>
+        <li>마감 알림 (Premium 구독)</li>
+        <li>운영자 컨설팅 (Premium 구독)</li>
+      </ul>
+
+      <h3>제6조 (서비스 이용료 · 토큰)</h3>
+      <ul>
+        <li>회원가입 시 50 토큰이 자동 지급됩니다.</li>
+        <li>유료 토큰 충전 또는 월 구독을 통해 추가 토큰을 보유할 수 있습니다.</li>
+        <li>토큰은 충전·구독 시점부터 1년간 유효합니다.</li>
+        <li>토큰의 현금 환급은 원칙적으로 불가합니다(환불 정책 별도).</li>
+        <li>월 구독은 매월 자동 결제되며, 이용자는 언제든 구독을 해지할 수 있습니다.</li>
+      </ul>
+
+      <h3>제7조 (이용자의 의무)</h3>
+      <ul>
+        <li>이용자는 AI 결과물을 신청 전 반드시 본인이 검토·수정·검증해야 합니다.</li>
+        <li>이용자는 서비스를 통해 얻은 정보를 무단 복제·배포하여 제3자에게 판매하는 등 영리적으로 활용해서는 안 됩니다.</li>
+        <li>이용자는 회사가 제공하는 정보를 기반으로 자신의 책임 하에 신청 여부를 결정해야 합니다.</li>
+        <li>타인의 명의 도용, 허위 정보 제공, 서비스 운영 방해 행위 등은 금지됩니다.</li>
+      </ul>
+
+      <h3>제8조 (회사의 의무 및 면책)</h3>
+      <p>회사는 안정적인 서비스 제공을 위해 노력합니다. 다만 다음의 경우 회사는 책임을 지지 않습니다.</p>
+      <ul>
+        <li>천재지변, 통신 장애, 기타 불가항력으로 인한 서비스 중단</li>
+        <li>이용자의 귀책사유로 인한 서비스 이용 장애</li>
+        <li>이용자가 AI 결과물을 검토 없이 그대로 사용하여 발생한 불이익</li>
+        <li>이용자의 정부 지원사업 신청 결과(선정·탈락)</li>
+        <li>제3자(정부 기관, 지자체 등)의 정책 변경, 공고 마감, 자료 변경</li>
+      </ul>
+    </section>
+
+    <!-- 제2부 AI 면책 -->
+    <section class="section-doc" id="ai-disclaimer">
+      <h2>제2부. AI 서비스 면책 조항 (중요)</h2>
+
+      <div class="critical">
+        <b>⚠️ 가장 중요한 안내</b><br />
+        본 서비스의 AI 기능은 보조 도구입니다. <b>정부 지원사업의 선정·합격을 절대 보장하지 않습니다.</b>
+        이용자는 AI 결과물을 신청 전 반드시 본인이 검토·수정·검증해야 합니다.
+      </div>
+
+      <h3>제9조 (AI 서비스의 성격)</h3>
+      <ul>
+        <li>본 서비스의 AI 매칭 추천, 사업계획서 AI 생성, 자동 분석 결과 등은 모두 <b>참고용 보조 자료</b>입니다.</li>
+        <li>회사가 제공하는 어떠한 AI 결과물도 정부 지원사업의 선정·합격·통과를 보장하지 않습니다.</li>
+        <li>AI 결과물에는 사실 오류, 잘못된 통계, 부정확한 인용, 환각(hallucination) 등이 포함될 수 있습니다.</li>
+        <li>AI 매칭 추천은 입력된 프로필 기반의 알고리즘 추천일 뿐, 객관적 합격 가능성 평가가 아닙니다.</li>
+      </ul>
+
+      <h3>제10조 (이용자의 검토 의무)</h3>
+      <ul>
+        <li>이용자는 AI 결과물(사업계획서 초안 포함)을 <b>본인이 처음부터 끝까지 검토·수정</b>해야 합니다.</li>
+        <li>이용자는 결과물의 사실관계, 수치, 인용 출처, 적용 법규 등을 직접 검증해야 합니다.</li>
+        <li>이용자는 결과물을 정부 양식·심사 기준에 맞게 추가 보완해야 합니다.</li>
+        <li>이용자가 AI 결과물을 그대로 신청서에 사용하여 발생한 모든 결과(탈락, 불이익, 정정 요구 등)에 대한 책임은 이용자에게 있습니다.</li>
+      </ul>
+
+      <h3>제11조 (회사의 면책 범위)</h3>
+      <p>회사는 다음 사항에 대해 어떠한 책임도 부담하지 않습니다.</p>
+      <ul>
+        <li>AI 결과물의 정확성·완전성·적합성</li>
+        <li>이용자의 정부 지원사업 신청 결과(선정·탈락)</li>
+        <li>AI 결과물 기반 신청서 제출에 따른 심사위원의 판단 결과</li>
+        <li>AI 결과물에 포함된 정보의 최신성·시의성</li>
+        <li>이용자가 AI 결과물을 수정·편집·변형하여 사용한 결과</li>
+      </ul>
+
+      <div class="notice">
+        <b>안내:</b> 회사의 고의 또는 중대한 과실로 인한 손해에 대해서는 관련 법령에 따라 책임을 부담합니다.
+      </div>
+    </section>
+
+    <!-- 제3부 환불 -->
+    <section class="section-doc" id="refund">
+      <h2>제3부. 환불·청약철회 정책</h2>
+
+      <h3>제12조 (디지털 콘텐츠의 청약철회 제한)</h3>
+      <p>「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 제2항 제5호에 따라, <b>본 서비스는 즉시 사용 가능한 디지털 콘텐츠로서 청약철회가 제한</b>됩니다. 단, 다음의 경우에는 청약철회가 가능합니다.</p>
+
+      <h3>제13조 (환불 가능 조건)</h3>
+      <ul>
+        <li><b>토큰 충전 후 미사용 토큰</b>: 결제일로부터 7일 이내, 토큰을 1회도 사용하지 않은 경우 100% 환불</li>
+        <li><b>월 구독</b>: 결제일로부터 7일 이내 + 토큰 미사용 시 100% 환불. 7일 경과 또는 토큰 사용 시 일할 계산 환불</li>
+        <li><b>시스템 오류로 인한 결제</b>: 100% 환불</li>
+        <li><b>중복 결제</b>: 100% 환불</li>
+        <li><b>회사의 명백한 귀책사유</b>: 100% 환불 + 경우에 따라 보상</li>
+      </ul>
+
+      <h3>제14조 (환불 불가 조건)</h3>
+      <ul>
+        <li>이미 사용된 토큰 (사업계획서 AI 1회 이상 실행 등)</li>
+        <li>결제 후 7일 경과 후 환불 요청</li>
+        <li>"결과물이 마음에 들지 않는다"는 이유의 환불 요청<br />
+          → AI 결과물의 주관적 만족도는 환불 사유가 아닙니다. 단, 운영자 재량으로 부분 환불·재생성을 제공할 수 있습니다.</li>
+        <li>이용자의 약관 위반으로 인한 이용 제한</li>
+      </ul>
+
+      <h3>제15조 (환불 절차)</h3>
+      <p>환불 요청은 운영자 이메일(rbshbomber@gmail.com)로 결제 영수증 첨부하여 신청하시면 영업일 기준 3~5일 내 처리됩니다.</p>
+    </section>
+
+    <!-- 제4부 개인정보처리방침 -->
+    <section class="section-doc" id="privacy">
+      <h2>제4부. 개인정보처리방침</h2>
+
+      <h3>제16조 (수집하는 개인정보 항목)</h3>
+      <ul>
+        <li><b>필수</b>: 이름, 이메일, 비밀번호(암호화 저장), 거주 지역(시도), 관심 분야</li>
+        <li><b>선택</b>: 나이, 한 줄 메모, 사업 아이템 정보</li>
+        <li><b>자동 수집</b>: 접속 IP, 쿠키, 서비스 이용 기록, 토큰 사용 내역</li>
+        <li><b>결제 정보</b>: 결제 대행사(토스페이먼츠/포트원)가 수집·관리. 회사는 카드번호 미보유</li>
+      </ul>
+
+      <h3>제17조 (개인정보의 수집·이용 목적)</h3>
+      <ul>
+        <li>회원 식별 및 서비스 제공</li>
+        <li>AI 매칭·사업계획서 생성 기능 제공</li>
+        <li>마감 알림·뉴스레터 발송 (선택 동의 시)</li>
+        <li>결제 및 환불 처리</li>
+        <li>서비스 개선 및 통계 분석 (가명 처리)</li>
+        <li>법령 준수 및 분쟁 해결</li>
+      </ul>
+
+      <h3>제18조 (개인정보의 보유·이용 기간)</h3>
+      <ul>
+        <li>회원 탈퇴 시 즉시 삭제 (단, 법령에 따른 보관 의무가 있는 경우 해당 기간 보관)</li>
+        <li>전자상거래법: 계약·청약철회 기록 5년, 대금결제 기록 5년, 소비자 불만 처리 3년</li>
+        <li>통신비밀보호법: 로그인 기록 3개월</li>
+      </ul>
+
+      <h3>제19조 (개인정보의 제3자 제공)</h3>
+      <p>회사는 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다. 다만 법령에 따른 요청이 있는 경우는 예외입니다.</p>
+
+      <h3>제20조 (개인정보의 처리 위탁)</h3>
+      <ul>
+        <li>호스팅: Vercel, Netlify, AWS 등 (서비스 운영을 위한 클라우드 인프라)</li>
+        <li>결제 대행: 토스페이먼츠 또는 포트원</li>
+        <li>AI 추론: Anthropic Claude API, OpenAI API (사용자 입력은 AI 학습에 사용되지 않음)</li>
+        <li>이메일 발송: 추후 도입 시 별도 고지</li>
+      </ul>
+
+      <h3>제21조 (이용자의 권리)</h3>
+      <ul>
+        <li>개인정보 열람·수정·삭제 요청 가능</li>
+        <li>회원 탈퇴 시 즉시 처리</li>
+        <li>처리 정지 요구 가능</li>
+        <li>문의: rbshbomber@gmail.com</li>
+      </ul>
+
+      <h3>제22조 (만 14세 미만 보호)</h3>
+      <p>회사는 만 14세 미만의 회원가입을 받지 않습니다. 만 14세 미만으로 확인된 계정은 즉시 삭제됩니다.</p>
+
+      <h3>제23조 (개인정보 보호책임자)</h3>
+      <ul>
+        <li>성명: 변승환</li>
+        <li>연락처: rbshbomber@gmail.com</li>
+      </ul>
+    </section>
+
+    <!-- 제5부 분쟁해결 -->
+    <section class="section-doc" id="dispute">
+      <h2>제5부. 분쟁 해결</h2>
+
+      <h3>제24조 (분쟁 해결 절차)</h3>
+      <ul>
+        <li>이용자는 서비스 이용 관련 분쟁이 발생한 경우 회사에 우선 분쟁 해결을 요청할 수 있습니다.</li>
+        <li>회사는 분쟁 신청 후 영업일 기준 7일 이내에 답변합니다.</li>
+        <li>분쟁이 해결되지 않을 경우 한국소비자원, 전자거래분쟁조정위원회 등을 이용할 수 있습니다.</li>
+      </ul>
+
+      <h3>제25조 (관할 법원)</h3>
+      <p>본 약관 및 서비스 관련 분쟁에 관한 소송의 관할 법원은 <b>민사소송법상 관할 법원</b>으로 합니다. 회사와 이용자가 합의하는 경우 서울중앙지방법원을 제1심 관할 법원으로 정할 수 있습니다.</p>
+
+      <h3>제26조 (준거법)</h3>
+      <p>본 약관은 대한민국 법령에 따라 해석·적용됩니다.</p>
+
+      <div class="ok-box">
+        <b>운영자 안내:</b><br />
+        본 약관 또는 서비스 이용 중 궁금한 점이 있으시면 언제든 운영자(rbshbomber@gmail.com)로 연락 주세요.
+        본 서비스는 베타 운영 중이며, 이용자 피드백을 바탕으로 약관·정책을 지속적으로 개선합니다.
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="container row">
+    <div>© 2026 새싹지원사업 · 전국 17개 시도 청년창업 통합 플랫폼 · 베타 운영 중</div>
+    <div>운영 책임자: 변승환 · rbshbomber@gmail.com</div>
+  </div>
+</footer>
+</body>
+</html>

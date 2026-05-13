@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /청년창업_지원사업_웹사이트_v2.html
+Disallow: /청년창업_지원사업_앱_v1.html
+
+Sitemap: /sitemap.xml

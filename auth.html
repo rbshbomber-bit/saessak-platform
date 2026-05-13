@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>회원가입 · 로그인 — 새싹지원사업</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6;
+  --bg-2: #f4f1ea;
+  --card: #ffffff;
+  --ink: #14181f;
+  --ink-2: #3a4250;
+  --ink-3: #6c7280;
+  --line: #e6e3da;
+  --line-2: #d7d3c7;
+  --sage: #8da888;
+  --sage-deep: #5c7a5a;
+  --sage-soft: #d8e3d4;
+  --cream: #f1ead9;
+  --good: #2f7a3c;
+  --bad: #b91c1c;
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06), 0 12px 32px rgba(20,24,31,.05);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); min-height: 100vh; }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-feature-settings: "ss01", "tnum";
+  font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(900px 500px at 80% 30%, rgba(141,168,136,.18), transparent 60%),
+    radial-gradient(700px 400px at 10% 80%, rgba(91,127,179,.12), transparent 60%),
+    var(--bg);
+}
+a { color: inherit; text-decoration: none; }
+
+.auth-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%; max-width: 460px;
+  box-shadow: var(--shadow-m);
+}
+.brand {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: center; margin-bottom: 28px;
+}
+.brand .logo-img {
+  width: 36px; height: 36px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+.brand .name .accent { color: var(--sage-deep); }
+
+.tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+.tab {
+  flex: 1; padding: 14px 0;
+  background: transparent; border: 0; border-bottom: 2px solid transparent;
+  font-size: 15px; font-weight: 600; color: var(--ink-3);
+  cursor: pointer; font-family: inherit;
+  transition: all .15s;
+  margin-bottom: -1px;
+}
+.tab.active { color: var(--ink); border-bottom-color: var(--sage); }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+h2 {
+  margin: 0 0 6px;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -.025em;
+}
+.sub { color: var(--ink-3); font-size: 14px; margin: 0 0 24px; }
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 12px; color: var(--ink-3); font-weight: 600;
+  margin-bottom: 6px;
+}
+.field input, .field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  transition: border-color .15s;
+}
+.field input:focus, .field select:focus {
+  outline: 0; border-color: var(--sage);
+}
+.field .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.checkbox-line {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; color: var(--ink-2);
+  margin: 16px 0;
+}
+.checkbox-line input { margin-top: 2px; }
+.checkbox-line a { color: var(--sage-deep); text-decoration: underline; }
+
+.submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--ink); color: white;
+  border: 0; border-radius: 10px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: background .15s;
+}
+.submit:hover:not(:disabled) { background: var(--sage-deep); }
+.submit:disabled { opacity: .5; cursor: wait; }
+
+.msg {
+  padding: 10px 14px; border-radius: 8px;
+  font-size: 13px; margin-bottom: 14px;
+  display: none;
+}
+.msg.show { display: block; }
+.msg.error { background: #fef2f2; color: var(--bad); border: 1px solid #fecaca; }
+.msg.success { background: #ecfdf5; color: var(--good); border: 1px solid #a7f3d0; }
+
+.divider {
+  text-align: center; font-size: 12px; color: var(--ink-3);
+  margin: 20px 0;
+  position: relative;
+}
+.divider::before, .divider::after {
+  content: ""; position: absolute; top: 50%;
+  width: 40%; height: 1px; background: var(--line);
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+.back-link {
+  display: block; text-align: center;
+  font-size: 13px; color: var(--ink-3);
+  margin-top: 20px;
+}
+.back-link:hover { color: var(--ink); }
+
+.admin-hint {
+  text-align: center; font-size: 11px; color: var(--ink-3);
+  margin-top: 24px;
+  padding-top: 16px; border-top: 1px dashed var(--line);
+}
+.admin-hint a { color: var(--sage-deep); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="auth-card">
+  <a class="brand" href="청년창업_지원사업_웹사이트_v3.html">
+    <span class="logo-img"></span>
+    <span class="name"><span class="accent">새싹</span>지원사업</span>
+  </a>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="login">로그인</button>
+    <button class="tab" data-tab="signup">회원가입</button>
+  </div>
+
+  <div id="msg" class="msg"></div>
+
+  <!-- 로그인 패널 -->
+  <div class="panel active" id="panel-login">
+    <h2>다시 만나서 반가워요</h2>
+    <p class="sub">계정으로 로그인하여 트래커·매칭 기록을 동기화하세요.</p>
+
+    <div class="field">
+      <label>이메일</label>
+      <input id="login-email" type="email" placeholder="you@example.com" />
+    </div>
+    <div class="field">
+      <label>비밀번호</label>
+      <input id="login-password" type="password" placeholder="••••••••" />
+    </div>
+
+    <button class="submit" id="login-btn">로그인</button>
+
+    <div class="divider">또는</div>
+    <p style="text-align:center;font-size:13px;color:var(--ink-3);margin:0;">
+      처음이신가요? <a href="#" id="goto-signup" style="color:var(--sage-deep);font-weight:600;">회원가입</a>
+    </p>
+  </div>
+
+  <!-- 회원가입 패널 -->
+  <div class="panel" id="panel-signup">
+    <h2>5분 만에 시작하세요</h2>
+    <p class="sub">회원가입 후 AI 매칭·트래커·맞춤 알림을 사용할 수 있습니다.</p>
+
+    <div class="field">
+      <label>이름</label>
+      <input id="signup-name" type="text" placeholder="홍길동" />
+    </div>
+    <div class="field">
+      <label>이메일</label>
+      <input id="signup-email" type="email" placeholder="you@example.com" />
+    </div>
+    <div class="field">
+      <label>비밀번호 (6자 이상)</label>
+      <input id="signup-password" type="password" placeholder="••••••••" />
+    </div>
+    <div class="field">
+      <div class="row">
+        <div>
+          <label>지역</label>
+          <select id="signup-region">
+            <option value="서울">서울</option>
+            <option value="경기">경기</option>
+            <option value="인천">인천</option>
+            <option value="부산">부산</option>
+            <option value="대구">대구</option>
+            <option value="대전">대전</option>
+            <option value="광주">광주</option>
+            <option value="울산">울산</option>
+            <option value="세종">세종</option>
+            <option value="강원">강원</option>
+            <option value="충북">충북</option>
+            <option value="충남">충남</option>
+            <option value="전북">전북</option>
+            <option value="전남">전남</option>
+            <option value="경북">경북</option>
+            <option value="경남">경남</option>
+            <option value="제주">제주</option>
+          </select>
+        </div>
+        <div>
+          <label>관심 분야</label>
+          <select id="signup-field">
+            <option value="딥테크·AI">딥테크·AI</option>
+            <option value="웰니스·헬스케어">웰니스·헬스케어</option>
+            <option value="커머스·로컬">커머스·로컬</option>
+            <option value="농업·푸드">농업·푸드</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>나이</label>
+      <input id="signup-age" type="number" placeholder="32" />
+    </div>
+
+    <label class="checkbox-line">
+      <input type="checkbox" id="signup-agree" />
+      <span>
+        <a href="terms.html" target="_blank">이용약관</a> ·
+        <a href="terms.html#privacy" target="_blank">개인정보처리방침</a> ·
+        <a href="terms.html#ai-disclaimer" target="_blank">AI 면책 조항</a>에 동의합니다 (필수)
+      </span>
+    </label>
+
+    <button class="submit" id="signup-btn">회원가입 완료</button>
+  </div>
+
+  <div class="admin-hint">
+    🔐 운영자이신가요? <a href="admin.html">관리자 페이지</a>
+  </div>
+</div>
+
+<script>
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+
+function getUsers(){
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]"); } catch(e){ return []; }
+}
+function saveUsers(arr){ localStorage.setItem(USER_KEY, JSON.stringify(arr)); }
+function setCurrent(id){ localStorage.setItem(CURRENT_KEY, id); }
+
+function showMsg(text, kind="error"){
+  const m = document.getElementById("msg");
+  m.textContent = text;
+  m.className = `msg ${kind} show`;
+  setTimeout(() => { m.classList.remove("show"); }, 4000);
+}
+
+// 탭 전환
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("panel-" + t.dataset.tab).classList.add("active");
+  });
+});
+
+document.getElementById("goto-signup").addEventListener("click", e => {
+  e.preventDefault();
+  document.querySelector('.tab[data-tab="signup"]').click();
+});
+
+// 회원가입
+document.getElementById("signup-btn").addEventListener("click", () => {
+  const name = document.getElementById("signup-name").value.trim();
+  const email = document.getElementById("signup-email").value.trim().toLowerCase();
+  const password = document.getElementById("signup-password").value;
+  const region = document.getElementById("signup-region").value;
+  const field = document.getElementById("signup-field").value;
+  const age = document.getElementById("signup-age").value;
+  const agree = document.getElementById("signup-agree").checked;
+
+  if(!name) return showMsg("이름을 입력해주세요");
+  if(!email || !email.includes("@")) return showMsg("유효한 이메일을 입력해주세요");
+  if(password.length < 6) return showMsg("비밀번호는 6자 이상이어야 합니다");
+  if(!agree) return showMsg("약관에 동의해주세요");
+
+  const users = getUsers();
+  if(users.find(u => u.email === email)) return showMsg("이미 가입된 이메일입니다");
+
+  const newUser = {
+    id: "u_" + Date.now(),
+    name, email, password, region, field,
+    age: age ? parseInt(age) : null,
+    plan: "free",
+    joinedAt: new Date().toISOString(),
+    usage: { matches: 0, plans: 0 },
+    tokens: 50,
+    subscription: null,
+    tokenLog: [{
+      ts: new Date().toISOString(),
+      kind: "signup-bonus", amount: 50, balance: 50,
+      memo: "신규 가입 보너스 — 50 토큰"
+    }]
+  };
+  users.push(newUser);
+  saveUsers(users);
+  setCurrent(newUser.id);
+  showMsg("회원가입 완료! 50 토큰이 지급되었습니다. 메인으로 이동합니다", "success");
+  setTimeout(() => { location.href = "청년창업_지원사업_웹사이트_v3.html"; }, 1200);
+});
+
+// 로그인
+document.getElementById("login-btn").addEventListener("click", () => {
+  const email = document.getElementById("login-email").value.trim().toLowerCase();
+  const password = document.getElementById("login-password").value;
+  if(!email || !password) return showMsg("이메일과 비밀번호를 입력해주세요");
+  const users = getUsers();
+  const user = users.find(u => u.email === email && u.password === password);
+  if(!user) return showMsg("이메일 또는 비밀번호가 올바르지 않습니다");
+  setCurrent(user.id);
+  showMsg(`환영합니다, ${user.name}님!`, "success");
+  setTimeout(() => { location.href = "청년창업_지원사업_웹사이트_v3.html"; }, 1000);
+});
+
+// Enter 키
+document.querySelectorAll("input").forEach(i => {
+  i.addEventListener("keypress", e => {
+    if(e.key === "Enter"){
+      const activeTab = document.querySelector(".tab.active").dataset.tab;
+      document.getElementById(activeTab + "-btn").click();
+    }
+  });
+});
+
+// 이미 로그인된 경우 안내
+const current = localStorage.getItem(CURRENT_KEY);
+if(current){
+  const u = getUsers().find(x => x.id === current);
+  if(u) showMsg(`이미 ${u.name}님으로 로그인 중입니다. 메인 또는 마이페이지로 이동하세요.`, "success");
+}
+</script>
+</body>
+</html>

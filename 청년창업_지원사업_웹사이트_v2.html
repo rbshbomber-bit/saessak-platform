@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>청년창업 지원사업 큐레이션 — 강화에서 전국으로</title>
+<meta name="description" content="전국 청년창업 지원사업을 한 곳에 모으고, AI가 당신에게 맞는 공고를 골라줍니다." />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6;
+  --bg-2: #f4f1ea;
+  --card: #ffffff;
+  --ink: #14181f;
+  --ink-2: #3a4250;
+  --ink-3: #6c7280;
+  --line: #e6e3da;
+  --line-2: #d7d3c7;
+  --sage: #8da888;
+  --sage-deep: #5c7a5a;
+  --sage-soft: #d8e3d4;
+  --cream: #f1ead9;
+  --cobalt: #5b7fb3;
+  --warn: #b45309;
+  --good: #2f7a3c;
+  --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06), 0 12px 32px rgba(20,24,31,.05);
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --maxw: 1200px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-feature-settings: "ss01", "tnum";
+  font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+/* ===== 헤더 ===== */
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.85);
+  backdrop-filter: saturate(160%) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name { font-size: 16px; letter-spacing: -.02em; }
+.brand .name .accent { color: var(--sage-deep); }
+.nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--ink-2); }
+.nav-links a:hover { color: var(--sage-deep); }
+.nav-cta {
+  font-size: 14px; font-weight: 600;
+  padding: 9px 16px; border-radius: 10px;
+  background: var(--ink); color: white;
+}
+.nav-cta:hover { background: var(--sage-deep); }
+@media (max-width: 760px) { .nav-links { display: none; } }
+
+/* ===== 히어로 ===== */
+.hero { position: relative; padding: 64px 0 80px; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(1200px 600px at 80% 30%, rgba(141,168,136,.16), transparent 60%),
+    radial-gradient(900px 500px at 10% 80%, rgba(91,127,179,.10), transparent 60%);
+  z-index: 0;
+}
+.hero .container {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: center;
+}
+.hero h1 {
+  font-size: 56px; font-weight: 800; letter-spacing: -.035em;
+  line-height: 1.12; margin: 0 0 20px;
+}
+.hero h1 .accent { color: var(--sage-deep); }
+.hero .lead { font-size: 18px; color: var(--ink-2); margin: 0 0 32px; max-width: 480px; }
+.hero .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 14px 22px; border-radius: 12px;
+  font-size: 15px; font-weight: 700;
+  border: 1px solid transparent; cursor: pointer;
+  transition: all .15s; font-family: inherit;
+}
+.btn.primary { background: var(--ink); color: white; }
+.btn.primary:hover { background: var(--sage-deep); }
+.btn.secondary { background: var(--card); color: var(--ink); border-color: var(--line-2); }
+.btn.secondary:hover { border-color: var(--ink); }
+.hero-art {
+  aspect-ratio: 16/10;
+  background-image: url("images/hero.png");
+  background-size: cover; background-position: center;
+  background-color: var(--cream);
+  background-repeat: no-repeat;
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-m);
+  position: relative;
+}
+.hero-stats {
+  margin-top: 56px;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 24px; border-top: 1px solid var(--line); padding-top: 28px;
+}
+.hero-stats .stat .num { font-size: 28px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+.hero-stats .stat .lbl { font-size: 13px; color: var(--ink-3); }
+@media (max-width: 900px) {
+  .hero { padding: 40px 0 56px; }
+  .hero .container { grid-template-columns: 1fr; gap: 32px; }
+  .hero h1 { font-size: 36px; }
+  .hero .lead { font-size: 16px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== 섹션 공통 ===== */
+.section { padding: 96px 0; }
+.section.alt { background: var(--bg-2); }
+.section-head { text-align: center; margin-bottom: 56px; max-width: 720px; margin-left: auto; margin-right: auto; }
+.section-head .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--sage-deep); text-transform: uppercase; margin-bottom: 14px; }
+.section-head h2 { font-size: 40px; font-weight: 800; letter-spacing: -.025em; margin: 0 0 14px; line-height: 1.18; }
+.section-head p { font-size: 17px; color: var(--ink-2); margin: 0; }
+@media (max-width: 760px) {
+  .section { padding: 64px 0; }
+  .section-head h2 { font-size: 28px; }
+  .section-head p { font-size: 15px; }
+}
+
+/* ===== 분야 카드 ===== */
+.fields-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.field-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius-m); padding: 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: all .2s;
+}
+.field-card:hover { border-color: var(--sage); transform: translateY(-2px); box-shadow: var(--shadow-m); }
+.field-card .icon {
+  width: 48px; height: 48px; background: var(--sage-soft);
+  border-radius: 12px; display: grid; place-items: center;
+  color: var(--sage-deep); font-size: 22px;
+}
+.field-card h3 { font-size: 16px; margin: 0; font-weight: 700; }
+.field-card p { font-size: 13px; color: var(--ink-3); margin: 0; }
+@media (max-width: 760px) { .fields-row { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== 큐레이션 - 필터 강화 ===== */
+.curation-wrap { margin-top: 40px; }
+
+/* 상단 1줄: 지역 pill + 검색 */
+.curation-top {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.chip {
+  font-size: 13px; font-weight: 500;
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+  color: var(--ink-2); cursor: pointer; transition: all .15s;
+  font-family: inherit;
+}
+.chip:hover { border-color: var(--ink); }
+.chip.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+.search-box {
+  flex: 1; min-width: 220px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+}
+.search-box input { flex: 1; border: 0; outline: 0; background: transparent; font-size: 14px; font-family: inherit; }
+
+/* 2줄: 정렬 + 필터 토글 + 결과 카운트 */
+.curation-controls {
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.sort-select {
+  padding: 8px 36px 8px 14px; border-radius: 10px;
+  background: var(--card) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='none' stroke='%236c7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5l3 3 3-3'/></svg>") no-repeat right 12px center;
+  border: 1px solid var(--line);
+  font-size: 13px; color: var(--ink-2); font-family: inherit;
+  appearance: none; -webkit-appearance: none;
+  cursor: pointer;
+}
+.filter-toggle {
+  padding: 8px 14px; border-radius: 10px;
+  background: var(--card); border: 1px solid var(--line);
+  font-size: 13px; color: var(--ink-2); font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.filter-toggle:hover { border-color: var(--ink); }
+.filter-toggle.open { background: var(--ink); color: white; border-color: var(--ink); }
+.filter-toggle .count {
+  background: var(--sage); color: white;
+  font-size: 11px; padding: 1px 6px; border-radius: 999px;
+  font-weight: 700;
+}
+.results-count {
+  margin-left: auto; font-size: 13px; color: var(--ink-3);
+}
+
+/* 활성 필터 칩 */
+.active-filters {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.active-filter {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 600;
+  padding: 5px 6px 5px 12px; border-radius: 999px;
+  background: var(--sage-soft); color: var(--sage-deep);
+  border: 1px solid transparent;
+}
+.active-filter button {
+  border: 0; background: transparent; cursor: pointer;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--sage-deep); font-size: 14px; line-height: 1;
+  font-family: inherit;
+}
+.active-filter button:hover { background: rgba(0,0,0,.08); }
+.active-filter.reset {
+  background: transparent; color: var(--ink-3);
+  border: 1px dashed var(--line-2);
+  cursor: pointer; padding: 5px 12px;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+}
+.active-filter.reset:hover { color: var(--ink); border-color: var(--ink); }
+
+/* 필터 패널 */
+.filter-panel {
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-s);
+}
+.filter-panel.open { display: block; }
+.filter-group { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.filter-group:first-child { padding-top: 0; }
+.filter-group:last-child { border-bottom: 0; padding-bottom: 0; }
+.filter-group h4 {
+  font-size: 13px; font-weight: 700; margin: 0 0 12px;
+  color: var(--ink); letter-spacing: -.01em;
+}
+.filter-group h4 .hint {
+  margin-left: 6px; font-weight: 500; color: var(--ink-3); font-size: 12px;
+}
+.checkbox-list { display: flex; gap: 8px; flex-wrap: wrap; }
+.cb-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: 13px; color: var(--ink-2); cursor: pointer;
+  user-select: none; transition: all .12s;
+  font-family: inherit;
+}
+.cb-pill:hover { border-color: var(--ink); }
+.cb-pill input {
+  position: absolute; opacity: 0; pointer-events: none;
+}
+.cb-pill .box {
+  width: 14px; height: 14px; border-radius: 4px;
+  border: 1.5px solid var(--line-2);
+  display: grid; place-items: center;
+  background: var(--card); flex-shrink: 0;
+  transition: all .12s;
+}
+.cb-pill .box::after {
+  content: ""; width: 6px; height: 9px;
+  border: solid white; border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+  opacity: 0; transition: opacity .12s;
+}
+.cb-pill.checked { background: var(--sage-soft); border-color: var(--sage); color: var(--sage-deep); font-weight: 600; }
+.cb-pill.checked .box { background: var(--sage); border-color: var(--sage); }
+.cb-pill.checked .box::after { opacity: 1; }
+
+/* 결과 카드 */
+.card-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+@media (max-width: 1000px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .card-grid { grid-template-columns: 1fr; } }
+
+.listing {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius-m); padding: 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: all .2s; position: relative;
+}
+.listing:hover { border-color: var(--sage); box-shadow: var(--shadow-m); transform: translateY(-2px); }
+.listing .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+}
+.tag.ganghwa  { background: #fef3c7; color: #92400e; }
+.tag.incheon  { background: #ede9fe; color: #5b21b6; }
+.tag.national { background: #dbeafe; color: #1e40af; }
+.tag.field    { background: var(--sage-soft); color: var(--sage-deep); }
+.tag.type     { background: #f1f5f9; color: var(--ink-2); }
+.listing h4 { margin: 4px 0 0; font-size: 16px; font-weight: 700; line-height: 1.35; }
+.listing .org { font-size: 12px; color: var(--ink-3); }
+.listing .meta-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ddl {
+  font-size: 12px; font-weight: 700;
+  padding: 4px 10px; border-radius: 6px;
+  background: #fef2f2; color: var(--bad);
+}
+.ddl.soon { background: #fffbeb; color: var(--warn); }
+.ddl.normal { background: #ecfdf5; color: var(--good); }
+.money {
+  font-size: 12px; font-weight: 600;
+  padding: 4px 10px; border-radius: 6px;
+  background: var(--bg-2); color: var(--ink-2);
+}
+.type-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.listing .summary { font-size: 13.5px; color: var(--ink-2); margin: 4px 0 0; }
+.listing .why {
+  margin-top: 8px; padding: 10px 12px;
+  background: var(--sage-soft); border-radius: 10px;
+  font-size: 13px; color: var(--sage-deep);
+  border-left: 3px solid var(--sage);
+}
+.listing .actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.btn-mini {
+  font-size: 12px; font-weight: 600;
+  padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-2); cursor: pointer; font-family: inherit;
+}
+.btn-mini.primary { background: var(--ink); color: white; border-color: var(--ink); }
+.btn-mini.saved { background: var(--sage); color: white; border-color: var(--sage); }
+
+/* Feature 섹션 */
+.feature {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 64px; align-items: center;
+}
+.feature.reverse { direction: rtl; }
+.feature.reverse > * { direction: ltr; }
+.feature .copy h2 { font-size: 36px; margin: 0 0 16px; font-weight: 800; letter-spacing: -.025em; line-height: 1.2; }
+.feature .copy .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--sage-deep); text-transform: uppercase; margin-bottom: 14px; }
+.feature .copy p { font-size: 16px; color: var(--ink-2); margin: 0 0 24px; }
+.feature .copy ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.feature .copy li { font-size: 15px; color: var(--ink); position: relative; padding-left: 24px; }
+.feature .copy li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--sage-deep); font-weight: 800; }
+.feature .art {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius-l); aspect-ratio: 4/3;
+  background-size: cover; background-position: center;
+  background-repeat: no-repeat; box-shadow: var(--shadow-m);
+}
+@media (max-width: 900px) { .feature { grid-template-columns: 1fr; gap: 32px; } .feature .copy h2 { font-size: 26px; } }
+
+/* AI 매칭 데모 */
+.match-demo {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius-l); padding: 28px;
+  margin-top: 32px; box-shadow: var(--shadow-s);
+}
+.match-demo h3 { margin: 0 0 14px; font-size: 18px; font-weight: 800; }
+.match-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.match-form .field { display: flex; flex-direction: column; gap: 6px; }
+.match-form label { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+.match-form input, .match-form select, .match-form textarea {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--bg); font-size: 14px;
+  font-family: inherit; color: var(--ink);
+}
+.match-form .full { grid-column: 1 / -1; }
+.match-form textarea { resize: vertical; min-height: 60px; }
+.match-form .submit {
+  grid-column: 1 / -1;
+  padding: 13px; border: 0; border-radius: 10px;
+  background: var(--ink); color: white;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.match-form .submit:disabled { opacity: .5; cursor: wait; }
+.match-form .submit:hover:not(:disabled) { background: var(--sage-deep); }
+#match-result { margin-top: 24px; }
+.loading { padding: 28px; text-align: center; color: var(--ink-3); font-size: 14px; }
+@media (max-width: 760px) { .match-form { grid-template-columns: 1fr; } }
+
+/* 트래커 */
+.tracker-stages { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.stage-pill {
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-3); cursor: pointer;
+}
+.stage-pill.on { background: var(--sage); color: white; border-color: var(--sage); }
+.empty-state { text-align: center; padding: 56px 24px; color: var(--ink-3); }
+.empty-state .empty-art {
+  width: 160px; height: 160px; margin: 0 auto 16px;
+  background-image: url("images/empty.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+
+/* About */
+.about-grid { display: grid; grid-template-columns: 5fr 6fr; gap: 56px; align-items: center; }
+.about-grid .art {
+  aspect-ratio: 4/5;
+  background-image: url("images/about.png");
+  background-size: cover; background-position: center;
+  background-color: var(--cream);
+  border-radius: var(--radius-l); box-shadow: var(--shadow-m);
+}
+.about-grid .copy h2 { font-size: 36px; margin: 0 0 18px; font-weight: 800; letter-spacing: -.025em; line-height: 1.2; }
+.about-grid .copy .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--sage-deep); text-transform: uppercase; margin-bottom: 14px; }
+.about-grid .copy p { font-size: 16px; color: var(--ink-2); margin: 0 0 16px; }
+.about-grid .copy .signature { margin-top: 24px; font-size: 14px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 32px; } .about-grid .copy h2 { font-size: 26px; } }
+
+/* 스토리 */
+.story {
+  position: relative; min-height: 480px;
+  display: grid; place-items: center; padding: 80px 24px;
+  background-image: linear-gradient(rgba(20,24,31,.42), rgba(20,24,31,.42)), url("images/story.png");
+  background-size: cover; background-position: center;
+  color: white; border-radius: var(--radius-l);
+  margin: 0 24px; box-shadow: var(--shadow-m);
+}
+.story .inner { max-width: 720px; text-align: center; }
+.story .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .85; margin-bottom: 14px; color: white; }
+.story h2 { font-size: 36px; font-weight: 800; letter-spacing: -.025em; line-height: 1.25; margin: 0 0 16px; }
+.story p { font-size: 17px; opacity: .9; margin: 0; line-height: 1.6; }
+@media (max-width: 760px) { .story h2 { font-size: 24px; } .story p { font-size: 14px; } }
+
+/* CTA */
+.cta {
+  text-align: center; padding: 88px 24px;
+  border-radius: var(--radius-l); margin: 96px 24px;
+  background-image: linear-gradient(rgba(251,250,246,.5), rgba(251,250,246,.5)), url("images/cta-bg.png");
+  background-size: cover; background-position: center;
+  background-color: var(--cream); border: 1px solid var(--line);
+}
+.cta h2 { font-size: 36px; font-weight: 800; letter-spacing: -.025em; margin: 0 0 12px; }
+.cta p { font-size: 17px; color: var(--ink-2); margin: 0 0 24px; }
+
+footer.site { border-top: 1px solid var(--line); padding: 40px 0 56px; font-size: 13px; color: var(--ink-3); }
+footer.site .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="#top">
+      <span class="logo-img"></span>
+      <span class="name"><span class="accent">새싹</span>지원사업</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#fields">분야</a>
+      <a href="#listings">공고</a>
+      <a href="#ai-matching">AI 매칭</a>
+      <a href="#tracker">트래커</a>
+      <a href="#about">소개</a>
+    </nav>
+    <a class="nav-cta" href="#ai-matching">지금 시작</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="container">
+      <div>
+        <h1>전국의 청년창업 지원,<br /><span class="accent">한 곳에서</span> 가장 빠르게.</h1>
+        <p class="lead">
+          중앙·지자체 청년창업 공고를 매일 모아드립니다.<br />
+          AI가 당신의 프로필에 맞는 사업을 추천하고, 신청 일정을 챙겨드려요.
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="#ai-matching">AI 매칭 받아보기 →</a>
+          <a class="btn secondary" href="#listings">공고 둘러보기</a>
+        </div>
+      </div>
+      <div class="hero-art" role="img" aria-label="청년창업 지원 큐레이션 서비스 컨셉 이미지"></div>
+    </div>
+
+    <div class="container">
+      <div class="hero-stats">
+        <div class="stat"><div class="num" id="stat-count">13</div><div class="lbl">큐레이션 공고</div></div>
+        <div class="stat"><div class="num">17개</div><div class="lbl">시도 전국 확장 가능</div></div>
+        <div class="stat"><div class="num">5분</div><div class="lbl">AI 매칭 소요</div></div>
+        <div class="stat"><div class="num">무료</div><div class="lbl">서비스 이용</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="fields">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">분야</div>
+        <h2>어떤 분야의 청년창업을 준비하세요?</h2>
+        <p>지원사업은 분야마다 심사 기준이 다릅니다. 우리는 분야별로 깊게 정리합니다.</p>
+      </div>
+      <div class="fields-row">
+        <div class="field-card"><div class="icon">🌾</div><h3>농업·로컬</h3><p>청년농업인 정착, 농촌융복합산업, 로컬크리에이터.</p></div>
+        <div class="field-card"><div class="icon">💗</div><h3>웰니스·헬스케어</h3><p>디지털 헬스, 시니어 케어, 약국·웰니스 융합.</p></div>
+        <div class="field-card"><div class="icon">✦</div><h3>딥테크·AI</h3><p>예비·초기창업패키지, 청년창업사관학교, K-Startup.</p></div>
+        <div class="field-card"><div class="icon">🏪</div><h3>제조·소상공인</h3><p>지자체 소상공인 창업, 청년몰 입점, 점포 개설 지원.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 공고 큐레이션 (필터 강화) -->
+  <section class="section alt" id="listings">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">공고 큐레이션</div>
+        <h2>강화에서 시작해 전국으로.</h2>
+        <p>지원 유형, 금액 범위, 마감 일정까지 — 원하는 조건으로 자유롭게 좁혀보세요.</p>
+      </div>
+
+      <div class="curation-wrap">
+        <!-- 1줄: 지역 + 검색 -->
+        <div class="curation-top">
+          <button class="chip active" data-region="all">전체</button>
+          <button class="chip" data-region="ganghwa">강화</button>
+          <button class="chip" data-region="incheon">인천</button>
+          <button class="chip" data-region="national">전국</button>
+          <div class="search-box">
+            <span style="font-size:14px;color:var(--ink-3)">🔍</span>
+            <input id="search-input" placeholder="공고명·주관기관 검색" />
+          </div>
+        </div>
+
+        <!-- 2줄: 정렬 + 필터 토글 + 카운트 -->
+        <div class="curation-controls">
+          <select class="sort-select" id="sort-select">
+            <option value="deadline-asc">마감 임박순</option>
+            <option value="deadline-desc">마감 여유순</option>
+            <option value="money-desc">지원금 큰 순</option>
+            <option value="money-asc">지원금 작은 순</option>
+          </select>
+          <button class="filter-toggle" id="filter-toggle">
+            <span>상세 필터</span>
+            <span class="count hidden" id="filter-count">0</span>
+            <span id="filter-arrow">▾</span>
+          </button>
+          <span class="results-count" id="results-count"></span>
+        </div>
+
+        <!-- 활성 필터 칩 -->
+        <div class="active-filters hidden" id="active-filters"></div>
+
+        <!-- 필터 패널 -->
+        <div class="filter-panel" id="filter-panel">
+          <div class="filter-group">
+            <h4>분야 <span class="hint">중복 선택 가능</span></h4>
+            <div class="checkbox-list" data-group="fields">
+              <label class="cb-pill"><input type="checkbox" value="농업·로컬" /><span class="box"></span>농업·로컬</label>
+              <label class="cb-pill"><input type="checkbox" value="웰니스·헬스케어" /><span class="box"></span>웰니스·헬스케어</label>
+              <label class="cb-pill"><input type="checkbox" value="딥테크·AI" /><span class="box"></span>딥테크·AI</label>
+              <label class="cb-pill"><input type="checkbox" value="제조·소상공인" /><span class="box"></span>제조·소상공인</label>
+              <label class="cb-pill"><input type="checkbox" value="기타" /><span class="box"></span>기타</label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h4>지원 유형 <span class="hint">중복 선택 가능</span></h4>
+            <div class="checkbox-list" data-group="types">
+              <label class="cb-pill"><input type="checkbox" value="자금" /><span class="box"></span>💰 자금 지원</label>
+              <label class="cb-pill"><input type="checkbox" value="융자" /><span class="box"></span>🏦 융자</label>
+              <label class="cb-pill"><input type="checkbox" value="공간" /><span class="box"></span>🏢 공간·입주</label>
+              <label class="cb-pill"><input type="checkbox" value="멘토링" /><span class="box"></span>🤝 멘토링·컨설팅</label>
+              <label class="cb-pill"><input type="checkbox" value="교육" /><span class="box"></span>📚 교육·연수</label>
+              <label class="cb-pill"><input type="checkbox" value="가산점" /><span class="box"></span>⭐ 가산점만</label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h4>지원금 범위 <span class="hint">자금 기준 (융자 제외)</span></h4>
+            <div class="checkbox-list" data-group="moneyRanges">
+              <label class="cb-pill"><input type="checkbox" value="under-1000" /><span class="box"></span>1,000만원 이하</label>
+              <label class="cb-pill"><input type="checkbox" value="1000-5000" /><span class="box"></span>1,000만~5,000만</label>
+              <label class="cb-pill"><input type="checkbox" value="5000-10000" /><span class="box"></span>5,000만~1억</label>
+              <label class="cb-pill"><input type="checkbox" value="over-10000" /><span class="box"></span>1억 이상</label>
+              <label class="cb-pill"><input type="checkbox" value="loan" /><span class="box"></span>융자 지원</label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h4>마감일 <span class="hint">현재 기준</span></h4>
+            <div class="checkbox-list" data-group="deadlineRanges">
+              <label class="cb-pill"><input type="checkbox" value="d14" /><span class="box"></span>2주 이내</label>
+              <label class="cb-pill"><input type="checkbox" value="d30" /><span class="box"></span>1개월 이내</label>
+              <label class="cb-pill"><input type="checkbox" value="d60" /><span class="box"></span>2개월 이내</label>
+              <label class="cb-pill"><input type="checkbox" value="d60plus" /><span class="box"></span>2개월 이상 남음</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid" id="list-container"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ai-matching">
+    <div class="container">
+      <div class="feature">
+        <div class="copy">
+          <div class="eyebrow">AI 매칭</div>
+          <h2>당신의 조건에 맞는 공고만 골라줍니다.</h2>
+          <p>나이·지역·관심 분야·사업 메모만 알려주시면, AI가 13개 공고 중 가장 적합한 3~5개를 찾아 이유까지 설명해드립니다.</p>
+          <ul>
+            <li>중앙부처 + 17개 시도 공고 통합 분석</li>
+            <li>마감 임박 + 적합도 동시 고려</li>
+            <li>왜 적합한지 한 줄 설명까지</li>
+          </ul>
+        </div>
+        <div class="art" style="background-image:url('images/ai-matching.png');"></div>
+      </div>
+
+      <div class="match-demo">
+        <h3>지금 매칭 받아보기</h3>
+        <div class="match-form">
+          <div class="field"><label>나이</label><input id="m-age" type="number" placeholder="예: 39" value="39" /></div>
+          <div class="field"><label>지역</label>
+            <select id="m-region">
+              <option value="강화도">강화도</option><option value="인천">인천</option>
+              <option value="서울">서울</option><option value="기타">기타 지역</option>
+            </select>
+          </div>
+          <div class="field"><label>관심 분야</label>
+            <select id="m-field">
+              <option value="농업·로컬">농업·로컬</option>
+              <option value="웰니스·헬스케어" selected>웰니스·헬스케어</option>
+              <option value="딥테크·AI">딥테크·AI</option>
+              <option value="제조·소상공인">제조·소상공인</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div class="field full"><label>한 줄 메모 (선택)</label>
+            <textarea id="m-note" placeholder="예: 약사 출신, 강화 거주, 시니어 복약관리 AI 챗봇 아이템 검토 중"></textarea>
+          </div>
+          <button class="submit" id="m-run">AI에게 매칭 요청 →</button>
+        </div>
+        <div id="match-result"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="tracker">
+    <div class="container">
+      <div class="feature reverse">
+        <div class="copy">
+          <div class="eyebrow">신청 트래커</div>
+          <h2>여러 공고, 한 화면에서 관리.</h2>
+          <p>관심 공고를 저장하고, 신청 단계별로 진행 상황을 추적합니다. 마감 임박은 자동으로 알려드립니다.</p>
+          <ul>
+            <li>6단계 진행 상태 (관심→통과)</li>
+            <li>마감 D-day 자동 계산</li>
+            <li>브라우저에 안전하게 저장</li>
+          </ul>
+        </div>
+        <div class="art" style="background-image:url('images/tracker.png');"></div>
+      </div>
+      <div class="match-demo" style="margin-top: 40px;">
+        <h3>내가 저장한 공고</h3>
+        <div id="tracker-container"></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding: 64px 0;">
+    <div class="story">
+      <div class="inner">
+        <div class="eyebrow">우리가 만든 이유</div>
+        <h2>"내 동네에 맞는 공고를<br />찾는 게 가장 어려웠다."</h2>
+        <p>청년창업 지원사업은 분명히 많습니다. 그러나 흩어져 있고, 마감은 빠르고, 신청서는 까다롭습니다.
+          우리는 강화에서 시작해, 전국 어디서든 청년이 자신의 동네에 맞는 사업을 가장 빨리 찾을 수 있는 길을 만들고 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="art" role="img" aria-label="운영자 워크스페이스"></div>
+        <div class="copy">
+          <div class="eyebrow">운영자 소개</div>
+          <h2>강화 청년이 만든,<br />강화 청년을 위한 서비스.</h2>
+          <p>본 서비스는 강화에서 청년창업과 지역 활동을 병행 중인 한 청년이 직접 기획·운영합니다.
+            정부 지원사업 정보를 찾으며 겪은 불편을 직접 해결하고자 시작한 프로젝트입니다.</p>
+          <p>웰니스·헬스케어 도메인 경험을 살려, 지역 약국·시니어 케어 분야 청년창업가들에게 특히 유용한
+            큐레이션을 제공하는 것을 1차 목표로 합니다.</p>
+          <div class="signature">운영 · 변승환 · 강화도 · 2026</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cta">
+      <h2>지금 5분이면 됩니다.</h2>
+      <p>나에게 맞는 청년창업 지원사업, AI에게 한 번 물어보세요.</p>
+      <a class="btn primary" href="#ai-matching">AI 매칭 받아보기 →</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="container row">
+    <div>© 2026 새싹지원사업 · 강화도 → 전국</div>
+    <div>본 서비스는 베타 운영 중 · 공고 데이터는 출처 확인 후 신청하세요</div>
+  </div>
+</footer>
+
+<script>
+// ===== 데이터 (types, moneyMax 보강) =====
+const LISTINGS = [
+  { id:"ghw-young-farmer", region:"ganghwa", regionLabel:"강화", title:"강화군 청년농업인 영농정착 지원사업",
+    org:"강화군청 농업기술센터", field:"농업·로컬", age:"만 18~49세", money:"월 최대 110만원 / 최장 3년",
+    types:["자금"], moneyMax: 39600000,
+    deadline:"2026-06-30", summary:"강화 거주 청년농업인 신규 영농정착 지원. 영농경력 3년 이하.",
+    url:"https://www.ganghwa.go.kr/" },
+  { id:"ghw-succession-farm", region:"ganghwa", regionLabel:"강화", title:"후계농업경영인 육성자금 (강화)",
+    org:"강화군청 + 농협", field:"농업·로컬", age:"만 18~49세", money:"최대 5억원 융자 (1%대)",
+    types:["융자"], moneyMax: 500000000,
+    deadline:"2026-08-15", summary:"강화 정착 후계농 대상 시설·농지 매입 융자. 2년 이상 영농계획 필요.",
+    url:"https://www.ganghwa.go.kr/" },
+  { id:"ghw-small-biz", region:"ganghwa", regionLabel:"강화", title:"강화군 소상공인 창업 지원금",
+    org:"강화군 일자리경제과", field:"제조·소상공인", age:"제한 없음 (청년 가산)", money:"최대 500만원",
+    types:["자금"], moneyMax: 5000000,
+    deadline:"2026-05-30", summary:"강화 내 신규 점포 개설·인테리어·간판 지원. 청년 창업 시 가산점.",
+    url:"https://www.ganghwa.go.kr/" },
+  { id:"ghw-saemaul-youth", region:"ganghwa", regionLabel:"강화", title:"강화 청년 새마을 활동가 모집",
+    org:"강화군 새마을협의회", field:"기타", age:"만 18~45세", money:"활동비 + 가산점",
+    types:["자금","가산점"], moneyMax: 1500000,
+    deadline:"2026-07-20", summary:"청년 새마을지도자 후보 인력풀. 지역 봉사·관계 실적 적립 가능.",
+    url:"https://www.saemaul.or.kr/" },
+  { id:"ic-pre-startup-school", region:"incheon", regionLabel:"인천", title:"인천 청년창업사관학교 (15기)",
+    org:"인천창조경제혁신센터", field:"딥테크·AI", age:"만 39세 이하", money:"최대 1억원 + 입주 + 멘토링",
+    types:["자금","공간","멘토링","교육"], moneyMax: 100000000,
+    deadline:"2026-06-10", summary:"AI·딥테크·웰니스 등 유망 분야 청년 스타트업 1년 집중 육성.",
+    url:"https://www.k-startup.go.kr/" },
+  { id:"ic-local-creator", region:"incheon", regionLabel:"인천", title:"인천 로컬크리에이터 양성사업",
+    org:"인천테크노파크", field:"농업·로컬", age:"제한 없음 (청년 우대)", money:"최대 3,000만원",
+    types:["자금","멘토링"], moneyMax: 30000000,
+    deadline:"2026-05-28", summary:"지역 자원(섬·해양·농산물) 활용 비즈니스 모델 양성. 강화·옹진 우대.",
+    url:"https://www.itp.or.kr/" },
+  { id:"ic-youth-mall", region:"incheon", regionLabel:"인천", title:"인천 청년몰 입점 지원",
+    org:"소상공인시장진흥공단 인천", field:"제조·소상공인", age:"만 39세 이하", money:"임대료 + 인테리어 지원",
+    types:["공간","자금"], moneyMax: 20000000,
+    deadline:"2026-09-30", summary:"신포·부평·강화 일대 청년몰 입점 청년 사업가 모집.",
+    url:"https://www.semas.or.kr/" },
+  { id:"nat-pre-pkg", region:"national", regionLabel:"전국", title:"예비창업패키지 2026",
+    org:"창업진흥원 / K-Startup", field:"딥테크·AI", age:"제한 없음 (청년 가산)", money:"최대 1억원 사업화 자금",
+    types:["자금","멘토링","교육"], moneyMax: 100000000,
+    deadline:"2026-06-25", summary:"예비창업자(사업자등록 전) 대상 사업화 자금 + 멘토링 + 교육.",
+    url:"https://www.k-startup.go.kr/" },
+  { id:"nat-early-pkg", region:"national", regionLabel:"전국", title:"초기창업패키지 2026 (AI 특화)",
+    org:"창업진흥원 / K-Startup", field:"딥테크·AI", age:"창업 3년 이내", money:"최대 1억원",
+    types:["자금","멘토링"], moneyMax: 100000000,
+    deadline:"2026-07-05", summary:"AI·빅데이터 분야 초기 스타트업 사업화 + 시제품 고도화. 205억 배정.",
+    url:"https://www.k-startup.go.kr/" },
+  { id:"nat-cys-school", region:"national", regionLabel:"전국", title:"청년창업사관학교 17기",
+    org:"중소벤처기업진흥공단", field:"딥테크·AI", age:"만 39세 이하", money:"최대 1억원 + 1년 입주",
+    types:["자금","공간","멘토링","교육"], moneyMax: 100000000,
+    deadline:"2026-06-15", summary:"전국 14개 거점. AI·로봇·딥테크 청년 스타트업 집중 육성.",
+    url:"https://start.kosmes.or.kr/" },
+  { id:"nat-agri-conv", region:"national", regionLabel:"전국", title:"농촌융복합산업 청년창업가 육성",
+    org:"농림축산식품부", field:"농업·로컬", age:"만 18~49세", money:"최대 5,000만원 + 컨설팅",
+    types:["자금","멘토링"], moneyMax: 50000000,
+    deadline:"2026-07-31", summary:"농업+가공+체험 융복합 비즈니스. 강화·옹진 같은 도서지역 우대.",
+    url:"https://www.mafra.go.kr/" },
+  { id:"nat-wellness-deeptech", region:"national", regionLabel:"전국", title:"딥테크 창업패키지 — 헬스케어·웰니스",
+    org:"중기부 / K-Startup", field:"웰니스·헬스케어", age:"창업 7년 이내", money:"최대 3억원",
+    types:["자금","멘토링"], moneyMax: 300000000,
+    deadline:"2026-08-20", summary:"AI 헬스케어·디지털 복약·시니어 케어 분야 우대.",
+    url:"https://www.k-startup.go.kr/" },
+  { id:"nat-rural-relocation", region:"national", regionLabel:"전국", title:"청년농촌 정착지원 + 창업자금",
+    org:"농협중앙회 + 농식품부", field:"농업·로컬", age:"만 18~45세", money:"정착금 + 최대 3억 융자",
+    types:["자금","융자"], moneyMax: 300000000,
+    deadline:"2026-09-10", summary:"도시→농촌(강화 포함) 이주 청년 대상. 영농+창업 결합 패키지.",
+    url:"https://www.nonghyup.com/" }
+];
+
+// 라벨 매핑 (활성 칩 표시용)
+const LABELS = {
+  fields: { /* value 그대로 사용 */ },
+  types: { "자금":"자금 지원", "융자":"융자", "공간":"공간·입주", "멘토링":"멘토링·컨설팅", "교육":"교육·연수", "가산점":"가산점만" },
+  moneyRanges: {
+    "under-1000":"1,000만 이하", "1000-5000":"1,000만~5,000만",
+    "5000-10000":"5,000만~1억", "over-10000":"1억 이상", "loan":"융자 지원"
+  },
+  deadlineRanges: { "d14":"2주 이내", "d30":"1개월 이내", "d60":"2개월 이내", "d60plus":"2개월 이상 남음" }
+};
+
+const GROUP_TITLES = { fields:"분야", types:"지원유형", moneyRanges:"지원금", deadlineRanges:"마감일" };
+
+const state = {
+  region: "all",
+  search: "",
+  sort: "deadline-asc",
+  fields: [],
+  types: [],
+  moneyRanges: [],
+  deadlineRanges: [],
+  filterOpen: false,
+  saved: {}
+};
+const STORAGE_KEY = "saessak_v2";
+const TODAY = new Date("2026-05-12");
+
+function loadStorage(){
+  try { const r = localStorage.getItem(STORAGE_KEY);
+    if(r){ const d = JSON.parse(r); state.saved = d.saved||{}; } } catch(e){}
+}
+function saveStorage(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({saved: state.saved})); } catch(e){}
+}
+function daysLeft(s){ return Math.ceil((new Date(s) - TODAY)/(1000*60*60*24)); }
+function ddlCls(d){ if(d<0) return ""; if(d<=14) return "soon"; return "normal"; }
+function ddlLbl(d){ if(d<0) return "마감"; if(d===0) return "오늘 마감"; return "D-"+d; }
+function fmtMoney(m){
+  if(m >= 100000000) return (m/100000000).toFixed(1).replace(".0","") + "억";
+  if(m >= 10000) return Math.round(m/10000).toLocaleString() + "만";
+  return m.toLocaleString();
+}
+
+function matchesMoneyRange(x, range){
+  if(range === "loan") return x.types.includes("융자");
+  // 금액 범위는 자금 기준 (융자만 있는 건 제외, but 자금+융자 혼합은 자금 기준 매칭)
+  const hasJagum = x.types.includes("자금");
+  if(!hasJagum) return false;
+  const m = x.moneyMax;
+  if(range === "under-1000") return m < 10000000;
+  if(range === "1000-5000")  return m >= 10000000 && m < 50000000;
+  if(range === "5000-10000") return m >= 50000000 && m < 100000000;
+  if(range === "over-10000") return m >= 100000000;
+  return false;
+}
+function matchesDeadlineRange(x, range){
+  const d = daysLeft(x.deadline);
+  if(d < 0) return false;
+  if(range === "d14")     return d <= 14;
+  if(range === "d30")     return d <= 30;
+  if(range === "d60")     return d <= 60;
+  if(range === "d60plus") return d > 60;
+  return false;
+}
+
+function applyFilters(){
+  return LISTINGS.filter(x => {
+    if(state.region !== "all" && x.region !== state.region) return false;
+    if(state.fields.length && !state.fields.includes(x.field)) return false;
+    if(state.types.length && !x.types.some(t => state.types.includes(t))) return false;
+    if(state.moneyRanges.length){
+      if(!state.moneyRanges.some(r => matchesMoneyRange(x, r))) return false;
+    }
+    if(state.deadlineRanges.length){
+      if(!state.deadlineRanges.some(r => matchesDeadlineRange(x, r))) return false;
+    }
+    if(state.search){
+      const s = state.search.toLowerCase();
+      if(!(x.title.toLowerCase().includes(s) ||
+           x.org.toLowerCase().includes(s) ||
+           x.summary.toLowerCase().includes(s))) return false;
+    }
+    return true;
+  });
+}
+function applySort(arr){
+  const a = arr.slice();
+  switch(state.sort){
+    case "deadline-asc":  return a.sort((p,q)=> new Date(p.deadline) - new Date(q.deadline));
+    case "deadline-desc": return a.sort((p,q)=> new Date(q.deadline) - new Date(p.deadline));
+    case "money-desc":    return a.sort((p,q)=> q.moneyMax - p.moneyMax);
+    case "money-asc":     return a.sort((p,q)=> p.moneyMax - q.moneyMax);
+    default: return a;
+  }
+}
+
+function cardHTML(x, why){
+  const days = daysLeft(x.deadline);
+  const saved = !!state.saved[x.id];
+  return `
+    <div class="listing" data-id="${x.id}">
+      <div class="tags">
+        <span class="tag ${x.region}">${x.regionLabel}</span>
+        <span class="tag field">${x.field}</span>
+      </div>
+      <h4>${x.title}</h4>
+      <div class="org">${x.org} · ${x.age}</div>
+      <div class="meta-row">
+        <span class="ddl ${ddlCls(days)}">${ddlLbl(days)} · ${x.deadline}</span>
+        <span class="money">${x.money}</span>
+      </div>
+      <div class="type-row">
+        ${x.types.map(t => `<span class="tag type">${LABELS.types[t]||t}</span>`).join("")}
+      </div>
+      <div class="summary">${x.summary}</div>
+      ${why ? `<div class="why"><b>AI 추천 이유:</b> ${why}</div>` : ""}
+      <div class="actions">
+        <button class="btn-mini ${saved?"saved":"primary"}" data-action="save">
+          ${saved ? "✓ 저장됨" : "+ 트래커에 추가"}
+        </button>
+        <button class="btn-mini" data-action="open">출처 ↗</button>
+      </div>
+    </div>`;
+}
+
+function renderActiveFilters(){
+  const bar = document.getElementById("active-filters");
+  const filterCount = document.getElementById("filter-count");
+  const items = [];
+  ["fields","types","moneyRanges","deadlineRanges"].forEach(g => {
+    state[g].forEach(v => {
+      const label = (LABELS[g] && LABELS[g][v]) || v;
+      items.push(`
+        <span class="active-filter" data-group="${g}" data-value="${v}">
+          ${GROUP_TITLES[g]}: ${label}
+          <button data-action="remove" aria-label="제거">×</button>
+        </span>`);
+    });
+  });
+  const total = items.length;
+  if(total > 0){
+    items.push(`<button class="active-filter reset" data-action="reset">전체 초기화</button>`);
+    bar.innerHTML = items.join("");
+    bar.classList.remove("hidden");
+    filterCount.textContent = String(total);
+    filterCount.classList.remove("hidden");
+    bar.querySelectorAll("[data-action='remove']").forEach(b => {
+      b.addEventListener("click", () => {
+        const sp = b.closest(".active-filter");
+        const g = sp.dataset.group; const v = sp.dataset.value;
+        state[g] = state[g].filter(x => x !== v);
+        syncCheckboxes(); renderAll();
+      });
+    });
+    bar.querySelector("[data-action='reset']")?.addEventListener("click", () => {
+      state.fields = []; state.types = []; state.moneyRanges = []; state.deadlineRanges = [];
+      syncCheckboxes(); renderAll();
+    });
+  } else {
+    bar.innerHTML = "";
+    bar.classList.add("hidden");
+    filterCount.classList.add("hidden");
+  }
+}
+
+function syncCheckboxes(){
+  document.querySelectorAll(".checkbox-list").forEach(list => {
+    const g = list.dataset.group;
+    list.querySelectorAll(".cb-pill").forEach(pill => {
+      const cb = pill.querySelector("input");
+      const checked = state[g].includes(cb.value);
+      cb.checked = checked;
+      pill.classList.toggle("checked", checked);
+    });
+  });
+}
+
+function renderList(){
+  const c = document.getElementById("list-container");
+  const filtered = applySort(applyFilters());
+  document.getElementById("results-count").textContent = `총 ${filtered.length}개 공고`;
+  if(!filtered.length){
+    c.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <div style="width:80px;height:80px;margin:0 auto 16px;border-radius:16px;background:var(--sage-soft);display:grid;place-items:center;font-size:32px;">🔎</div>
+      조건에 맞는 공고가 없어요.<br /><small>필터를 줄여보세요.</small></div>`;
+    return;
+  }
+  c.innerHTML = filtered.map(cardHTML).join("");
+  bindCardActions(c);
+}
+
+const STAGES = [
+  {key:"interest", label:"관심"}, {key:"preparing", label:"준비중"},
+  {key:"submitted", label:"제출"}, {key:"waiting", label:"결과대기"},
+  {key:"passed", label:"통과"}, {key:"rejected", label:"탈락"}
+];
+function renderTracker(){
+  const c = document.getElementById("tracker-container");
+  const ids = Object.keys(state.saved);
+  if(!ids.length){
+    c.innerHTML = `<div class="empty-state">
+      <div class="empty-art"></div>
+      아직 저장한 공고가 없어요.<br />
+      위에서 <b>+ 트래커에 추가</b>를 눌러 시작하세요.
+    </div>`;
+    return;
+  }
+  const items = ids.map(id => ({item: LISTINGS.find(x=>x.id===id), s: state.saved[id]}))
+    .filter(x=>x.item).sort((a,b)=> new Date(a.item.deadline) - new Date(b.item.deadline));
+  c.innerHTML = `<div class="card-grid">${items.map(({item,s})=>{
+    const days = daysLeft(item.deadline);
+    return `
+      <div class="listing" data-id="${item.id}">
+        <div class="tags">
+          <span class="tag ${item.region}">${item.regionLabel}</span>
+          <span class="tag field">${item.field}</span>
+        </div>
+        <h4>${item.title}</h4>
+        <div class="org">${item.org}</div>
+        <div class="meta-row">
+          <span class="ddl ${ddlCls(days)}">${ddlLbl(days)} · ${item.deadline}</span>
+          <span class="money">${item.money}</span>
+        </div>
+        <div class="tracker-stages">
+          ${STAGES.map(st => `<span class="stage-pill ${s.stage===st.key?"on":""}"
+            data-action="stage" data-stage="${st.key}">${st.label}</span>`).join("")}
+        </div>
+        <div class="actions">
+          <button class="btn-mini" data-action="open">출처 ↗</button>
+          <button class="btn-mini" data-action="remove">삭제</button>
+        </div>
+      </div>`;
+  }).join("")}</div>`;
+  bindCardActions(c);
+}
+
+function bindCardActions(scope){
+  scope.querySelectorAll(".listing").forEach(card => {
+    const id = card.dataset.id;
+    card.querySelectorAll("[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const a = btn.dataset.action;
+        if(a === "save"){
+          if(state.saved[id]) delete state.saved[id];
+          else state.saved[id] = { stage:"interest", addedAt: new Date().toISOString() };
+          saveStorage(); renderAll();
+        } else if(a === "open"){
+          const it = LISTINGS.find(x=>x.id===id);
+          if(it?.url) window.open(it.url, "_blank", "noopener");
+        } else if(a === "stage"){
+          if(state.saved[id]) state.saved[id].stage = btn.dataset.stage;
+          saveStorage(); renderTracker();
+        } else if(a === "remove"){
+          delete state.saved[id]; saveStorage(); renderAll();
+        }
+      });
+    });
+  });
+}
+
+function renderAll(){
+  renderActiveFilters();
+  renderList();
+  renderTracker();
+}
+
+// AI 매칭
+async function runMatch(){
+  const btn = document.getElementById("m-run");
+  const out = document.getElementById("match-result");
+  const age = document.getElementById("m-age").value || "미지정";
+  const region = document.getElementById("m-region").value;
+  const field = document.getElementById("m-field").value;
+  const note = document.getElementById("m-note").value || "";
+
+  btn.disabled = true; btn.textContent = "AI 분석 중...";
+  out.innerHTML = `<div class="loading">AI가 13개 공고를 검토 중입니다...</div>`;
+
+  const prompt = `당신은 한국 청년창업 지원사업 큐레이션 전문가입니다.
+사용자 프로필에 가장 적합한 공고 3~5개를 골라주세요.
+
+[사용자 프로필]
+- 나이: ${age}세
+- 지역: ${region}
+- 관심분야: ${field}
+- 메모: ${note || "(없음)"}
+
+[작업]
+첨부된 공고 목록 중 적합도 높은 순으로 3~5개 선택.
+각 공고에 "왜 이 사람에게 맞는지" 1~2문장 설명.
+
+[출력 형식] 반드시 JSON만 출력:
+{ "matches": [ { "id": "공고id", "reason": "이유 1~2문장" } ] }`;
+
+  try {
+    if(!window.cowork?.askClaude){
+      const matches = LISTINGS
+        .map(x => ({
+          x,
+          score: (x.field === field ? 3 : 0) +
+                 (region === "강화도" && x.region === "ganghwa" ? 2 : 0) +
+                 (region === "인천" && x.region === "incheon" ? 2 : 0) +
+                 (x.region === "national" ? 1 : 0) +
+                 (parseInt(age) <= 49 && x.age.includes("49") ? 1 : 0) +
+                 (parseInt(age) <= 39 && x.age.includes("39") ? 2 : 0)
+        }))
+        .sort((a,b)=> b.score - a.score)
+        .slice(0,4)
+        .map(({x,score})=>({
+          id: x.id,
+          reason: `(데모 매칭) 분야·지역·연령 조건 기준 적합도 ${score}점.`
+        }));
+      renderMatches({matches});
+      return;
+    }
+    const resp = await window.cowork.askClaude(prompt, [{listings: LISTINGS}]);
+    const text = typeof resp === "string" ? resp : (resp?.text || JSON.stringify(resp));
+    const m = text.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("JSON not found");
+    const parsed = JSON.parse(m[0]);
+    if(!Array.isArray(parsed.matches)) throw new Error("matches missing");
+    renderMatches(parsed);
+  } catch(e){
+    console.error(e);
+    out.innerHTML = `<div class="empty-state">매칭 실패. 다시 시도해주세요.<br /><small>${e.message||""}</small></div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = "AI에게 매칭 요청 →";
+  }
+}
+function renderMatches(parsed){
+  const out = document.getElementById("match-result");
+  out.innerHTML = `
+    <div style="margin: 24px 0 12px; font-size: 13px; color: var(--ink-3); font-weight: 600;">
+      ${parsed.matches.length}개 매칭 — 적합도 순
+    </div>
+    <div class="card-grid">
+      ${parsed.matches.map(m => {
+        const item = LISTINGS.find(x=>x.id===m.id);
+        return item ? cardHTML(item, m.reason) : "";
+      }).join("")}
+    </div>`;
+  bindCardActions(out);
+}
+
+// 이벤트 바인딩
+document.addEventListener("DOMContentLoaded", () => {
+  loadStorage();
+
+  // 지역 칩
+  document.querySelectorAll(".curation-top .chip").forEach(c => {
+    c.addEventListener("click", () => {
+      document.querySelectorAll(".curation-top .chip").forEach(x=>x.classList.remove("active"));
+      c.classList.add("active");
+      state.region = c.dataset.region;
+      renderAll();
+    });
+  });
+
+  // 검색
+  document.getElementById("search-input").addEventListener("input", e => {
+    state.search = e.target.value; renderList();
+  });
+
+  // 정렬
+  document.getElementById("sort-select").addEventListener("change", e => {
+    state.sort = e.target.value; renderList();
+  });
+
+  // 필터 토글
+  document.getElementById("filter-toggle").addEventListener("click", () => {
+    state.filterOpen = !state.filterOpen;
+    document.getElementById("filter-panel").classList.toggle("open", state.filterOpen);
+    document.getElementById("filter-toggle").classList.toggle("open", state.filterOpen);
+    document.getElementById("filter-arrow").textContent = state.filterOpen ? "▴" : "▾";
+  });
+
+  // 체크박스
+  document.querySelectorAll(".checkbox-list").forEach(list => {
+    const g = list.dataset.group;
+    list.querySelectorAll(".cb-pill").forEach(pill => {
+      const cb = pill.querySelector("input");
+      pill.addEventListener("click", e => {
+        // label 자체가 클릭되면 input이 자동으로 토글되니, 한 번만 처리
+        e.preventDefault();
+        const v = cb.value;
+        if(state[g].includes(v)) state[g] = state[g].filter(x => x !== v);
+        else state[g] = [...state[g], v];
+        syncCheckboxes();
+        renderAll();
+      });
+    });
+  });
+
+  document.getElementById("m-run").addEventListener("click", runMatch);
+
+  renderAll();
+});
+</script>
+</body>
+</html>
