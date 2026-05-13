@@ -103,9 +103,52 @@ function extractTotalCount(text) {
   return m ? parseInt(m[1], 10) : 0;
 }
 
-// ===== K-Startup 1건 → 우리 LISTINGS 1건 =====
+// 영문 분야 키 → 한글 라벨 (사이트 카드 표시용)
+const FIELD_KO = {
+  ai: 'AI·딥테크',
+  bio: '헬스케어',
+  manufacturing: '제조',
+  commerce: '커머스',
+  food: '농업·푸드',
+  culture: '문화·콘텐츠',
+  energy: '에너지·ESG',
+  social: '소셜·복지',
+  deeptech: '딥테크',
+  education: '창업교육',
+  space: '시설·공간',
+  general: '일반',
+};
+
+// K-Startup의 한글 분류(supt_biz_clsfc) → types 배열 매핑
+function bizClsfcToTypes(bizClsfc) {
+  if (!bizClsfc) return ['자금'];
+  const text = bizClsfc;
+  const types = [];
+  if (/사업화/.test(text)) types.push('자금');
+  if (/창업교육|교육/.test(text)) types.push('교육');
+  if (/멘토링|컨설팅/.test(text)) types.push('멘토링');
+  if (/시설|공간|보육|입주/.test(text)) types.push('공간');
+  if (/판로|해외/.test(text)) types.push('판로');
+  if (/행사|네트워크/.test(text)) types.push('네트워크');
+  if (/투자/.test(text)) types.push('투자');
+  return types.length > 0 ? types : ['자금'];
+}
+
+// 금액 문자열 → 숫자 추정 (정렬용)
+function moneyToNumber(s, summary) {
+  const text = (s || '') + ' ' + (summary || '');
+  if (!text) return 0;
+  const m1 = text.match(/(\d+(?:\.\d+)?)\s*억/);
+  if (m1) return parseFloat(m1[1]) * 100000000;
+  const m2 = text.match(/(\d+)\s*천만/);
+  if (m2) return parseInt(m2[1], 10) * 10000000;
+  const m3 = text.match(/(\d+(?:,\d{3})*)\s*만/);
+  if (m3) return parseInt(m3[1].replace(/,/g, ''), 10) * 10000;
+  return 0;
+}
+
+// ===== K-Startup 1건 → 우리 LISTINGS 1건 (사이트 카드 호환 구조) =====
 function transformItem(item, idx) {
-  // 실제 K-Startup 응답 필드명 (확인 완료)
   const title = item.biz_pbanc_nm || item.intg_pbanc_biz_nm || '';
   const summary = item.pbanc_ctnt || item.aply_trgt_cntnt || '';
   const startDate = item.pbanc_rcpt_bgng_dt || '';
@@ -123,29 +166,36 @@ function transformItem(item, idx) {
   const rcrtPrgsYn = item.rcrt_prgs_yn || '';
   const contact = item.prch_cnpl_no || '';
 
-  // 청년창업 자격 판정 (만 39세 이하 키워드)
   const ageStr = targetAge + ' ' + target;
   const isYouth = /만 39세 이하|39세|청년|만 19세|만 20세|만 29세|만 34세/.test(ageStr);
 
-  // 지원 분야 (사업화/창업교육/시설공간/멘토링/행사 등)
-  const bizClsfcKor = suptBizClsfc; // K-Startup의 분류 그대로
+  const fieldKey = classifyField(title, summary, suptBizClsfc);
+  const region = classifyRegion(suptRegin, agency, title);
+  const money = extractAmount(summary, suptBizClsfc);
+  const types = bizClsfcToTypes(suptBizClsfc);
 
   return {
+    // === 사이트 카드 호환 필드 (기존 LISTINGS 구조) ===
     id: `ks-${id}`,
+    region: region,
+    regionLabel: suptRegin || '전국',  // 카드 표시용
     title: title.trim().replace(/\s+/g, ' '),
-    field: classifyField(title, summary, suptBizClsfc),
-    bizClsfc: bizClsfcKor,  // "사업화", "창업교육" 등 한글 분류
-    region: classifyRegion(suptRegin, agency, title),
-    regionName: suptRegin,  // "전국", "서울" 등 원본
-    age: isYouth ? '만 39세 이하' : (targetAge || '제한없음'),
-    target: target || '예비창업자/창업기업',
-    money: extractAmount(summary, suptBizClsfc),
-    period: `${normalizeDate(startDate)} ~ ${normalizeDate(endDate)}`,
+    org: agency || '창업진흥원',  // 카드 표시용 (기관명)
+    field: FIELD_KO[fieldKey] || '일반',  // 한글 라벨
+    age: isYouth ? '만 39세 이하' : (targetAge ? targetAge.split(',')[0] : '제한 없음'),
+    money: money,
+    types: types,
+    moneyMax: moneyToNumber(money, summary),
     deadline: normalizeDate(endDate),
-    agency: agency || '창업진흥원',
-    sprvInst: sprvInst,  // "민간"/"공공기관" 등
     summary: summary.slice(0, 250),
     url: detailUrl || guideUrl || 'https://www.k-startup.go.kr',
+
+    // === K-Startup 추가 메타 (선택적 사용) ===
+    fieldKey: fieldKey,
+    bizClsfc: suptBizClsfc,
+    sprvInst: sprvInst,
+    period: `${normalizeDate(startDate)} ~ ${normalizeDate(endDate)}`,
+    target: target,
     applyUrl: applyUrl,
     contact: contact,
     rcrtOngoing: rcrtPrgsYn === 'Y',
