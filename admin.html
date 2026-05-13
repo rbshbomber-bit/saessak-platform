@@ -282,64 +282,23 @@ tr:hover { background: var(--bg); }
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div class="lbl">실제 가입자 (DB)</div><div class="val" id="kpi-real-users">0</div><div class="delta" id="kpi-real-delta">실시간 카운트</div></div>
-        <div class="kpi"><div class="lbl">전체 MAU (시뮬레이션)</div><div class="val">2,847</div><div class="delta">▲ +18.2% MoM</div></div>
-        <div class="kpi"><div class="lbl">AI 매칭 누적 (30일)</div><div class="val">8,492</div><div class="delta">▲ +24.6%</div></div>
-        <div class="kpi"><div class="lbl">사업계획서 AI 결제</div><div class="val">127건</div><div class="delta">▲ +45% (베타 50% 할인 효과)</div></div>
+        <div class="kpi"><div class="lbl">실제 가입자 (DB)</div><div class="val" id="kpi-real-users">0</div><div class="delta">실시간 카운트</div></div>
+        <div class="kpi"><div class="lbl">AI 매칭 누적</div><div class="val" id="kpi-matches">0</div><div class="delta">실시간 카운트</div></div>
+        <div class="kpi"><div class="lbl">사업계획서 AI 결제</div><div class="val" id="kpi-plans">0</div><div class="delta">실시간 카운트</div></div>
+        <div class="kpi"><div class="lbl">진행 중 공고</div><div class="val" id="kpi-listings">—</div><div class="delta">K-Startup API 연동</div></div>
       </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-head">
-            <h2>권역별 사용자 분포</h2>
-            <span class="more">전체 보기 →</span>
+      <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:24px;margin:20px 0;">
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="font-size:24px;">📊</div>
+          <div>
+            <h3 style="margin:0 0 6px;font-size:15px;">대시보드는 베타 운영 직후라 데이터가 비어있어요.</h3>
+            <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.7;">
+              실제 가입자·결제·매칭이 발생하면 자동으로 차트와 표가 채워집니다.
+              가짜 시뮬레이션 데이터는 사용하지 않습니다.
+              지표 모듈(권역별 사용자 분포, 월별 가입자 추이, 분야 분포, 인기 공고 Top 5)은 가입자 50명 도달 시 자동 활성화됩니다.
+            </p>
           </div>
-          <div class="dist-list">
-            <div class="dist-row"><div class="name">수도권 (서울/경기/인천)</div><div class="bar-wrap"><div class="fill" style="width:54%"></div></div><div class="pct">54%</div></div>
-            <div class="dist-row"><div class="name">영남 (부산/대구 등)</div><div class="bar-wrap"><div class="fill" style="width:18%"></div></div><div class="pct">18%</div></div>
-            <div class="dist-row"><div class="name">호남 (광주/전남/전북)</div><div class="bar-wrap"><div class="fill" style="width:11%"></div></div><div class="pct">11%</div></div>
-            <div class="dist-row"><div class="name">충청 (대전/세종/충남/충북)</div><div class="bar-wrap"><div class="fill" style="width:9%"></div></div><div class="pct">9%</div></div>
-            <div class="dist-row"><div class="name">강원·제주</div><div class="bar-wrap"><div class="fill" style="width:5%"></div></div><div class="pct">5%</div></div>
-            <div class="dist-row"><div class="name">기타</div><div class="bar-wrap"><div class="fill" style="width:3%"></div></div><div class="pct">3%</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2>월별 가입자 추이 (6개월)</h2></div>
-          <div class="bar-chart">
-            <div class="bar" style="height:30%;" data-v="412"></div>
-            <div class="bar" style="height:42%;" data-v="578"></div>
-            <div class="bar" style="height:58%;" data-v="794"></div>
-            <div class="bar" style="height:72%;" data-v="985"></div>
-            <div class="bar" style="height:88%;" data-v="1,204"></div>
-            <div class="bar" style="height:100%;" data-v="1,370"></div>
-          </div>
-          <div class="bar-labels"><span>12월</span><span>1월</span><span>2월</span><span>3월</span><span>4월</span><span>5월</span></div>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-head"><h2>관심 분야 분포 (30일)</h2></div>
-          <div class="dist-list">
-            <div class="dist-row"><div class="name">✦ 딥테크·AI</div><div class="bar-wrap"><div class="fill" style="width:47%"></div></div><div class="pct">47%</div></div>
-            <div class="dist-row"><div class="name">💗 웰니스·헬스</div><div class="bar-wrap"><div class="fill" style="width:23%"></div></div><div class="pct">23%</div></div>
-            <div class="dist-row"><div class="name">🛍️ 커머스·로컬</div><div class="bar-wrap"><div class="fill" style="width:17%"></div></div><div class="pct">17%</div></div>
-            <div class="dist-row"><div class="name">🌾 농업·푸드</div><div class="bar-wrap"><div class="fill" style="width:10%"></div></div><div class="pct">10%</div></div>
-            <div class="dist-row"><div class="name">기타</div><div class="bar-wrap"><div class="fill" style="width:3%"></div></div><div class="pct">3%</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2>인기 공고 Top 5</h2></div>
-          <table>
-            <thead><tr><th>공고명</th><th>매칭 수</th><th>전환</th></tr></thead>
-            <tbody>
-              <tr><td>예비창업패키지 2026</td><td>1,847</td><td>28%</td></tr>
-              <tr><td>청년창업사관학교 17기</td><td>1,394</td><td>22%</td></tr>
-              <tr><td>초기창업패키지 AI 특화</td><td>1,098</td><td>19%</td></tr>
-              <tr><td>딥테크 헬스케어 패키지</td><td>728</td><td>15%</td></tr>
-              <tr><td>서울 청년창업 1000</td><td>612</td><td>17%</td></tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </section>
@@ -352,9 +311,9 @@ tr:hover { background: var(--bg); }
       </div>
 
       <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
-        <div class="kpi"><div class="lbl">실제 가입자 수</div><div class="val" id="users-real">0</div><div class="delta">localStorage</div></div>
-        <div class="kpi"><div class="lbl">Free 플랜</div><div class="val" id="users-free">0</div><div class="delta">95% (시뮬레이션)</div></div>
-        <div class="kpi"><div class="lbl">Premium 플랜</div><div class="val" id="users-premium">0</div><div class="delta">전환율 4.2%</div></div>
+        <div class="kpi"><div class="lbl">전체 가입자</div><div class="val" id="users-real">0</div><div class="delta">실시간 카운트</div></div>
+        <div class="kpi"><div class="lbl">Free 플랜</div><div class="val" id="users-free">0</div><div class="delta">실시간 카운트</div></div>
+        <div class="kpi"><div class="lbl">Premium 플랜</div><div class="val" id="users-premium">0</div><div class="delta">결제 시스템 연동 전</div></div>
       </div>
 
       <div class="card">
@@ -372,36 +331,22 @@ tr:hover { background: var(--bg); }
     <!-- 공고 관리 -->
     <section data-section="listings" class="section-content" style="display:none;">
       <div class="main-head">
-        <div><h1>공고 관리</h1><div class="sub">전국 청년창업 지원사업 큐레이션 (현재 13건)</div></div>
-        <div class="date-range">+ 공고 추가</div>
+        <div><h1>공고 관리</h1><div class="sub">K-Startup OpenAPI 실시간 연동 + 폴백 데이터</div></div>
+        <div class="date-range">실시간 동기화</div>
       </div>
 
       <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
-        <div class="kpi"><div class="lbl">전체 공고</div><div class="val">13</div></div>
-        <div class="kpi"><div class="lbl">진행 중</div><div class="val">12</div><div class="delta">1건 마감 임박</div></div>
-        <div class="kpi"><div class="lbl">이번 주 마감</div><div class="val">2</div><div class="delta down">▼ 알림 발송 필요</div></div>
+        <div class="kpi"><div class="lbl">K-Startup 전체</div><div class="val" id="kpi-ks-total">—</div><div class="delta">공공데이터포털 인증</div></div>
+        <div class="kpi"><div class="lbl">사이트 노출</div><div class="val" id="kpi-ks-shown">—</div><div class="delta">마감 안 지난 공고</div></div>
+        <div class="kpi"><div class="lbl">폴백 데이터</div><div class="val">13건</div><div class="delta">API 장애 시 사용</div></div>
       </div>
 
       <div class="card">
         <div class="card-head"><h2>공고 리스트</h2></div>
-        <table>
-          <thead><tr><th>공고명</th><th>주관</th><th>권역</th><th>분야</th><th>마감</th><th>매칭 수</th></tr></thead>
-          <tbody>
-            <tr><td>예비창업패키지 2026</td><td>창업진흥원</td><td>전국</td><td>딥테크·AI</td><td>2026-06-25</td><td>1,847</td></tr>
-            <tr><td>인천 청년창업사관학교 (15기)</td><td>인천창경</td><td>수도권</td><td>딥테크·AI</td><td>2026-06-10</td><td>521</td></tr>
-            <tr><td>청년창업사관학교 17기</td><td>중진공</td><td>전국</td><td>딥테크·AI</td><td>2026-06-15</td><td>1,394</td></tr>
-            <tr><td>서울 청년창업 1000</td><td>서울창업허브</td><td>수도권</td><td>딥테크·AI</td><td>2026-06-20</td><td>612</td></tr>
-            <tr><td>경기 청년기업 성장지원</td><td>경기경제과학</td><td>수도권</td><td>커머스·로컬</td><td>2026-07-10</td><td>389</td></tr>
-            <tr><td>대전 청년 딥테크</td><td>대전테크노파크</td><td>충청</td><td>딥테크·AI</td><td>2026-06-28</td><td>241</td></tr>
-            <tr><td>초기창업패키지 AI</td><td>창업진흥원</td><td>전국</td><td>딥테크·AI</td><td>2026-07-05</td><td>1,098</td></tr>
-            <tr><td>부산 청년창업 패키지</td><td>부산창경</td><td>영남</td><td>커머스·로컬</td><td>2026-07-15</td><td>318</td></tr>
-            <tr><td>제주 청년창업가</td><td>제주테크노파크</td><td>제주</td><td>커머스·로컬</td><td>2026-07-25</td><td>156</td></tr>
-            <tr><td>딥테크 헬스케어</td><td>중기부</td><td>전국</td><td>웰니스·헬스</td><td>2026-08-20</td><td>728</td></tr>
-            <tr><td>농촌융복합 청년창업가</td><td>농식품부</td><td>전국</td><td>농업·푸드</td><td>2026-07-31</td><td>197</td></tr>
-            <tr><td>전남 청년창업 활성화</td><td>전남창경</td><td>호남</td><td>농업·푸드</td><td>2026-08-05</td><td>142</td></tr>
-            <tr><td>청년농촌 정착지원</td><td>농협중앙회</td><td>전국</td><td>농업·푸드</td><td>2026-09-10</td><td>108</td></tr>
-          </tbody>
-        </table>
+        <div id="ks-listings-status" style="padding:24px;text-align:center;font-size:13px;color:var(--ink-3);">
+          📡 K-Startup API에서 실시간 로딩 중...<br />
+          <small>실제 진행 중 공고는 메인 페이지 또는 /api/listings 에서 확인 가능</small>
+        </div>
       </div>
     </section>
 
@@ -413,44 +358,19 @@ tr:hover { background: var(--bg); }
 
       <div class="kpi-grid">
         <div class="kpi"><div class="lbl">이번 달 매출</div><div class="val">₩4,237,000</div><div class="delta">▲ +34% MoM</div></div>
-        <div class="kpi"><div class="lbl">토큰 충전 매출 (월)</div><div class="val">₩2,841,000</div><div class="delta">▲ 단건 결제 412건</div></div>
-        <div class="kpi"><div class="lbl">월 구독 매출 (월)</div><div class="val">₩1,396,000</div><div class="delta">활성 구독자 128명</div></div>
-        <div class="kpi"><div class="lbl">토큰 소비 (월)</div><div class="val">38,420</div><div class="delta">사업계획서 1,921회</div></div>
+        <div class="kpi"><div class="lbl">토큰 충전 매출 (월)</div><div class="val">₩0</div><div class="delta">결제 시스템 연동 전</div></div>
+        <div class="kpi"><div class="lbl">월 구독 매출 (월)</div><div class="val">₩0</div><div class="delta">결제 시스템 연동 전</div></div>
+        <div class="kpi"><div class="lbl">토큰 소비 (월)</div><div class="val" id="kpi-tokens-spent">0</div><div class="delta">실시간 카운트</div></div>
       </div>
 
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-head"><h2>토큰 패키지별 판매 추이 (최근 30일)</h2></div>
-        <table>
-          <thead><tr><th>패키지</th><th>판매 수</th><th>매출</th><th>총 토큰 발행</th></tr></thead>
-          <tbody>
-            <tr><td>蓄 Mini 微 (150 토큰)</td><td>184건</td><td>₩625,600</td><td>27,600</td></tr>
-            <tr><td>蓄 Standard 中 (300 토큰) ⭐</td><td>147건</td><td>₩1,014,300</td><td>44,100</td></tr>
-            <tr><td>蓄 Plus 厚 (600 토큰)</td><td>52건</td><td>₩722,800</td><td>31,200</td></tr>
-            <tr><td>蓄 Pro 極 (1,200 토큰)</td><td>17건</td><td>₩474,300</td><td>20,400</td></tr>
-            <tr style="background:var(--bg-2);"><td><b>충전 합계</b></td><td><b>400건</b></td><td><b>₩2,837,000</b></td><td><b>123,300</b></td></tr>
-            <tr><td>流 Light (400/월)</td><td>78명</td><td>₩538,200</td><td>31,200</td></tr>
-            <tr><td>流 Standard 河 (900/월) ⭐</td><td>41명</td><td>₩569,900</td><td>36,900</td></tr>
-            <tr><td>流 Premium 海 (2,000/월)</td><td>9명</td><td>₩251,100</td><td>18,000</td></tr>
-            <tr style="background:var(--bg-2);"><td><b>구독 합계</b></td><td><b>128명</b></td><td><b>₩1,359,200</b></td><td><b>86,100</b></td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>최근 결제 내역</h2></div>
-        <table>
-          <thead><tr><th>일시</th><th>이메일</th><th>상품</th><th>금액</th><th>토큰</th><th>상태</th></tr></thead>
-          <tbody>
-            <tr><td>2026-05-12 14:23</td><td>j***@gmail.com</td><td>蓄 Standard 中</td><td>₩6,900</td><td>+300</td><td><span class="t-badge paid">결제 완료</span></td></tr>
-            <tr><td>2026-05-12 13:51</td><td>m***@naver.com</td><td>流 Standard 河</td><td>₩13,900</td><td>+900/월</td><td><span class="t-badge paid">구독 시작</span></td></tr>
-            <tr><td>2026-05-12 11:08</td><td>k***@kakao.com</td><td>蓄 Mini 微</td><td>₩3,400</td><td>+150</td><td><span class="t-badge paid">결제 완료</span></td></tr>
-            <tr><td>2026-05-12 09:44</td><td>s***@gmail.com</td><td>蓄 Plus 厚</td><td>₩13,900</td><td>+600</td><td><span class="t-badge paid">결제 완료</span></td></tr>
-            <tr><td>2026-05-11 23:12</td><td>p***@daum.net</td><td>蓄 Standard 中</td><td>₩6,900</td><td>+300</td><td><span class="t-badge refund">환불</span></td></tr>
-            <tr><td>2026-05-11 20:33</td><td>h***@gmail.com</td><td>流 Premium 海</td><td>₩27,900</td><td>+2,000/월</td><td><span class="t-badge paid">구독 시작</span></td></tr>
-            <tr><td>2026-05-11 18:05</td><td>n***@gmail.com</td><td>蓄 Pro 極</td><td>₩27,900</td><td>+1,200</td><td><span class="t-badge paid">결제 완료</span></td></tr>
-          </tbody>
-        </table>
-        <div style="margin-top:16px;font-size:12px;color:var(--ink-3);text-align:center;">결제 시스템 (토스페이먼츠/포트원) 베타 출시 후 활성화 예정</div>
+      <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:24px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">💳</div>
+        <h3 style="margin:0 0 8px;font-size:15px;">결제 데이터 — 베타 운영 직후라 비어있어요.</h3>
+        <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.7;">
+          토스페이먼츠 PG 연동(2026년 8월 예정) 후부터 실제 결제 내역이 표시됩니다.
+          판매 추이·결제 내역 표는 첫 결제 발생 시 자동 활성화됩니다.
+          가짜 시뮬레이션 데이터는 사용하지 않습니다.
+        </p>
       </div>
     </section>
 
@@ -461,28 +381,29 @@ tr:hover { background: var(--bg); }
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div class="lbl">활성 계약</div><div class="val">0</div><div class="delta">PoC 협의 1건 진행 중</div></div>
-        <div class="kpi"><div class="lbl">상담 문의 (월)</div><div class="val">4</div><div class="delta">▲ +2건</div></div>
-        <div class="kpi"><div class="lbl">예상 연 매출 (PoC 성공 시)</div><div class="val">₩7,500,000</div><div class="delta">강화군 + α</div></div>
-        <div class="kpi"><div class="lbl">파이프라인 (3개월 내)</div><div class="val">7곳</div><div class="delta">17개 시도 목표</div></div>
+        <div class="kpi"><div class="lbl">활성 계약</div><div class="val">0</div><div class="delta">아직 없음</div></div>
+        <div class="kpi"><div class="lbl">상담 문의</div><div class="val">0</div><div class="delta">실 발생 시 카운트</div></div>
+        <div class="kpi"><div class="lbl">파이프라인 타깃 (계획)</div><div class="val">7곳</div><div class="delta">17개 시도 영업 계획</div></div>
+        <div class="kpi"><div class="lbl">목표 단가 (시도 단위)</div><div class="val">₩500만~3,000만</div><div class="delta">연 라이선스 예상</div></div>
       </div>
 
       <div class="card">
-        <div class="card-head"><h2>지자체 파이프라인</h2></div>
+        <div class="card-head"><h2>지자체 영업 파이프라인 (계획)</h2></div>
+        <div style="padding:0 4px 12px;font-size:12px;color:var(--ink-3);">아래는 운영자가 작성한 영업 타깃 리스트이며, 실제 계약·상담 데이터는 아닙니다.</div>
         <table>
-          <thead><tr><th>지자체</th><th>담당자</th><th>단계</th><th>예상 계약가</th><th>다음 액션</th></tr></thead>
+          <thead><tr><th>지자체</th><th>담당 부서</th><th>단계</th><th>목표 단가</th><th>액션 플랜</th></tr></thead>
           <tbody>
-            <tr><td><b>강화군청</b> (인천)</td><td>일자리경제과</td><td><span class="t-badge enterprise">PoC 협의</span></td><td>연 500만~1,500만</td><td>1차 미팅 (5월 말)</td></tr>
-            <tr><td>인천창조경제혁신센터</td><td>청년정책팀</td><td><span class="t-badge premium">상담 요청</span></td><td>연 1,000만~2,500만</td><td>제안서 송부</td></tr>
-            <tr><td>서울시 청년정책과</td><td>—</td><td><span class="t-badge free">관심 표시</span></td><td>연 3,000만+</td><td>콜드 콘택트</td></tr>
-            <tr><td>부산창조경제혁신센터</td><td>—</td><td><span class="t-badge free">관심 표시</span></td><td>연 800만~2,000만</td><td>콜드 콘택트</td></tr>
-            <tr><td>전남창조경제혁신센터</td><td>—</td><td><span class="t-badge free">리드</span></td><td>연 500만~1,000만</td><td>이메일 발송</td></tr>
-            <tr><td>제주테크노파크</td><td>—</td><td><span class="t-badge free">리드</span></td><td>연 500만~1,000만</td><td>이메일 발송</td></tr>
-            <tr><td>대전테크노파크</td><td>—</td><td><span class="t-badge free">리드</span></td><td>연 800만~1,500만</td><td>이메일 발송</td></tr>
+            <tr><td><b>강화군청</b> (인천)</td><td>일자리경제과</td><td><span class="t-badge enterprise">1순위 타깃</span></td><td>연 500만~1,500만</td><td>운영자 거주지 — 미팅 시도</td></tr>
+            <tr><td>인천창조경제혁신센터</td><td>청년정책팀</td><td><span class="t-badge premium">2순위 타깃</span></td><td>연 1,000만~2,500만</td><td>제안서 송부 예정</td></tr>
+            <tr><td>서울시 청년정책과</td><td>—</td><td><span class="t-badge free">콜드 리드</span></td><td>연 3,000만+</td><td>콜드 콘택트 예정</td></tr>
+            <tr><td>부산창조경제혁신센터</td><td>—</td><td><span class="t-badge free">콜드 리드</span></td><td>연 800만~2,000만</td><td>콜드 콘택트 예정</td></tr>
+            <tr><td>전남창조경제혁신센터</td><td>—</td><td><span class="t-badge free">콜드 리드</span></td><td>연 500만~1,000만</td><td>이메일 발송 예정</td></tr>
+            <tr><td>제주테크노파크</td><td>—</td><td><span class="t-badge free">콜드 리드</span></td><td>연 500만~1,000만</td><td>이메일 발송 예정</td></tr>
+            <tr><td>대전테크노파크</td><td>—</td><td><span class="t-badge free">콜드 리드</span></td><td>연 800만~1,500만</td><td>이메일 발송 예정</td></tr>
           </tbody>
         </table>
         <div style="margin-top:16px;text-align:center;">
-          <a href="b2b-demo.html" style="font-size:13px;color:var(--primary);font-weight:600;">→ 화이트라벨 데모 페이지로 이동</a>
+          <a href="b2b-demo.html" style="font-size:13px;color:var(--primary);font-weight:600;">→ 화이트라벨 데모 페이지 (강화군 가상 시연용)</a>
         </div>
       </div>
     </section>

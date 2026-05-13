@@ -662,7 +662,7 @@ footer.site a:hover { color: var(--ink); }
   🚧 <b>베타 운영 중</b> — AI 매칭·사업계획서 정식 가동 <b>2026년 7월</b> · 결제 시스템 정식 가동 <b>2026년 8월</b> · 현재는 시연 모드
 </div>
 <div class="promo">
-  💡 <span class="em">베타 한정</span> — 첫 100명 사업계획서 AI <b>50% 할인 (2,500원)</b> · <a href="#pricing">자세히 →</a>
+  💡 <span class="em">베타 한정</span> — 사업계획서 AI <b>50% 할인 (2,500원)</b> · 결제 시스템 정식 가동 시 종료 · <a href="#pricing">자세히 →</a>
 </div>
 <div id="deadline-banner" class="promo" style="background:#b91c1c;display:none;">
   ⏰ <b>마감 임박</b> — <span id="deadline-count">0</span>건의 공고가 D-3 이내로 마감됩니다 · <a href="#listings" onclick="filterDeadlineSoon(event)">바로가기 →</a>
@@ -1000,7 +1000,7 @@ footer.site a:hover { color: var(--ink); }
           </div>
           <div class="field full">
             <label>강점·차별점 (선택, 한 줄)</label>
-            <textarea id="p-strength" placeholder="예: 도메인 전문성 (전 직장 5년 경력) + 베타 사용자 30명 확보 + 시제품 작동 중"></textarea>
+            <textarea id="p-strength" placeholder="예: 도메인 전문성 (전 직장 5년 경력) + 시제품 작동 중 + 본인 데이터 확보"></textarea>
           </div>
           <div class="field full">
             <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink-2);background:var(--bg-2);padding:12px 14px;border-radius:10px;border:1px solid var(--line);cursor:pointer;">
@@ -1924,7 +1924,7 @@ async function runPlan(){
       {h:"2. 솔루션·핵심 가치", body: `본 사업은 "${item}"을(를) 핵심 솔루션으로 제시합니다. 사용자가 직면한 핵심 페인 포인트를 디지털 기술의 결합으로 해소하며, 기존 대안 대비 명확한 차별점을 제공합니다.`},
       {h:"3. 시장 분석·타깃", body: `${field} 시장 규모는 국내 약 [추정 규모] 원이며 연 [%] 성장 중입니다. 1차 타깃은 ${region} 거주 [구체 페르소나]이고, 향후 전국으로 확장 가능합니다.`},
       {h:"4. 비즈니스 모델", body: `수익은 [구독료 / 1회 결제 / B2B 라이선스 등] 다축 모델로 구성됩니다. 1년차 목표 매출은 [N]원, 3년차 [N]원이며, 비용 구조는 호스팅·AI API·인건비 중심으로 마진 [%] 확보가 가능합니다.`},
-      {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 베타 사용자 50명 확보. M+4~M+6: 핵심 기능 고도화 및 첫 매출. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
+      {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 초기 사용자 확보 (목표 N명). M+4~M+6: 핵심 기능 고도화 및 첫 매출 발생. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
       {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [%], (2) 마케팅·사용자 획득 [%], (3) 인프라·운영비 [%], (4) 예비비 [%]로 배분합니다.${strength ? " 운영자 강점: " + strength : ""}`}
     ]
   };
