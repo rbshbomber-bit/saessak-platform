@@ -63,9 +63,13 @@ function decodeEntities(s) {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#34;/g, '"')
     .replace(/&#xD;/g, '')
     .replace(/&#xA;/g, ' ')
-    .replace(/&#x[0-9a-fA-F]+;/g, ' ');
+    .replace(/&#x[0-9a-fA-F]+;/g, ' ')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
 }
 
 // ===== K-Startup XML 파서 =====
@@ -171,6 +175,10 @@ export default async function handler(req, res) {
   try {
     const url = new URL('https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01');
     url.searchParams.set('serviceKey', apiKey);
+    // K-Startup은 perPage/page 파라미터를 씀 (numOfRows/pageNo 아님)
+    url.searchParams.set('perPage', String(perPage));
+    url.searchParams.set('page', '1');
+    // 호환성을 위해 둘 다 보냄
     url.searchParams.set('numOfRows', String(perPage));
     url.searchParams.set('pageNo', '1');
 
