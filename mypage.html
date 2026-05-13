@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>마이페이지 — 새싹지원사업</title>
 <script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
@@ -371,11 +372,17 @@ document.getElementById("u-match-val").textContent = usage.matches;
 document.getElementById("u-plan-val").textContent = usage.plans;
 
 // 토큰 잔액
+const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(user);
 const tokens = user.tokens != null ? user.tokens : 0;
-document.getElementById("token-balance").textContent = tokens.toLocaleString();
-const plansPossible = Math.floor(tokens / 20);
-document.getElementById("token-sub").textContent =
-  `사업계획서 AI ${plansPossible}회 분 · 1회 = 20 토큰`;
+document.getElementById("token-balance").textContent = isAdmin ? '∞' : tokens.toLocaleString();
+if(isAdmin){
+  document.getElementById("token-sub").textContent =
+    `👑 관리자 모드 · 모든 AI 기능 무제한 사용`;
+} else {
+  const plansPossible = Math.floor(tokens / 20);
+  document.getElementById("token-sub").textContent =
+    `사업계획서 AI ${plansPossible}회 분 · 1회 = 20 토큰`;
+}
 
 // 구독 상태
 const sub = user.subscription;

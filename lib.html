@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>합격 사업계획서 라이브러리 — 새싹지원사업</title>
 <script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
@@ -279,8 +280,14 @@ function addUnlocked(id){
 function refreshTokenDisplay(){
   const u = getCurrentUser();
   const el = document.getElementById("token-display");
-  if(u) el.querySelector("span:last-child").textContent = `토큰 ${(u.tokens||0).toLocaleString()}`;
-  else el.querySelector("span:last-child").textContent = "로그인";
+  if(!el) return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const display = isAdmin ? '∞' : (u.tokens||0).toLocaleString();
+    el.querySelector("span:last-child").textContent = `토큰 ${display}`;
+  } else {
+    el.querySelector("span:last-child").textContent = "로그인";
+  }
 }
 
 // ===== 합격 사례 12건 (익명화) =====
@@ -466,22 +473,28 @@ function openCase(id){
       }
       return;
     }
-    if((u.tokens || 0) < COST){
-      showInsufficient();
-      return;
-    }
-    if(!confirm(`이 사례 열람에 ${COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - COST}\n진행하시겠습니까?`)) return;
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
 
-    updateUser(user => {
-      user.tokens = (user.tokens || 0) - COST;
-      if(!user.tokenLog) user.tokenLog = [];
-      user.tokenLog.unshift({
-        ts: new Date().toISOString(),
-        kind: "spend", amount: -COST, balance: user.tokens,
-        memo: `합격 사례 열람: ${c.title.slice(0,30)}`
+    if(!isAdmin){
+      if((u.tokens || 0) < COST){
+        showInsufficient();
+        return;
+      }
+      if(!confirm(`이 사례 열람에 ${COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - COST}\n진행하시겠습니까?`)) return;
+
+      updateUser(user => {
+        user.tokens = (user.tokens || 0) - COST;
+        if(!user.tokenLog) user.tokenLog = [];
+        user.tokenLog.unshift({
+          ts: new Date().toISOString(),
+          kind: "spend", amount: -COST, balance: user.tokens,
+          memo: `합격 사례 열람: ${c.title.slice(0,30)}`
+        });
+        return user;
       });
-      return user;
-    });
+    } else {
+      console.log('[saessak] 관리자 모드 — 사례 무료 열람');
+    }
     addUnlocked(id);
     refreshTokenDisplay();
   }

@@ -19,6 +19,7 @@
 <link rel="apple-touch-icon" href="images/logo.png" />
 
 <script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin
@@ -1937,13 +1938,17 @@ function updateAuthUI(){
   const area = document.getElementById("auth-area");
   if(!area) return;
   if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
     const tokens = u.tokens != null ? u.tokens : 0;
+    const tokenDisplay = isAdmin ? '∞' : tokens.toLocaleString();
     const sub = u.subscription;
-    const planTag = sub
-      ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
-      : '<span class="plan-tag">FREE</span>';
+    const planTag = isAdmin
+      ? '<span class="plan-tag subscriber" style="background:#fde68a;color:#92400e;">ADMIN</span>'
+      : (sub
+        ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
+        : '<span class="plan-tag">FREE</span>');
     area.innerHTML = `
-      <a class="token-chip" href="#pricing"><span class="ico">蓄</span><span>토큰 ${tokens.toLocaleString()}</span></a>
+      <a class="token-chip" href="#pricing"><span class="ico">蓄</span><span>토큰 ${tokenDisplay}</span></a>
       <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
     `;
   }
@@ -1966,6 +1971,10 @@ function updateUser(updater){
 function spendTokens(amount, memo){
   const u = getCurrentUser();
   if(!u) return { ok: false, reason: "not_logged_in" };
+  // 관리자는 토큰 무제한 — 차감 없이 통과
+  if(window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u)){
+    return { ok: true, balance: Infinity, admin: true };
+  }
   if((u.tokens || 0) < amount) return { ok: false, reason: "insufficient", balance: u.tokens || 0 };
   updateUser(user => {
     user.tokens = (user.tokens || 0) - amount;
