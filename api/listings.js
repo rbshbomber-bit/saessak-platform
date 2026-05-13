@@ -29,7 +29,8 @@ function classifyRegion(suptRegin, agency, title) {
   if (/전국|전체 권역|전\s*국/.test(suptRegin)) return 'national';
   if (/서울/.test(r)) return 'seoul';
   if (/경기/.test(r)) return 'gyeonggi';
-  if (/인천/.test(r)) return 'incheon';
+  // 인천 — 시·군·구 보강 (강화군·옹진군 포함)
+  if (/인천|강화군?|옹진군?|미추홀|남동구|부평구|계양구|연수구/.test(r)) return 'incheon';
   if (/부산/.test(r)) return 'busan';
   if (/대구/.test(r)) return 'daegu';
   if (/울산/.test(r)) return 'ulsan';
@@ -218,9 +219,41 @@ function transformItem(item, idx) {
   };
 }
 
+// 단일 페이지 가져오기
+async function fetchPage(apiKey, page, perPage) {
+  const url = new URL('https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01');
+  url.searchParams.set('serviceKey', apiKey);
+  url.searchParams.set('perPage', String(perPage));
+  url.searchParams.set('page', String(page));
+  url.searchParams.set('numOfRows', String(perPage));
+  url.searchParams.set('pageNo', String(page));
+
+  try {
+    const apiRes = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/xml,text/xml,*/*',
+        'User-Agent': 'saessak-platform/1.0',
+      }
+    });
+    if (!apiRes.ok) {
+      console.error(`K-Startup page ${page} HTTP ${apiRes.status}`);
+      return { items: [], totalCount: 0 };
+    }
+    const text = await apiRes.text();
+    return {
+      items: parseKStartupXML(text),
+      totalCount: extractTotalCount(text),
+    };
+  } catch (err) {
+    console.error(`K-Startup page ${page} fetch error`, err.message);
+    return { items: [], totalCount: 0 };
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=600');
+  // 캐시 10분 (1시간 → 10분 단축, 최신성 ↑)
+  res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=300');
 
   const apiKey = process.env.KSTARTUP_API_KEY;
   if (!apiKey) {
@@ -234,48 +267,42 @@ export default async function handler(req, res) {
 
   // ?youth=1 파라미터: 청년창업만 필터
   const youthOnly = req.query?.youth === '1';
-  // ?perPage 파라미터: 가져올 개수 (기본 200, 최대 500)
-  const perPage = Math.min(parseInt(req.query?.perPage || '200', 10), 500);
+  // ?perPage 파라미터: 페이지당 개수 (기본 500, 최대 500)
+  const perPage = Math.min(parseInt(req.query?.perPage || '500', 10), 500);
+  // ?pages 파라미터: 가져올 페이지 수 (기본 5 = 최대 2,500건, 최대 10 = 5,000건)
+  const maxPages = Math.min(parseInt(req.query?.pages || '5', 10), 10);
 
   try {
-    const url = new URL('https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01');
-    url.searchParams.set('serviceKey', apiKey);
-    // K-Startup은 perPage/page 파라미터를 씀 (numOfRows/pageNo 아님)
-    url.searchParams.set('perPage', String(perPage));
-    url.searchParams.set('page', '1');
-    // 호환성을 위해 둘 다 보냄
-    url.searchParams.set('numOfRows', String(perPage));
-    url.searchParams.set('pageNo', '1');
+    // 페이지 1~N 병렬 호출
+    const pageNumbers = Array.from({ length: maxPages }, (_, i) => i + 1);
+    const results = await Promise.all(
+      pageNumbers.map(p => fetchPage(apiKey, p, perPage))
+    );
 
-    const apiRes = await fetch(url.toString(), {
-      headers: {
-        'Accept': 'application/xml,text/xml,*/*',
-        'User-Agent': 'saessak-platform/1.0',
-      }
-    });
+    // 모든 페이지 합치기
+    const allItems = results.flatMap(r => r.items);
+    const totalAvailable = results[0]?.totalCount || 0;
 
-    const text = await apiRes.text();
-
-    if (!apiRes.ok) {
-      return res.status(200).json({
-        ok: false,
-        error: `K-Startup API ${apiRes.status}`,
-        detail: text.slice(0, 500),
-        fallback: true,
-        listings: STATIC_FALLBACK,
-      });
-    }
-
-    const items = parseKStartupXML(text);
     const today = new Date().toISOString().slice(0, 10);
 
-    let transformed = items
+    // 변환 + 필터 + 중복 제거 + 정렬
+    let transformed = allItems
       .map((item, idx) => transformItem(item, idx))
-      .filter(x => x.title)  // 제목 있는 것만
-      .filter(x => !x.deadline || x.deadline >= today)  // 마감 안 지난 것
-      .filter(x => x.rcrtOngoing !== false)  // 모집 진행 중인 것 (Y만)
-      .filter(x => !x.isExplicitlyNonYouth)  // 명시적 비청년(만 40세 이상·시니어·중장년) 제외
-      .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+      .filter(x => x.title)
+      .filter(x => !x.deadline || x.deadline >= today)
+      .filter(x => x.rcrtOngoing !== false)
+      .filter(x => !x.isExplicitlyNonYouth);
+
+    // 중복 제거 (id 기준 — 같은 공고가 여러 페이지에 나오는 경우 대비)
+    const seen = new Set();
+    transformed = transformed.filter(x => {
+      if (seen.has(x.id)) return false;
+      seen.add(x.id);
+      return true;
+    });
+
+    // 마감 임박순 정렬
+    transformed.sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
 
     // 청년 전용 필터
     if (youthOnly) {
@@ -285,8 +312,9 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       count: transformed.length,
-      totalAvailable: extractTotalCount(text),
-      rawItemsParsed: items.length,
+      totalAvailable,
+      rawItemsParsed: allItems.length,
+      pagesFetched: maxPages,
       updatedAt: new Date().toISOString(),
       source: 'kstartup-live',
       listings: transformed,
