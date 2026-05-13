@@ -21,6 +21,8 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="ai-history.js" defer></script>
+<script src="docx-gen.js" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
@@ -159,7 +161,42 @@ header.site {
   background: var(--ink); color: white;
 }
 .nav-cta:hover { background: var(--sage-deep); }
-@media (max-width: 760px) { .nav-links { display: none; } }
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  font-size: 22px; cursor: pointer; color: var(--ink);
+  padding: 6px 10px; font-family: inherit;
+}
+@media (max-width: 760px) {
+  .nav-links { display: none; }
+  .mobile-menu-btn { display: inline-block; }
+  .nav-links.mobile-open {
+    display: flex; flex-direction: column;
+    position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+    background: var(--bg); padding: 24px;
+    z-index: 90; gap: 0;
+    overflow-y: auto;
+    border-top: 1px solid var(--line);
+  }
+  .nav-links.mobile-open > a,
+  .nav-links.mobile-open .dropdown {
+    width: 100%; padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 16px;
+  }
+  .nav-links.mobile-open .dropdown-trigger {
+    width: 100%; text-align: left; font-size: 16px;
+    justify-content: space-between;
+  }
+  .nav-links.mobile-open .dropdown-menu {
+    position: static; opacity: 1; visibility: visible;
+    transform: none; box-shadow: none; border: none;
+    background: var(--bg-2); margin-top: 8px;
+    padding: 8px;
+  }
+  .nav-links.mobile-open .dropdown:not(.open) .dropdown-menu {
+    display: none;
+  }
+}
 
 /* ===== Promo Bar ===== */
 .promo {
@@ -627,6 +664,9 @@ footer.site a:hover { color: var(--ink); }
 <div class="promo">
   💡 <span class="em">베타 한정</span> — 첫 100명 사업계획서 AI <b>50% 할인 (2,500원)</b> · <a href="#pricing">자세히 →</a>
 </div>
+<div id="deadline-banner" class="promo" style="background:#b91c1c;display:none;">
+  ⏰ <b>마감 임박</b> — <span id="deadline-count">0</span>건의 공고가 D-3 이내로 마감됩니다 · <a href="#listings" onclick="filterDeadlineSoon(event)">바로가기 →</a>
+</div>
 
 <header class="site">
   <div class="container nav">
@@ -634,7 +674,8 @@ footer.site a:hover { color: var(--ink); }
       <span class="logo-img"></span>
       <span class="name"><span class="accent">새싹</span>지원사업</span>
     </a>
-    <nav class="nav-links">
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">☰</button>
+    <nav class="nav-links" id="nav-links">
       <a href="#listings">공고</a>
 
       <div class="dropdown" data-dropdown>
@@ -1548,6 +1589,7 @@ function cardHTML(x, why){
       ${why ? `<div class="why"><b>AI 추천 이유:</b> ${why}</div>` : ""}
       <div class="actions">
         <button class="btn-mini ${saved?"saved":"primary"}" data-action="save">${saved ? "✓ 저장됨" : "+ 트래커에 추가"}</button>
+        <button class="btn-mini" data-action="ai-plan">AI 분석 →</button>
         <button class="btn-mini" data-action="open">출처 ↗</button>
       </div>
     </div>`;
@@ -1663,6 +1705,29 @@ function bindCardActions(scope){
         } else if(a === "open"){
           const it = LISTINGS.find(x=>x.id===id);
           if(it?.url) window.open(it.url, "_blank", "noopener");
+        } else if(a === "ai-plan"){
+          // 공고 정보를 사업계획서 AI 폼에 자동 채움 + 스크롤
+          const it = LISTINGS.find(x=>x.id===id);
+          if(it){
+            const tSel = document.getElementById("p-target");
+            if(tSel){
+              const targetMap = {
+                "예비창업패키지":"예비창업패키지","초기창업패키지":"초기창업패키지",
+                "청년창업사관학교":"청년창업사관학교","딥테크":"딥테크 헬스케어 패키지"
+              };
+              let matched = "기타";
+              for(const k in targetMap){
+                if((it.title||"").includes(k)) { matched = targetMap[k]; break; }
+              }
+              const opt = Array.from(tSel.options).find(o => o.value === matched);
+              if(opt) tSel.value = matched;
+            }
+            const itemInp = document.getElementById("p-item");
+            if(itemInp && !itemInp.value){
+              itemInp.placeholder = `${it.title} 신청 (사업 아이템 한 줄 입력)`;
+            }
+            document.getElementById("ai-planner")?.scrollIntoView({behavior:"smooth"});
+          }
         } else if(a === "stage"){
           if(state.saved[id]) state.saved[id].stage = btn.dataset.stage;
           saveStorage(); renderTracker();
@@ -1673,7 +1738,34 @@ function bindCardActions(scope){
     });
   });
 }
-function renderAll(){ renderActiveFilters(); renderList(); renderTracker(); }
+function renderAll(){ renderActiveFilters(); renderList(); renderTracker(); updateDeadlineBanner(); }
+
+function updateDeadlineBanner(){
+  const banner = document.getElementById("deadline-banner");
+  if(!banner) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() + 3);
+  const soonCount = (LISTINGS || []).filter(it => {
+    if(!it.deadline) return false;
+    const d = new Date(it.deadline);
+    return d >= today && d <= cutoff;
+  }).length;
+  if(soonCount > 0){
+    document.getElementById("deadline-count").textContent = soonCount;
+    banner.style.display = "block";
+  } else {
+    banner.style.display = "none";
+  }
+}
+
+function filterDeadlineSoon(e){
+  if(e) e.preventDefault();
+  state.deadlineRanges = ["d3"];  // 기존 필터에 d3 있다면 사용, 없으면 무시
+  // 정렬도 deadline 오름차순
+  state.sort = "deadline-asc";
+  renderAll();
+  document.getElementById("listings")?.scrollIntoView({behavior:"smooth"});
+}
 
 // AI 매칭
 async function runMatch(){
@@ -1866,10 +1958,29 @@ async function runPlan(){
 }
 function renderPlan(parsed){
   const out = document.getElementById("plan-result");
+  const target = document.getElementById("p-target").value;
+  const item = document.getElementById("p-item").value;
+  const planFullText = parsed.chapters.map(c => `${c.h}\n${c.body}`).join("\n\n");
+
+  // 결과 저장 (히스토리)
+  window.saessak?.saveHistory?.({
+    kind: 'plan',
+    title: parsed.title || `${target} 사업계획서`,
+    target,
+    input: item,
+    output: parsed,
+    meta: {
+      field: document.getElementById("p-field").value,
+      region: document.getElementById("p-region").value,
+    }
+  });
+  window.saessak?.handOff?.({ source: 'plan', target, planText: planFullText });
+  window._currentPlanData = { parsed, target, planFullText };
+
   out.innerHTML = `
     <div class="plan-doc">
       <h4 style="border-bottom:none;margin-bottom:0;font-size:20px;">${parsed.title || "사업계획서 초안"}</h4>
-      <p style="color:var(--ink-3);font-size:13px;margin-bottom:12px;">AI 자동 생성 · 본인 검토·편집 필요</p>
+      <p style="color:var(--ink-3);font-size:13px;margin-bottom:12px;">AI 자동 생성 · 본인 검토·편집 필요 · ✅ 마이페이지에 자동 저장됨</p>
 
       <!-- 면책 워터마크 박스 -->
       <div style="background:#fef2f2;border:1.5px solid #fecaca;border-left:4px solid var(--bad);padding:12px 16px;border-radius:8px;margin-bottom:24px;font-size:12px;color:var(--bad);">
@@ -1887,12 +1998,29 @@ function renderPlan(parsed){
         🤖 AI 자동 생성 · 본인 검토 후 사용 · 합격 보장 없음 · © 새싹지원사업 베타
       </div>
 
-      <div class="actions">
-        <button class="btn-mini primary" id="plan-download">📥 워드 파일로 저장 (프리미엄)</button>
-        <button class="btn-mini" onclick="window.print()">🖨️ 인쇄 / PDF</button>
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+        <button class="btn-mini primary" id="plan-download-docx" style="flex:1;min-width:140px;">📥 워드 다운로드</button>
+        <button class="btn-mini" onclick="window.print()" style="flex:1;min-width:120px;">🖨️ 인쇄/PDF</button>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <a href="compare.html?from=plan" style="flex:1;min-width:140px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;">→ 비교 분석 (10토큰)</a>
+        <a href="simulate.html?from=plan" style="flex:1;min-width:140px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;">→ 심사 시뮬레이션 (50토큰)</a>
+        <a href="slides.html?from=plan" style="flex:1;min-width:140px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;">→ 발표 슬라이드 (30토큰)</a>
       </div>
     </div>`;
-  document.getElementById("plan-download").addEventListener("click", () => openModal("download"));
+  document.getElementById("plan-download-docx").addEventListener("click", () => {
+    const cur = window._currentPlanData;
+    if(!cur){ alert("저장된 결과가 없습니다."); return; }
+    const sections = (cur.parsed.chapters || []).map(c => ({ heading: c.h, content: c.body }));
+    window.saessak.downloadDocx({
+      title: cur.parsed.title || `${cur.target} 사업계획서 초안`,
+      subtitle: `${cur.target} 신청용 초안`,
+      sections,
+      filename: `사업계획서_${cur.target}_${new Date().toISOString().slice(0,10)}`,
+      footerNote: '🤖 AI 자동 생성 초안 · 본인 검토 후 사용 · 합격 보장 없음 · 새싹지원사업'
+    }).catch(e => alert('다운로드 실패: ' + e.message));
+  });
 }
 
 // 결제 모달
@@ -2147,6 +2275,23 @@ async function tryLoadListingsJson(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ===== 모바일 햄버거 메뉴 =====
+  const mobileBtn = document.getElementById("mobile-menu-btn");
+  const navLinks = document.getElementById("nav-links");
+  if (mobileBtn && navLinks) {
+    mobileBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("mobile-open");
+      mobileBtn.textContent = navLinks.classList.contains("mobile-open") ? "✕" : "☰";
+    });
+    // 네비 링크 클릭 시 메뉴 닫기 (드롭다운 trigger 제외)
+    navLinks.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => {
+        navLinks.classList.remove("mobile-open");
+        mobileBtn.textContent = "☰";
+      });
+    });
+  }
+
   // ===== 드롭다운 메뉴 (AI 도구 / 리소스) =====
   const dropdowns = document.querySelectorAll("[data-dropdown]");
   dropdowns.forEach(dd => {

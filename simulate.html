@@ -8,6 +8,8 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="ai-history.js" defer></script>
+<script src="docx-gen.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
@@ -351,6 +353,23 @@ function refreshTokenDisplay(){
 }
 refreshTokenDisplay();
 
+// 핸드오프 데이터 자동 입력
+setTimeout(() => {
+  const handoff = window.saessak?.consumeHandOff?.();
+  if(handoff && handoff.planText){
+    const ta = document.getElementById("s-text");
+    if(ta){
+      ta.value = handoff.planText;
+      if(handoff.target){
+        const sel = document.getElementById("s-target");
+        const opt = sel && Array.from(sel.options).find(o => o.value === handoff.target);
+        if(opt) sel.value = handoff.target;
+      }
+      ta.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+}, 300);
+
 const PERSONA_META = {
   gov:   { emoji: "🏛️", name: "정부 사업 운영 경험형", role: "정부 양식·심사 절차 중심 평가 페르소나" },
   vc:    { emoji: "💼", name: "VC·투자 경험형",      role: "BM·시장성·성장 가능성 중심 평가 페르소나" },
@@ -461,6 +480,19 @@ ${text}
 });
 
 function renderResult(data, target){
+  // 결과 저장 (히스토리)
+  const planText = document.getElementById("s-text").value;
+  window.saessak?.saveHistory?.({
+    kind: 'simulate',
+    title: `${target} 심사 시뮬레이션`,
+    target,
+    input: planText,
+    output: data,
+    meta: { field: document.getElementById("s-field").value }
+  });
+  window.saessak?.handOff?.({ source: 'simulate', target, planText });
+  window._currentSimulateData = { data, target, planText };
+
   const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
   const gradeClass = { strong:"grade-strong", good:"grade-good", medium:"grade-medium", weak:"grade-weak" };
 
@@ -510,10 +542,47 @@ function renderResult(data, target){
       <h3>🎯 가장 시급한 보완 액션 3가지</h3>
       ${actionsHTML}
     </div>
+
+    <div style="display:flex;gap:10px;margin:24px 0;flex-wrap:wrap;">
+      <button onclick="downloadSimDocx()" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink-2);">📥 워드 다운로드</button>
+      <a href="compare.html?from=simulate" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 비교 분석 (10토큰)</a>
+      <a href="slides.html?from=simulate" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 발표 슬라이드 (30토큰)</a>
+    </div>
+
     <div class="footer-note">
       🤖 가상 페르소나 시뮬레이션 결과 · 5개 캐릭터는 정부 사업 심사 일반 패턴 학습 기반 가상 캐릭터 ·
-      특정 기관·인물 지칭 아님 · 실제 심사 결과와 무관 · 합격 보장 없음 · 본 결과를 바탕으로 한 의사결정의 책임은 사용자 본인에게 있음.
+      특정 기관·인물 지칭 아님 · 실제 심사 결과와 무관 · 합격 보장 없음 · ✅ 마이페이지에 자동 저장됨.
     </div>`;
+}
+
+function downloadSimDocx(){
+  const cur = window._currentSimulateData;
+  if(!cur){ alert("저장된 결과가 없습니다."); return; }
+  const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
+  const sections = [
+    { heading: '종합 평가', content: cur.data.overall || '' }
+  ];
+  ["gov","vc","tech","legal","youth"].forEach(key => {
+    const p = cur.data.personas?.[key];
+    if(!p) return;
+    const meta = PERSONA_META[key];
+    sections.push({
+      heading: `${meta.emoji} ${meta.name} (등급: ${gradeLabel[p.grade]||'보통'})`,
+      subheading: '강점',
+      items: p.strengths || []
+    });
+    sections.push({ subheading: '약점', items: p.weaknesses || [] });
+    sections.push({ subheading: '예상 질문 5개', items: p.questions || [] });
+  });
+  sections.push({ heading: '가장 시급한 보완 액션', bullets: cur.data.topActions || [] });
+
+  window.saessak.downloadDocx({
+    title: `${cur.target} 심사위원 시뮬레이션`,
+    subtitle: '5명 가상 페르소나 평가 결과',
+    sections,
+    filename: `심사시뮬레이션_${cur.target}_${new Date().toISOString().slice(0,10)}`,
+    footerNote: '🤖 가상 페르소나 시뮬레이션 결과 · 실제 심사와 무관 · 합격 보장 없음 · 새싹지원사업'
+  }).catch(e => alert('다운로드 실패: ' + e.message));
 }
 </script>
 </body>

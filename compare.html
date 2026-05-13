@@ -8,6 +8,8 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="ai-history.js" defer></script>
+<script src="docx-gen.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
@@ -308,6 +310,23 @@ function refreshTokenDisplay(){
 }
 refreshTokenDisplay();
 
+// 핸드오프 데이터 자동 입력 (사업계획서 AI 등에서 넘어온 경우)
+setTimeout(() => {
+  const handoff = window.saessak?.consumeHandOff?.();
+  if(handoff && handoff.planText){
+    const ta = document.getElementById("c-text");
+    if(ta){
+      ta.value = handoff.planText;
+      if(handoff.target){
+        const sel = document.getElementById("c-target");
+        const opt = sel && Array.from(sel.options).find(o => o.value === handoff.target);
+        if(opt) sel.value = handoff.target;
+      }
+      ta.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+}, 300);
+
 document.getElementById("c-run").addEventListener("click", async () => {
   const u = getCurrentUser();
   if(!u){
@@ -428,9 +447,20 @@ function renderResult(data, target){
     </p>
   `).join("");
 
+  // 결과 저장 (히스토리)
+  const planText = document.getElementById("c-text").value;
+  window.saessak?.saveHistory?.({
+    kind: 'compare',
+    title: `${target} 비교 분석`,
+    target: target,
+    input: planText,
+    output: data,
+    meta: { field: document.getElementById("c-field").value }
+  });
+
   document.getElementById("result-area").innerHTML = `
     <div class="result-card">
-      <div class="meta">신청 사업: ${target} · 비교 기준: 합격 사례 12건 · 분석 일시: ${new Date().toLocaleString("ko-KR")}</div>
+      <div class="meta">신청 사업: ${target} · 비교 기준: 합격 사례 12건 · 분석 일시: ${new Date().toLocaleString("ko-KR")} · ✅ 마이페이지에 자동 저장됨</div>
       <h2>비교 분석 결과</h2>
       <p style="background:var(--sage-soft);padding:14px 16px;border-radius:10px;border-left:3px solid var(--sage-deep);">
         <b style="color:var(--sage-deep);">전반 평가</b><br />
@@ -440,11 +470,42 @@ function renderResult(data, target){
       <div class="score-grid">${chaptersHTML}</div>
       <h3>🎯 가장 시급한 보완 액션 3가지</h3>
       ${actionsHTML}
+
+      <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;">
+        <button onclick="downloadDocx()" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink-2);">📥 워드 다운로드</button>
+        <a href="simulate.html?from=compare" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 심사 시뮬레이션 (50토큰)</a>
+        <a href="slides.html?from=compare" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 발표 슬라이드 (30토큰)</a>
+      </div>
+
       <div class="footer-note">
         🤖 AI 비교 분석 결과 · 합격 사례 12건의 패턴 기반 추정 · 실제 심사 결과와 무관할 수 있음 ·
         본 분석은 보조 도구이며 본인의 최종 판단과 차별화된 본인 데이터가 반드시 추가되어야 합니다.
       </div>
     </div>`;
+
+  // 다음 단계 페이지로 핸드오프 데이터 저장
+  window.saessak?.handOff?.({ source: 'compare', target, planText });
+  // 다운로드 함수 노출
+  window._currentCompareData = { data, target, planText };
+}
+
+function downloadDocx(){
+  const cur = window._currentCompareData;
+  if(!cur){ alert("저장된 결과가 없습니다."); return; }
+  const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
+  const sections = [
+    { heading: '전반 평가', content: cur.data.overall || '' },
+    { heading: '챕터별 비교 평가',
+      items: (cur.data.chapters || []).map(c => `[${gradeLabel[c.grade]||'보통'}] ${c.name} — ${c.comment||''}`) },
+    { heading: '가장 시급한 보완 액션',
+      bullets: cur.data.topActions || [] }
+  ];
+  window.saessak.downloadDocx({
+    title: `${cur.target} 비교 분석 결과`,
+    subtitle: '새싹지원사업 AI 비교 분석',
+    sections,
+    filename: `비교분석_${cur.target}_${new Date().toISOString().slice(0,10)}`
+  }).catch(e => alert('다운로드 실패: ' + e.message));
 }
 </script>
 </body>

@@ -6,6 +6,7 @@
 <title>마이페이지 — 새싹지원사업</title>
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
+<script src="ai-history.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
@@ -307,6 +308,36 @@ footer.site .row { display: flex; justify-content: space-between; flex-wrap: wra
         </div>
       </div>
     </div>
+
+    <!-- 친구 초대 -->
+    <div style="margin-top:24px;background:linear-gradient(135deg,var(--sage-soft) 0%,var(--cream) 100%);border:1px solid var(--sage);border-radius:14px;padding:24px;">
+      <h2 style="margin:0 0 8px;font-size:18px;">🎁 친구 초대하기</h2>
+      <p style="margin:0 0 16px;font-size:13px;color:var(--ink-2);">친구가 내 링크로 가입하면 — <b style="color:var(--sage-deep);">친구 +30 토큰, 나도 +30 토큰</b> 자동 지급. 무제한 초대 가능.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="referral-link" readonly style="flex:1;min-width:240px;padding:11px 14px;border:1px solid var(--line-2);border-radius:8px;font-size:13px;font-family:inherit;background:var(--card);color:var(--ink);" />
+        <button onclick="copyReferralLink()" style="padding:11px 18px;background:var(--ink);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">📋 링크 복사</button>
+      </div>
+      <div id="ref-stats" style="margin-top:10px;font-size:12px;color:var(--ink-3);"></div>
+    </div>
+
+    <!-- 내 자료실 (AI 결과물 히스토리) -->
+    <div class="card" style="margin-top:24px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow-s);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;">📚 내 자료실 — AI 결과물 보관함</h2>
+          <p style="margin:4px 0 0;font-size:12px;color:var(--ink-3);">결제한 모든 AI 결과(사업계획서/비교/시뮬레이션/슬라이드)가 자동 저장됩니다. 언제든 다시 보고 다운로드.</p>
+        </div>
+        <div id="history-count" style="font-size:12px;color:var(--ink-3);font-weight:600;"></div>
+      </div>
+      <div id="history-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="hf-btn active" data-kind="" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--ink);color:white;border:none;border-radius:6px;cursor:pointer;font-family:inherit;">전체</button>
+        <button class="hf-btn" data-kind="plan" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">사업계획서</button>
+        <button class="hf-btn" data-kind="compare" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">비교 분석</button>
+        <button class="hf-btn" data-kind="simulate" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">심사 시뮬레이션</button>
+        <button class="hf-btn" data-kind="slides" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">발표 슬라이드</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
   </div>
 </main>
 
@@ -478,6 +509,105 @@ document.getElementById("logout-btn").addEventListener("click", () => {
     location.href = "index.html";
   }
 });
+
+// ===== 내 자료실 (AI 히스토리) =====
+let currentHistoryFilter = "";
+function renderHistory(){
+  const items = (window.saessak?.getHistory?.(currentHistoryFilter) || []);
+  const list = document.getElementById("history-list");
+  const cnt = document.getElementById("history-count");
+  if(cnt) cnt.textContent = `총 ${items.length}건`;
+  if(!list) return;
+  if(items.length === 0){
+    list.innerHTML = `<div style="text-align:center;padding:36px 16px;color:var(--ink-3);font-size:13px;">아직 저장된 결과가 없습니다.<br /><small>AI 도구를 사용하면 결과가 자동으로 여기 저장됩니다.</small></div>`;
+    return;
+  }
+  const KIND = { plan:"📋", compare:"📊", simulate:"🎯", slides:"📑", mentor:"💬" };
+  list.innerHTML = items.map(it => {
+    const date = new Date(it.createdAt).toLocaleString("ko-KR", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    const kindLabel = window.saessak?.KIND_LABEL?.[it.kind] || it.kind;
+    return `
+      <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;">
+        <div style="font-size:24px;flex-shrink:0;">${KIND[it.kind]||'📄'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${it.title}</div>
+          <div style="font-size:11px;color:var(--ink-3);">${kindLabel} · ${it.target||''} · ${date}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button onclick="viewHistoryItem('${it.id}')" style="padding:6px 10px;font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--line-2);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--ink-2);">보기</button>
+          <button onclick="deleteHistoryItem('${it.id}')" style="padding:6px 10px;font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--line-2);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--bad);">삭제</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+function viewHistoryItem(id){
+  const item = window.saessak?.getHistoryItem?.(id);
+  if(!item) return alert("결과를 찾을 수 없습니다.");
+  // 종류별 페이지로 핸드오프 + 이동
+  const PAGE = { plan:"index.html#ai-planner", compare:"compare.html", simulate:"simulate.html", slides:"slides.html" };
+  // 결과 보기는 새 창에 JSON 표시 (간단)
+  const win = window.open("", "_blank", "width=720,height=720");
+  if(win){
+    const safe = JSON.stringify(item.output, null, 2).replace(/</g,'&lt;');
+    win.document.write(`<title>${item.title}</title><pre style="font:13px monospace;padding:24px;line-height:1.6;background:#fbfaf6;color:#14181f;">${safe}</pre>`);
+  }
+}
+function deleteHistoryItem(id){
+  if(!confirm("이 결과를 삭제하시겠어요?")) return;
+  window.saessak?.deleteHistory?.(id);
+  renderHistory();
+}
+document.querySelectorAll(".hf-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".hf-btn").forEach(b => {
+      b.style.background = "var(--bg-2)";
+      b.style.color = "var(--ink-2)";
+    });
+    btn.style.background = "var(--ink)";
+    btn.style.color = "white";
+    currentHistoryFilter = btn.dataset.kind;
+    renderHistory();
+  });
+});
+setTimeout(renderHistory, 100);
+
+// ===== 친구 초대 시스템 =====
+function renderReferral(){
+  const u = (function(){
+    const id = localStorage.getItem("saessak_current_user");
+    if(!id) return null;
+    try { return JSON.parse(localStorage.getItem("saessak_users") || "[]").find(x => x.id === id) || null; } catch(e){ return null; }
+  })();
+  if(!u) return;
+  const inp = document.getElementById("referral-link");
+  if(inp){
+    const refUrl = `${location.origin}/auth.html?ref=${encodeURIComponent(u.id)}`;
+    inp.value = refUrl;
+  }
+  // 초대한 친구 수 계산
+  try {
+    const allUsers = JSON.parse(localStorage.getItem("saessak_users") || "[]");
+    const invited = allUsers.filter(x => x.referredBy === u.id);
+    const earned = (u.tokenLog || []).filter(l => l.kind === "referral-bonus").reduce((s,l) => s + l.amount, 0);
+    const statsEl = document.getElementById("ref-stats");
+    if(statsEl){
+      if(invited.length > 0){
+        statsEl.innerHTML = `✅ 지금까지 <b>${invited.length}명</b> 초대 · 누적 보너스 <b>${earned} 토큰</b>`;
+      } else {
+        statsEl.innerHTML = `초대 친구 0명 · 첫 친구 초대 시 +30 토큰 즉시 지급`;
+      }
+    }
+  } catch(e){}
+}
+function copyReferralLink(){
+  const inp = document.getElementById("referral-link");
+  if(!inp) return;
+  inp.select();
+  navigator.clipboard.writeText(inp.value).then(() => {
+    alert("초대 링크가 복사되었습니다. 친구에게 공유하세요!\n\n친구가 가입하면:\n• 친구 +30 토큰 (가입 보너스 50 + 초대 30 = 80)\n• 나 +30 토큰 (자동)");
+  }).catch(() => alert("복사 실패. 링크를 직접 복사해주세요."));
+}
+setTimeout(renderReferral, 150);
 </script>
 </body>
 </html>

@@ -378,6 +378,20 @@ document.getElementById("signup-btn").addEventListener("click", () => {
   const users = getUsers();
   if(users.find(u => u.email === email)) return showMsg("이미 가입된 이메일입니다");
 
+  // ===== 친구 초대 보너스 =====
+  const urlParams = new URLSearchParams(location.search);
+  const refCode = urlParams.get('ref');
+  let bonusTokens = 50;
+  let bonusNote = "신규 가입 보너스 — 50 토큰";
+  let referrer = null;
+  if(refCode){
+    referrer = users.find(u => u.id === refCode);
+    if(referrer){
+      bonusTokens = 80;  // 일반 50 + 초대 30
+      bonusNote = "신규 가입 + 친구 초대 보너스 — 50 + 30 = 80 토큰";
+    }
+  }
+
   const newUser = {
     id: "u_" + Date.now(),
     name, email, password, region, field,
@@ -385,19 +399,38 @@ document.getElementById("signup-btn").addEventListener("click", () => {
     plan: "free",
     joinedAt: new Date().toISOString(),
     usage: { matches: 0, plans: 0 },
-    tokens: 50,
+    tokens: bonusTokens,
     subscription: null,
+    referredBy: referrer ? referrer.id : null,
     tokenLog: [{
       ts: new Date().toISOString(),
-      kind: "signup-bonus", amount: 50, balance: 50,
-      memo: "신규 가입 보너스 — 50 토큰"
+      kind: "signup-bonus", amount: bonusTokens, balance: bonusTokens,
+      memo: bonusNote
     }]
   };
   users.push(newUser);
+
+  // 추천인에게도 +30 토큰
+  if(referrer){
+    const refIdx = users.findIndex(u => u.id === referrer.id);
+    if(refIdx > -1){
+      users[refIdx].tokens = (users[refIdx].tokens || 0) + 30;
+      users[refIdx].tokenLog = users[refIdx].tokenLog || [];
+      users[refIdx].tokenLog.unshift({
+        ts: new Date().toISOString(),
+        kind: "referral-bonus", amount: 30, balance: users[refIdx].tokens,
+        memo: `친구 초대 보너스 — ${name}님 가입`
+      });
+    }
+  }
+
   saveUsers(users);
   setCurrent(newUser.id);
-  showMsg("회원가입 완료! 50 토큰이 지급되었습니다. 메인으로 이동합니다", "success");
-  setTimeout(() => { location.href = "index.html"; }, 1200);
+  const msg = referrer
+    ? `회원가입 완료! ${bonusTokens} 토큰 지급 (친구 초대 +30 포함). 메인으로 이동합니다`
+    : `회원가입 완료! ${bonusTokens} 토큰이 지급되었습니다. 메인으로 이동합니다`;
+  showMsg(msg, "success");
+  setTimeout(() => { location.href = "index.html"; }, 1500);
 });
 
 // 로그인
