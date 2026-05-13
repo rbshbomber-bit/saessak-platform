@@ -544,7 +544,7 @@ function viewHistoryItem(id){
   const item = window.saessak?.getHistoryItem?.(id);
   if(!item) return alert("결과를 찾을 수 없습니다.");
   // 종류별 페이지로 핸드오프 + 이동
-  const PAGE = { plan:"index.html#ai-planner", compare:"compare.html", simulate:"simulate.html", slides:"slides.html" };
+  const PAGE = { plan:"index.html#ai-planner", simulate:"simulate.html", slides:"slides.html" };
   // 결과 보기는 새 창에 JSON 표시 (간단)
   const win = window.open("", "_blank", "width=720,height=720");
   if(win){

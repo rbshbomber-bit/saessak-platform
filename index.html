@@ -722,7 +722,6 @@ footer.site a:hover { color: var(--ink); }
           <a href="#ai-matching"><span>AI 매칭 추천</span><span class="meta">즉시</span></a>
           <a href="#ai-planner"><span>사업계획서 AI</span><span class="meta token">20토큰</span></a>
           <div class="divider"></div>
-          <a href="compare.html"><span>비교 분석<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">10토큰</span></a>
           <a href="simulate.html"><span>심사 시뮬레이션<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">50토큰</span></a>
           <a href="slides.html"><span>발표 슬라이드<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">30토큰</span></a>
           <div class="divider"></div>
@@ -730,15 +729,7 @@ footer.site a:hover { color: var(--ink); }
         </div>
       </div>
 
-      <div class="dropdown" data-dropdown>
-        <button class="dropdown-trigger" type="button">
-          리소스 <span class="caret">▾</span>
-        </button>
-        <div class="dropdown-menu">
-          <a href="lib.html"><span>합격 라이브러리</span><span class="meta">12건</span></a>
-          <a href="#tracker"><span>신청 트래커</span><span class="meta">무료</span></a>
-        </div>
-      </div>
+      <a href="#tracker">신청 트래커</a>
 
       <a href="#pricing">요금</a>
     </nav>
@@ -2087,7 +2078,6 @@ function renderPlan(parsed){
       </div>
 
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-        <a href="compare.html?from=plan" style="flex:1;min-width:140px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;">→ 비교 분석 (10토큰)</a>
         <a href="simulate.html?from=plan" style="flex:1;min-width:140px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;">→ 심사 시뮬레이션 (50토큰)</a>
         <a href="slides.html?from=plan" style="flex:1;min-width:140px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;">→ 발표 슬라이드 (30토큰)</a>
       </div>
