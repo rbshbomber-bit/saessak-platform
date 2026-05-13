@@ -2316,27 +2316,46 @@ function incUsage(kind){
   } catch(e){}
 }
 
-// ===== 공고 데이터 로드 (1차: K-Startup API, 2차: listings.json, 3차: 인라인) =====
+// ===== 공고 데이터 로드 =====
+// 메인: K-Startup 실시간 + 지역 보강(강화·인천 스크래핑) 병렬
+// 폴백: listings.json → 인라인 데이터
 async function tryLoadListingsJson(){
-  // 1차 시도: /api/listings (K-Startup 실시간 공고)
-  try {
-    const resp = await fetch("/api/listings", { cache: "default" });
-    if(resp.ok){
-      const data = await resp.json();
-      if(data?.ok && Array.isArray(data.listings) && data.listings.length > 0){
-        LISTINGS = data.listings;
-        console.log(`[K-Startup] ${LISTINGS.length}건 실시간 로드 완료 (${data.updatedAt})`);
-        renderAll();
-        return;
-      } else {
-        console.warn("[K-Startup] API 응답에 listings 없음 또는 ok=false:", data?.error);
-      }
-    }
-  } catch(e){
-    console.warn("[K-Startup] /api/listings 호출 실패:", e.message);
+  // K-Startup + 지역 보강 병렬 호출
+  const [mainResp, localResp] = await Promise.allSettled([
+    fetch("/api/listings", { cache: "default" }).then(r => r.ok ? r.json() : null),
+    fetch("/api/listings-local", { cache: "default" }).then(r => r.ok ? r.json() : null),
+  ]);
+
+  let combined = [];
+
+  // 1) K-Startup 결과 (메인)
+  if (mainResp.status === 'fulfilled' && mainResp.value?.ok && Array.isArray(mainResp.value.listings)) {
+    combined = mainResp.value.listings;
+    console.log(`[K-Startup] ${combined.length}건 로드 (${mainResp.value.updatedAt})`);
+  } else {
+    console.warn("[K-Startup] API 응답 없음 또는 실패");
   }
 
-  // 2차 폴백: static listings.json
+  // 2) 지역 보강 (강화·인천 — 중복 제거 후 추가)
+  if (localResp.status === 'fulfilled' && localResp.value?.ok && Array.isArray(localResp.value.listings)) {
+    const existing = new Set(combined.map(x => `${x.title}|${x.org || ''}`));
+    const localUnique = localResp.value.listings.filter(x =>
+      !existing.has(`${x.title}|${x.org || ''}`)
+    );
+    combined = [...combined, ...localUnique];
+    console.log(`[Local] ${localResp.value.count}건 수신 (중복 제외 ${localUnique.length}건 추가)`, localResp.value.sources);
+  } else {
+    console.warn("[Local] 지역 보강 API 응답 없음 또는 실패");
+  }
+
+  // 둘 중 하나라도 성공하면 사용
+  if (combined.length > 0) {
+    LISTINGS = combined;
+    renderAll();
+    return;
+  }
+
+  // 둘 다 실패 → static listings.json 폴백
   try {
     const resp = await fetch("listings.json", { cache: "no-store" });
     if(!resp.ok) throw new Error("HTTP " + resp.status);
