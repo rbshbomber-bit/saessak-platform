@@ -226,9 +226,9 @@ footer.site .container { display: flex; justify-content: space-between; flex-wra
 
 <section class="intro">
   <div class="container">
-    <span class="badge">⭐ PREMIUM · 세션당 30 토큰</span>
+    <span class="badge">⭐ Opus 4.6 · 세션당 50 토큰</span>
     <h1>AI 1:1 멘토링</h1>
-    <p>청년창업 도메인 학습된 AI 멘토와 1:1 대화. 한 세션 = 메시지 5~10회 자유 대화 (30 토큰).</p>
+    <p>청년창업 도메인 학습된 AI 멘토와 1:1 대화. 한 세션 = 메시지 5~10회 자유 대화 (50 토큰).</p>
   </div>
 </section>
 
@@ -289,7 +289,7 @@ footer.site .container { display: flex; justify-content: space-between; flex-wra
     </div>
   </div>
   <div class="cost-note">
-    한 세션 = 멘토와 자유로운 대화 · 시작 시 <b>30 토큰</b> 차감
+    한 세션 = 멘토와 자유로운 대화 · 시작 시 <b>50 토큰</b> 차감
   </div>
 </div>
 
@@ -331,7 +331,7 @@ footer.site .container { display: flex; justify-content: space-between; flex-wra
 <script>
 const USER_KEY = "saessak_users";
 const CURRENT_KEY = "saessak_current_user";
-const SESSION_COST = 30;
+const SESSION_COST = 50;
 
 function getCurrentUser(){
   const id = localStorage.getItem(CURRENT_KEY);
@@ -523,7 +523,7 @@ document.getElementById("msg-input").addEventListener("input", e => {
 });
 
 document.getElementById("new-session-btn").addEventListener("click", () => {
-  if(confirm("새 세션을 시작하면 30 토큰이 추가 차감됩니다. 계속하시겠습니까?")){
+  if(confirm("새 세션을 시작하면 50 토큰이 추가 차감됩니다. 계속하시겠습니까?")){
     document.getElementById("chat-screen").classList.remove("active");
     document.getElementById("start-screen").style.display = "block";
     document.getElementById("chat-msgs").innerHTML = "";

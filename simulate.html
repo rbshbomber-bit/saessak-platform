@@ -233,7 +233,7 @@ footer.site {
 
 <section class="hero-bar">
   <div class="container">
-    <span class="badge">⭐ PREMIUM · 회당 50 토큰</span>
+    <span class="badge">⭐ Opus 4.6 · 회당 80 토큰</span>
     <h1>심사위원 시뮬레이션</h1>
     <p>5명의 가상 페르소나가 당신의 사업계획서를 다각도로 평가합니다. 예상 질문 25개 + 강점·약점 도출.</p>
   </div>
@@ -300,7 +300,7 @@ footer.site {
       </div>
     </div>
 
-    <button class="btn-run" id="s-run">5명 페르소나 시뮬레이션 시작 (50 토큰)</button>
+    <button class="btn-run" id="s-run">5명 페르소나 시뮬레이션 시작 (80 토큰)</button>
   </div>
 
   <div id="result-area" class="result-area"></div>
@@ -320,7 +320,7 @@ footer.site {
 <script>
 const USER_KEY = "saessak_users";
 const CURRENT_KEY = "saessak_current_user";
-const SIMULATE_COST = 50;
+const SIMULATE_COST = 80;
 
 function getCurrentUser(){
   const id = localStorage.getItem(CURRENT_KEY);
@@ -475,7 +475,7 @@ ${text}
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "5명 페르소나 시뮬레이션 시작 (50 토큰)";
+    btn.textContent = "5명 페르소나 시뮬레이션 시작 (80 토큰)";
   }
 });
 
