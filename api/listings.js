@@ -53,29 +53,52 @@ function extractAmount(summary) {
   return '문의';
 }
 
-// ===== 간단한 XML 파서 (K-Startup 응답 구조 전용) =====
-// <item>...</item> 블록을 추출하고, 각 블록 내부의 단순 필드를 객체로 변환
+// ===== XML 파서 (여러 item 태그 후보 시도) =====
 function parseXMLItems(xml) {
-  if (!xml || typeof xml !== 'string') return [];
+  if (!xml || typeof xml !== 'string') return { items: [], tagUsed: null };
 
-  // CDATA 처리: <![CDATA[...]]> → 내부 텍스트로 변환
+  // CDATA 처리
   const cleaned = xml.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
 
-  const items = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let m;
-  while ((m = itemRegex.exec(cleaned)) !== null) {
-    const itemXml = m[1];
-    const obj = {};
-    // 단일 레벨 태그만 추출 (중첩 X)
-    const fieldRegex = /<([\w_]+)>([\s\S]*?)<\/\1>/g;
-    let fm;
-    while ((fm = fieldRegex.exec(itemXml)) !== null) {
-      obj[fm[1]] = fm[2].trim();
+  // 다양한 정부 API에서 쓰는 item 태그 후보들
+  const tagCandidates = ['item', 'row', 'data', 'record', 'announcement', 'pblanc', 'BSNS', 'list'];
+
+  for (const tag of tagCandidates) {
+    const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const itemRegex = new RegExp(`<${escaped}>([\\s\\S]*?)</${escaped}>`, 'g');
+    const items = [];
+    let m;
+    while ((m = itemRegex.exec(cleaned)) !== null) {
+      const itemXml = m[1];
+      const obj = {};
+      const fieldRegex = /<([\w_:]+)>([\s\S]*?)<\/\1>/g;
+      let fm;
+      while ((fm = fieldRegex.exec(itemXml)) !== null) {
+        obj[fm[1]] = fm[2].trim();
+      }
+      if (Object.keys(obj).length > 0) {
+        items.push(obj);
+      }
     }
-    items.push(obj);
+    if (items.length > 0) {
+      return { items, tagUsed: tag };
+    }
   }
-  return items;
+
+  return { items: [], tagUsed: null };
+}
+
+// 모든 최상위 태그 이름 추출 (디버그용)
+function extractTopLevelTags(xml) {
+  if (!xml) return [];
+  const tags = new Set();
+  const re = /<([\w_:]+)[\s>]/g;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    tags.add(m[1]);
+    if (tags.size > 50) break;
+  }
+  return Array.from(tags);
 }
 
 // XML/JSON 응답에서 totalCount 추출
@@ -176,6 +199,7 @@ export default async function handler(req, res) {
     // JSON 우선 시도, 안 되면 XML 파싱
     let items = [];
     let parseMode = 'unknown';
+    let tagUsed = null;
 
     try {
       const json = JSON.parse(text);
@@ -189,7 +213,9 @@ export default async function handler(req, res) {
       parseMode = 'json';
     } catch (jsonErr) {
       // XML 파싱
-      items = parseXMLItems(text);
+      const parsed = parseXMLItems(text);
+      items = parsed.items;
+      tagUsed = parsed.tagUsed;
       parseMode = 'xml';
     }
 
@@ -200,16 +226,29 @@ export default async function handler(req, res) {
       .filter(x => x.title && (!x.deadline || x.deadline >= today))
       .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
 
-    return res.status(200).json({
+    // 파싱은 됐는데 결과 0건이면 디버그 정보 추가
+    const response = {
       ok: true,
       count: transformed.length,
       totalCount: extractTotalCount(text),
       parseMode,
+      tagUsed,
       contentType: ct,
       updatedAt: new Date().toISOString(),
       source: 'kstartup-live',
       listings: transformed,
-    });
+    };
+
+    if (transformed.length === 0) {
+      response.debug = {
+        rawItemsParsed: items.length,
+        topLevelTags: extractTopLevelTags(text).slice(0, 30),
+        rawSample: text.slice(0, 3000),
+        firstItemKeys: items[0] ? Object.keys(items[0]) : [],
+      };
+    }
+
+    return res.status(200).json(response);
   } catch (err) {
     console.error('K-Startup fetch error', err);
     return res.status(200).json({
