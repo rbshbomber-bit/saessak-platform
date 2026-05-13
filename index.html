@@ -308,6 +308,34 @@ header.site {
   display: flex; gap: 6px; flex-wrap: wrap;
   flex: 1; min-width: 0;
 }
+.region-select-wrap {
+  display: flex; align-items: center; gap: 10px;
+  flex: 0 0 auto;
+}
+.region-label {
+  font-size: 13px; font-weight: 600; color: var(--ink-2);
+}
+.region-dropdown {
+  padding: 9px 36px 9px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  font-family: inherit; font-size: 14px;
+  color: var(--ink); cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 8L9 4.5' stroke='%236c7280' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  min-width: 200px;
+  transition: border-color .15s;
+}
+.region-dropdown:hover { border-color: var(--ink); }
+.region-dropdown:focus { outline: none; border-color: var(--sage-deep); }
+.region-hint {
+  font-size: 12px; color: var(--ink-3); margin-top: 6px;
+  padding-left: 4px;
+}
+.region-hint b { color: var(--sage-deep); }
 .chip {
   font-size: 13px; font-weight: 500;
   padding: 8px 14px; border-radius: 999px;
@@ -811,31 +839,47 @@ footer.site a:hover { color: var(--ink); }
       </div>
       <div class="curation-wrap">
         <div class="curation-top">
-          <div class="region-chips">
-            <button class="chip active" data-region="all">전체</button>
-            <button class="chip" data-region="national">전국</button>
-            <button class="chip" data-region="seoul">서울</button>
-            <button class="chip" data-region="gyeonggi">경기</button>
-            <button class="chip" data-region="incheon">인천</button>
-            <button class="chip" data-region="busan">부산</button>
-            <button class="chip" data-region="daegu">대구</button>
-            <button class="chip" data-region="ulsan">울산</button>
-            <button class="chip" data-region="gwangju">광주</button>
-            <button class="chip" data-region="daejeon">대전</button>
-            <button class="chip" data-region="sejong">세종</button>
-            <button class="chip" data-region="gangwon">강원</button>
-            <button class="chip" data-region="chungbuk">충북</button>
-            <button class="chip" data-region="chungnam">충남</button>
-            <button class="chip" data-region="jeonbuk">전북</button>
-            <button class="chip" data-region="jeonnam">전남</button>
-            <button class="chip" data-region="gyeongbuk">경북</button>
-            <button class="chip" data-region="gyeongnam">경남</button>
-            <button class="chip" data-region="jeju">제주</button>
+          <div class="region-select-wrap">
+            <label for="region-select" class="region-label">지역</label>
+            <select id="region-select" class="region-dropdown">
+              <option value="all">전체</option>
+              <option value="national">전국 단위 (중앙부처)</option>
+              <optgroup label="수도권">
+                <option value="seoul">서울</option>
+                <option value="gyeonggi">경기</option>
+                <option value="incheon">인천</option>
+              </optgroup>
+              <optgroup label="영남권">
+                <option value="busan">부산</option>
+                <option value="daegu">대구</option>
+                <option value="ulsan">울산</option>
+                <option value="gyeongbuk">경북</option>
+                <option value="gyeongnam">경남</option>
+              </optgroup>
+              <optgroup label="호남권">
+                <option value="gwangju">광주</option>
+                <option value="jeonbuk">전북</option>
+                <option value="jeonnam">전남</option>
+              </optgroup>
+              <optgroup label="충청권">
+                <option value="daejeon">대전</option>
+                <option value="sejong">세종</option>
+                <option value="chungbuk">충북</option>
+                <option value="chungnam">충남</option>
+              </optgroup>
+              <optgroup label="강원·제주">
+                <option value="gangwon">강원</option>
+                <option value="jeju">제주</option>
+              </optgroup>
+            </select>
           </div>
           <div class="search-box">
             <span style="font-size:14px;color:var(--ink-3)">🔍</span>
-            <input id="search-input" placeholder="공고명·주관기관 검색" />
+            <input id="search-input" placeholder="공고명·주관기관·시군구 검색 (예: 강화, 관악)" />
           </div>
+        </div>
+        <div class="region-hint">
+          💡 <b>강화군·관악구·마포구</b> 같은 시군구 단위는 위 검색창에 입력하세요. 시도 단위는 드롭다운에서 선택.
         </div>
         <div class="curation-controls">
           <select class="sort-select" id="sort-select">
@@ -2365,6 +2409,15 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStorage();
   updateAuthUI();
   tryLoadListingsJson();
+  // 지역 드롭다운 핸들러
+  const regionSelect = document.getElementById("region-select");
+  if (regionSelect) {
+    regionSelect.addEventListener("change", e => {
+      state.region = e.target.value;
+      renderAll();
+    });
+  }
+  // 호환성: 옛 칩 구조가 남아 있다면 그것도 작동
   document.querySelectorAll(".region-chips .chip").forEach(c => {
     c.addEventListener("click", () => {
       document.querySelectorAll(".region-chips .chip").forEach(x=>x.classList.remove("active"));
