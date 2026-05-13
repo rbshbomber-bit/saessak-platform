@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>사업계획서 비교 분석 — 새싹지원사업</title>
+<meta name="description" content="당신의 사업계획서를 합격 사례 12건과 비교 분석하여 강점·약점을 짚어드립니다." />
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<script src="ai-client.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6; --bg-2: #f4f1ea; --card: #ffffff;
+  --ink: #14181f; --ink-2: #3a4250; --ink-3: #6c7280;
+  --line: #e6e3da; --line-2: #d7d3c7;
+  --sage: #8da888; --sage-deep: #5c7a5a; --sage-soft: #d8e3d4;
+  --cream: #f1ead9; --gold: #b9844a;
+  --good: #2f7a3c; --warn: #b45309; --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.nav-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.token-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--sage);
+  color: var(--sage-deep); font-weight: 700; font-size: 12px;
+}
+.token-chip .ico { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 14px; }
+.back { color: var(--ink-2); font-weight: 600; }
+
+.hero-bar {
+  background: linear-gradient(135deg, var(--sage-soft) 0%, var(--cream) 100%);
+  padding: 48px 0 36px;
+}
+.hero-bar h1 {
+  font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px;
+}
+.hero-bar h1 .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  color: var(--sage-deep); font-weight: 500;
+}
+.hero-bar p { color: var(--ink-2); margin: 0; font-size: 15px; }
+.hero-bar .badge {
+  display: inline-block; background: var(--gold); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  margin-bottom: 12px;
+}
+
+.disclaimer-box {
+  background: var(--sage-soft); border: 1px solid var(--sage);
+  border-radius: 12px; padding: 14px 18px;
+  margin: 24px 0; display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13px; line-height: 1.7; color: var(--ink-2);
+}
+.disclaimer-box .ico { font-size: 18px; flex-shrink: 0; }
+.disclaimer-box b { color: var(--sage-deep); }
+
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 24px;
+  box-shadow: var(--shadow-s); margin: 24px 0;
+}
+.card h3 {
+  margin: 0 0 16px; font-size: 17px; font-weight: 700;
+}
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--ink-2); margin-bottom: 6px;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid var(--line-2); border-radius: 10px;
+  font-size: 14px; font-family: inherit; background: var(--bg);
+  color: var(--ink);
+}
+.field textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--sage-deep);
+  background: var(--card);
+}
+
+.btn-run {
+  display: inline-block; width: 100%; padding: 14px 24px;
+  background: var(--ink); color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit;
+  transition: opacity .2s;
+}
+.btn-run:hover { opacity: .85; }
+.btn-run:disabled { background: var(--ink-3); cursor: not-allowed; }
+
+.result-area {
+  margin-top: 24px;
+}
+.result-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 28px;
+  box-shadow: var(--shadow-m);
+}
+.result-card .meta {
+  font-size: 12px; color: var(--ink-3); margin-bottom: 8px;
+}
+.result-card h2 {
+  margin: 0 0 20px; font-size: 22px; font-weight: 800;
+}
+.result-card h3 {
+  margin: 24px 0 10px; font-size: 16px; font-weight: 700;
+  color: var(--sage-deep);
+}
+.result-card p {
+  margin: 0 0 12px; color: var(--ink-2); font-size: 14px; line-height: 1.7;
+}
+
+.score-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 16px; margin: 16px 0;
+}
+@media (max-width: 640px) { .score-grid { grid-template-columns: 1fr; } }
+.score-item {
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px 16px;
+}
+.score-item .chapter {
+  font-weight: 700; font-size: 13px; color: var(--ink);
+  margin-bottom: 6px;
+}
+.score-item .grade {
+  display: inline-block; padding: 3px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; color: white;
+  margin-bottom: 8px;
+}
+.grade-strong { background: var(--good); }
+.grade-good { background: var(--sage-deep); }
+.grade-medium { background: var(--gold); }
+.grade-weak { background: var(--bad); }
+.score-item .comment {
+  font-size: 12px; color: var(--ink-2); line-height: 1.6;
+}
+
+.footer-note {
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 14px; font-size: 11px;
+  color: var(--ink-3); margin-top: 20px; line-height: 1.6;
+}
+
+.empty-msg {
+  text-align: center; padding: 40px 20px; color: var(--ink-3);
+  font-size: 14px;
+}
+.loading {
+  text-align: center; padding: 40px 20px; color: var(--sage-deep);
+  font-weight: 600; font-size: 15px;
+}
+.loading .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 20px; margin-right: 6px;
+}
+
+footer.site {
+  border-top: 1px solid var(--line);
+  padding: 32px 0; margin-top: 60px;
+  background: var(--bg-2);
+}
+.foot-row { text-align: center; font-size: 12px; color: var(--ink-3); }
+.foot-row .legal { margin-bottom: 8px; }
+.foot-row a { color: var(--ink-2); margin: 0 8px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <div class="logo-img" aria-hidden="true"></div>
+      <span class="name">새싹<span class="accent">지원사업</span></span>
+    </a>
+    <div class="nav-right">
+      <span class="token-chip" id="token-display">
+        <span class="ico">蓄</span><span>로그인</span>
+      </span>
+      <a href="index.html" class="back">← 메인</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero-bar">
+  <div class="container">
+    <span class="badge">⭐ PREMIUM · 회당 10 토큰</span>
+    <h1><span class="han">較</span> 사업계획서 비교 분석</h1>
+    <p>당신의 사업계획서를 합격 사례 12건과 비교하여 강점·약점·보완 포인트를 도출합니다. (10 토큰)</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="disclaimer-box">
+    <div class="ico">🤝</div>
+    <div>
+      <b>AI는 자동화가 아닌 ‘비교 분석 보조 도구’입니다.</b><br />
+      합격 사례와의 패턴 비교를 통해 객관적 인사이트를 제공하지만, 합격을 보장하지 않습니다.
+      본인이 결과를 검토하고 본인의 상황·차별점에 맞게 활용해야 합니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>1️⃣ 비교할 사업계획서 입력</h3>
+    <div class="field">
+      <label>신청 사업 선택</label>
+      <select id="c-target">
+        <option value="예비창업패키지">예비창업패키지</option>
+        <option value="초기창업패키지">초기창업패키지</option>
+        <option value="청년창업사관학교">청년창업사관학교</option>
+        <option value="딥테크 헬스케어 패키지">딥테크 헬스케어 패키지</option>
+        <option value="지자체 청년창업">지자체 청년창업</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>분야</label>
+      <select id="c-field">
+        <option>AI·딥테크</option><option>헬스케어</option>
+        <option>커머스·로컬</option><option>농업·푸드</option>
+        <option>문화·콘텐츠</option><option>기타</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>사업계획서 본문 (필수 — 6개 챕터 모두 또는 핵심 부분만)</label>
+      <textarea id="c-text" placeholder="예시:&#10;1. 문제 정의 — ...&#10;2. 솔루션 — ...&#10;3. 시장 분석 — ...&#10;4. BM — ...&#10;5. 추진 일정 — ...&#10;6. 자금 운용 — ..."></textarea>
+    </div>
+    <button class="btn-run" id="c-run">較 합격 사례 12건과 비교 분석 시작 (10 토큰)</button>
+  </div>
+
+  <div id="result-area" class="result-area"></div>
+</div>
+
+<footer class="site">
+  <div class="container foot-row">
+    <div class="legal">
+      <a href="terms.html">이용약관</a> ·
+      <a href="terms.html#ai-disclaimer">AI 면책</a> ·
+      <a href="terms.html#privacy">개인정보처리방침</a>
+    </div>
+    <div>© 2026 새싹지원사업 · AI 자동 응답 · 본인 판단·검토 필수 · 합격 보장 없음</div>
+  </div>
+</footer>
+
+<script>
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+const COMPARE_COST = 10;
+
+function getCurrentUser(){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]").find(u => u.id === id) || null; } catch(e){ return null; }
+}
+function updateUser(updater){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try {
+    const users = JSON.parse(localStorage.getItem(USER_KEY) || "[]");
+    const idx = users.findIndex(x => x.id === id);
+    if(idx === -1) return null;
+    users[idx] = updater(users[idx]) || users[idx];
+    localStorage.setItem(USER_KEY, JSON.stringify(users));
+    return users[idx];
+  } catch(e){ return null; }
+}
+function refreshTokenDisplay(){
+  const u = getCurrentUser();
+  const el = document.getElementById("token-display");
+  if(!el) return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const display = isAdmin ? '∞' : (u.tokens||0).toLocaleString();
+    el.querySelector("span:last-child").textContent = `토큰 ${display}`;
+  } else {
+    el.querySelector("span:last-child").textContent = "로그인";
+  }
+}
+refreshTokenDisplay();
+
+document.getElementById("c-run").addEventListener("click", async () => {
+  const u = getCurrentUser();
+  if(!u){
+    if(confirm("비교 분석은 회원가입/로그인이 필요합니다. 로그인 페이지로 이동할까요?")){
+      location.href = "auth.html";
+    }
+    return;
+  }
+  const text = document.getElementById("c-text").value.trim();
+  if(text.length < 100){
+    alert("사업계획서 본문을 100자 이상 입력해주세요. (각 챕터의 핵심 내용만이라도)");
+    return;
+  }
+  const target = document.getElementById("c-target").value;
+  const field = document.getElementById("c-field").value;
+
+  const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+  if(!isAdmin){
+    if((u.tokens || 0) < COMPARE_COST){
+      alert(`토큰이 부족합니다. ${COMPARE_COST} 토큰이 필요해요. 현재 잔액: ${u.tokens || 0} 토큰\n\n메인 페이지 → 요금제에서 충전하시거나, 구독을 시작하세요.`);
+      return;
+    }
+    if(!confirm(`비교 분석에 ${COMPARE_COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - COMPARE_COST}\n진행하시겠습니까?`)) return;
+    updateUser(user => {
+      user.tokens = (user.tokens || 0) - COMPARE_COST;
+      if(!user.tokenLog) user.tokenLog = [];
+      user.tokenLog.unshift({
+        ts: new Date().toISOString(), kind: "spend",
+        amount: -COMPARE_COST, balance: user.tokens,
+        memo: `비교 분석: ${target}`,
+      });
+      return user;
+    });
+    refreshTokenDisplay();
+  }
+
+  const btn = document.getElementById("c-run");
+  btn.disabled = true;
+  btn.textContent = "AI가 합격 사례와 비교 분석 중...";
+  document.getElementById("result-area").innerHTML = `
+    <div class="loading"><span class="han">較</span> 합격 사례 12건의 패턴과 비교 분석 중... (10~20초)</div>`;
+
+  const systemPrompt = `당신은 정부 청년창업 지원사업 사업계획서 심사 경험이 풍부한 전문가입니다.
+새싹지원사업 플랫폼의 합격 사업계획서 라이브러리 12건 (예비창업패키지, 청년창업사관학교, 딥테크 헬스케어 등에서 합격한 익명화 케이스)의 일반적인 패턴을 알고 있습니다.
+
+다음 규칙으로 답변하세요:
+- 정확한 합격률 % 추정은 금지. 정성적 평가만.
+- 6개 챕터(문제정의/솔루션/시장분석/BM/추진일정/자금운용)별 등급(strong/good/medium/weak)과 코멘트 제공.
+- 합격을 보장하지 않으며 본 분석은 패턴 비교 보조 도구임을 명시.
+- JSON으로만 응답. 마크다운 코드블록 금지.`;
+
+  const prompt = `[신청 사업] ${target}
+[분야] ${field}
+[사용자 사업계획서 본문]
+${text}
+
+[작업]
+사용자의 사업계획서를 합격 사례 12건의 일반적 패턴과 비교 분석하세요.
+6개 챕터별로 등급(strong/good/medium/weak) + 합격 사례 대비 평가 + 보완 포인트를 제시하세요.
+
+[JSON 출력 형식]
+{
+  "overall": "전반 평가 한 문단 (200자 이내)",
+  "chapters": [
+    {"name":"1. 문제 정의","grade":"strong|good|medium|weak","comment":"합격 사례 대비 평가 + 보완 포인트 (50~80자)"},
+    {"name":"2. 솔루션·핵심 가치","grade":"...","comment":"..."},
+    {"name":"3. 시장 분석","grade":"...","comment":"..."},
+    {"name":"4. 비즈니스 모델","grade":"...","comment":"..."},
+    {"name":"5. 추진 일정","grade":"...","comment":"..."},
+    {"name":"6. 자금 운용","grade":"...","comment":"..."}
+  ],
+  "topActions": ["가장 시급한 보완 액션 3개", "...", "..."]
+}`;
+
+  try {
+    const responseText = await window.saessak.callClaude(prompt, {
+      system: systemPrompt,
+      max_tokens: 2000,
+      fallback: ""
+    });
+
+    if(!responseText){
+      throw new Error("AI 응답을 받지 못했습니다.");
+    }
+
+    const m = responseText.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("응답 형식 오류");
+    const data = JSON.parse(m[0]);
+
+    renderResult(data, target);
+  } catch(e){
+    console.error(e);
+    document.getElementById("result-area").innerHTML = `
+      <div class="result-card">
+        <div class="empty-msg">분석 실패. 다시 시도해주세요.<br /><small style="color:var(--bad);">${e.message}</small></div>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "較 합격 사례 12건과 비교 분석 시작 (10 토큰)";
+  }
+});
+
+function renderResult(data, target){
+  const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
+  const gradeClass = { strong:"grade-strong", good:"grade-good", medium:"grade-medium", weak:"grade-weak" };
+
+  const chaptersHTML = (data.chapters || []).map(c => `
+    <div class="score-item">
+      <div class="chapter">${c.name}</div>
+      <div class="grade ${gradeClass[c.grade]||'grade-medium'}">${gradeLabel[c.grade]||'보통'}</div>
+      <div class="comment">${c.comment||''}</div>
+    </div>
+  `).join("");
+
+  const actionsHTML = (data.topActions || []).map((a, i) => `
+    <p style="padding-left:18px;text-indent:-18px;">
+      <b style="color:var(--gold);">${i+1}.</b> ${a}
+    </p>
+  `).join("");
+
+  document.getElementById("result-area").innerHTML = `
+    <div class="result-card">
+      <div class="meta">신청 사업: ${target} · 비교 기준: 합격 사례 12건 · 분석 일시: ${new Date().toLocaleString("ko-KR")}</div>
+      <h2>비교 분석 결과</h2>
+      <p style="background:var(--sage-soft);padding:14px 16px;border-radius:10px;border-left:3px solid var(--sage-deep);">
+        <b style="color:var(--sage-deep);">전반 평가</b><br />
+        ${data.overall || ''}
+      </p>
+      <h3>📊 챕터별 비교 평가</h3>
+      <div class="score-grid">${chaptersHTML}</div>
+      <h3>🎯 가장 시급한 보완 액션 3가지</h3>
+      ${actionsHTML}
+      <div class="footer-note">
+        🤖 AI 비교 분석 결과 · 합격 사례 12건의 패턴 기반 추정 · 실제 심사 결과와 무관할 수 있음 ·
+        본 분석은 보조 도구이며 본인의 최종 판단과 차별화된 본인 데이터가 반드시 추가되어야 합니다.
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

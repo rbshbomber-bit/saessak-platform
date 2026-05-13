@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>심사위원 시뮬레이션 — 새싹지원사업</title>
+<meta name="description" content="가상 심사위원 5명 페르소나가 당신의 사업계획서를 검토합니다. 예상 질문 + 답변 가이드 포함." />
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<script src="ai-client.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6; --bg-2: #f4f1ea; --card: #ffffff;
+  --ink: #14181f; --ink-2: #3a4250; --ink-3: #6c7280;
+  --line: #e6e3da; --line-2: #d7d3c7;
+  --sage: #8da888; --sage-deep: #5c7a5a; --sage-soft: #d8e3d4;
+  --cream: #f1ead9; --gold: #b9844a;
+  --good: #2f7a3c; --warn: #b45309; --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.nav-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.token-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--sage);
+  color: var(--sage-deep); font-weight: 700; font-size: 12px;
+}
+.token-chip .ico { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 14px; }
+.back { color: var(--ink-2); font-weight: 600; }
+
+.hero-bar {
+  background: linear-gradient(135deg, var(--sage-soft) 0%, var(--cream) 100%);
+  padding: 48px 0 36px;
+}
+.hero-bar h1 {
+  font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px;
+}
+.hero-bar h1 .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  color: var(--sage-deep); font-weight: 500;
+}
+.hero-bar p { color: var(--ink-2); margin: 0; font-size: 15px; }
+.hero-bar .badge {
+  display: inline-block; background: var(--gold); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  margin-bottom: 12px;
+}
+
+.disclaimer-box {
+  background: var(--sage-soft); border: 1px solid var(--sage);
+  border-radius: 12px; padding: 14px 18px;
+  margin: 24px 0; display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13px; line-height: 1.7; color: var(--ink-2);
+}
+.disclaimer-box .ico { font-size: 18px; flex-shrink: 0; }
+.disclaimer-box b { color: var(--sage-deep); }
+
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 24px;
+  box-shadow: var(--shadow-s); margin: 24px 0;
+}
+.card h3 {
+  margin: 0 0 16px; font-size: 17px; font-weight: 700;
+}
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--ink-2); margin-bottom: 6px;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid var(--line-2); border-radius: 10px;
+  font-size: 14px; font-family: inherit; background: var(--bg);
+  color: var(--ink);
+}
+.field textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--sage-deep);
+  background: var(--card);
+}
+
+.persona-preview {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 10px; margin: 16px 0;
+}
+@media (max-width: 768px) { .persona-preview { grid-template-columns: repeat(2, 1fr); } }
+.persona-chip {
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px 10px; text-align: center;
+}
+.persona-chip .emoji { font-size: 22px; margin-bottom: 4px; }
+.persona-chip .name { font-size: 11px; font-weight: 700; color: var(--ink-2); }
+
+.btn-run {
+  display: inline-block; width: 100%; padding: 14px 24px;
+  background: var(--ink); color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit;
+  transition: opacity .2s;
+}
+.btn-run:hover { opacity: .85; }
+.btn-run:disabled { background: var(--ink-3); cursor: not-allowed; }
+
+.result-area { margin-top: 24px; }
+
+.persona-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 24px;
+  box-shadow: var(--shadow-s); margin: 16px 0;
+}
+.persona-card .head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.persona-card .head .emoji { font-size: 28px; }
+.persona-card .head .info { flex: 1; }
+.persona-card .head .info .name { font-weight: 800; font-size: 15px; margin-bottom: 2px; }
+.persona-card .head .info .role { font-size: 12px; color: var(--ink-3); }
+.persona-card .head .grade {
+  padding: 5px 12px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; color: white;
+}
+.grade-strong { background: var(--good); }
+.grade-good { background: var(--sage-deep); }
+.grade-medium { background: var(--gold); }
+.grade-weak { background: var(--bad); }
+
+.persona-card h4 {
+  margin: 16px 0 8px; font-size: 13px; font-weight: 700;
+  color: var(--sage-deep);
+}
+.persona-card .strengths, .persona-card .weaknesses {
+  font-size: 13px; color: var(--ink-2); line-height: 1.7;
+  padding-left: 16px; margin: 0;
+}
+.persona-card .strengths li::marker { color: var(--good); }
+.persona-card .weaknesses li::marker { color: var(--warn); }
+.persona-card .questions {
+  background: var(--bg-2); border-radius: 10px;
+  padding: 14px 16px; font-size: 13px; color: var(--ink-2);
+}
+.persona-card .questions ol {
+  margin: 0; padding-left: 20px; line-height: 1.9;
+}
+
+.summary-card {
+  background: var(--sage-soft); border: 1px solid var(--sage);
+  border-radius: 14px; padding: 24px; margin: 24px 0;
+}
+.summary-card h3 {
+  margin: 0 0 12px; font-size: 16px; color: var(--sage-deep);
+}
+.summary-card p { margin: 0 0 8px; font-size: 14px; line-height: 1.7; }
+
+.footer-note {
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 14px; font-size: 11px;
+  color: var(--ink-3); margin-top: 20px; line-height: 1.6;
+}
+
+.empty-msg {
+  text-align: center; padding: 40px 20px; color: var(--ink-3);
+  font-size: 14px;
+}
+.loading {
+  text-align: center; padding: 40px 20px; color: var(--sage-deep);
+  font-weight: 600; font-size: 15px;
+}
+.loading .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 20px; margin-right: 6px;
+}
+
+footer.site {
+  border-top: 1px solid var(--line);
+  padding: 32px 0; margin-top: 60px;
+  background: var(--bg-2);
+}
+.foot-row { text-align: center; font-size: 12px; color: var(--ink-3); }
+.foot-row .legal { margin-bottom: 8px; }
+.foot-row a { color: var(--ink-2); margin: 0 8px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <div class="logo-img" aria-hidden="true"></div>
+      <span class="name">새싹<span class="accent">지원사업</span></span>
+    </a>
+    <div class="nav-right">
+      <span class="token-chip" id="token-display">
+        <span class="ico">蓄</span><span>로그인</span>
+      </span>
+      <a href="index.html" class="back">← 메인</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero-bar">
+  <div class="container">
+    <span class="badge">⭐ PREMIUM · 회당 50 토큰</span>
+    <h1><span class="han">審</span> 심사위원 시뮬레이션</h1>
+    <p>5명의 가상 페르소나가 당신의 사업계획서를 다각도로 평가합니다. 예상 질문 25개 + 강점·약점 도출.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="disclaimer-box">
+    <div class="ico">🤝</div>
+    <div>
+      <b>가상 시뮬레이션이며 실제 심사와 무관합니다.</b><br />
+      등장하는 5개 페르소나는 정부 사업 심사 일반 패턴을 학습한 AI의 가상 캐릭터이며, 특정 기관·인물을 지칭하지 않습니다.
+      평가 결과는 정성 평가(매우 강함/강함/보통/약함)로 제공되며, 실제 합격률을 예측하지 않습니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>1️⃣ 시뮬레이션할 사업계획서 입력</h3>
+    <div class="field">
+      <label>신청 사업</label>
+      <select id="s-target">
+        <option value="예비창업패키지">예비창업패키지</option>
+        <option value="초기창업패키지">초기창업패키지</option>
+        <option value="청년창업사관학교">청년창업사관학교</option>
+        <option value="딥테크 헬스케어 패키지">딥테크 헬스케어 패키지</option>
+        <option value="지자체 청년창업">지자체 청년창업</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>분야</label>
+      <select id="s-field">
+        <option>AI·딥테크</option><option>헬스케어</option>
+        <option>커머스·로컬</option><option>농업·푸드</option>
+        <option>문화·콘텐츠</option><option>기타</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>사업계획서 본문 (필수)</label>
+      <textarea id="s-text" placeholder="6개 챕터(문제정의/솔루션/시장분석/BM/추진일정/자금운용) 또는 핵심 내용을 입력하세요. 100자 이상."></textarea>
+    </div>
+
+    <div style="margin: 20px 0 12px;">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:8px;">참여 페르소나 5명 (모두 가상 캐릭터)</div>
+      <div class="persona-preview">
+        <div class="persona-chip">
+          <div class="emoji">🏛️</div>
+          <div class="name">정부 사업 운영 경험형</div>
+        </div>
+        <div class="persona-chip">
+          <div class="emoji">💼</div>
+          <div class="name">VC·투자 경험형</div>
+        </div>
+        <div class="persona-chip">
+          <div class="emoji">🎓</div>
+          <div class="name">학계·기술 검토형</div>
+        </div>
+        <div class="persona-chip">
+          <div class="emoji">⚖️</div>
+          <div class="name">법무·리스크 검토형</div>
+        </div>
+        <div class="persona-chip">
+          <div class="emoji">🌱</div>
+          <div class="name">청년정책·지역 효과형</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-run" id="s-run">審 5명 페르소나 시뮬레이션 시작 (50 토큰)</button>
+  </div>
+
+  <div id="result-area" class="result-area"></div>
+</div>
+
+<footer class="site">
+  <div class="container foot-row">
+    <div class="legal">
+      <a href="terms.html">이용약관</a> ·
+      <a href="terms.html#ai-disclaimer">AI 면책</a> ·
+      <a href="terms.html#privacy">개인정보처리방침</a>
+    </div>
+    <div>© 2026 새싹지원사업 · 가상 시뮬레이션 · 실제 심사와 무관 · 합격 보장 없음</div>
+  </div>
+</footer>
+
+<script>
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+const SIMULATE_COST = 50;
+
+function getCurrentUser(){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]").find(u => u.id === id) || null; } catch(e){ return null; }
+}
+function updateUser(updater){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try {
+    const users = JSON.parse(localStorage.getItem(USER_KEY) || "[]");
+    const idx = users.findIndex(x => x.id === id);
+    if(idx === -1) return null;
+    users[idx] = updater(users[idx]) || users[idx];
+    localStorage.setItem(USER_KEY, JSON.stringify(users));
+    return users[idx];
+  } catch(e){ return null; }
+}
+function refreshTokenDisplay(){
+  const u = getCurrentUser();
+  const el = document.getElementById("token-display");
+  if(!el) return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const display = isAdmin ? '∞' : (u.tokens||0).toLocaleString();
+    el.querySelector("span:last-child").textContent = `토큰 ${display}`;
+  } else {
+    el.querySelector("span:last-child").textContent = "로그인";
+  }
+}
+refreshTokenDisplay();
+
+const PERSONA_META = {
+  gov:   { emoji: "🏛️", name: "정부 사업 운영 경험형", role: "정부 양식·심사 절차 중심 평가 페르소나" },
+  vc:    { emoji: "💼", name: "VC·투자 경험형",      role: "BM·시장성·성장 가능성 중심 평가 페르소나" },
+  tech:  { emoji: "🎓", name: "학계·기술 검토형",    role: "기술 차별성·검증 가능성 중심 평가 페르소나" },
+  legal: { emoji: "⚖️", name: "법무·리스크 검토형",  role: "리스크·규제 준수·운영 안정성 중심 평가 페르소나" },
+  youth: { emoji: "🌱", name: "청년정책·지역 효과형", role: "청년·지역 효과·정책 부합성 중심 평가 페르소나" },
+};
+
+document.getElementById("s-run").addEventListener("click", async () => {
+  const u = getCurrentUser();
+  if(!u){
+    if(confirm("심사위원 시뮬레이션은 회원가입/로그인이 필요합니다. 로그인 페이지로 이동할까요?")){
+      location.href = "auth.html";
+    }
+    return;
+  }
+  const text = document.getElementById("s-text").value.trim();
+  if(text.length < 100){
+    alert("사업계획서 본문을 100자 이상 입력해주세요.");
+    return;
+  }
+  const target = document.getElementById("s-target").value;
+  const field = document.getElementById("s-field").value;
+
+  const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+  if(!isAdmin){
+    if((u.tokens || 0) < SIMULATE_COST){
+      alert(`토큰이 부족합니다. ${SIMULATE_COST} 토큰이 필요해요. 현재 잔액: ${u.tokens || 0} 토큰\n\n메인 페이지 → 요금제에서 충전하시거나, 구독을 시작하세요.`);
+      return;
+    }
+    if(!confirm(`심사위원 시뮬레이션에 ${SIMULATE_COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - SIMULATE_COST}\n진행하시겠습니까?`)) return;
+    updateUser(user => {
+      user.tokens = (user.tokens || 0) - SIMULATE_COST;
+      if(!user.tokenLog) user.tokenLog = [];
+      user.tokenLog.unshift({
+        ts: new Date().toISOString(), kind: "spend",
+        amount: -SIMULATE_COST, balance: user.tokens,
+        memo: `심사 시뮬레이션: ${target}`,
+      });
+      return user;
+    });
+    refreshTokenDisplay();
+  }
+
+  const btn = document.getElementById("s-run");
+  btn.disabled = true;
+  btn.textContent = "5명 페르소나 시뮬레이션 진행 중...";
+  document.getElementById("result-area").innerHTML = `
+    <div class="loading"><span class="han">審</span> 5명 가상 페르소나가 각자 검토 중... (20~40초)</div>`;
+
+  const systemPrompt = `당신은 한국 청년창업 정부 지원사업 심사를 다각도로 시뮬레이션하는 AI입니다.
+다음 5개의 가상 페르소나로 사업계획서를 평가합니다 (모두 가상 캐릭터, 실제 인물/기관 아님):
+
+1. gov: 정부 사업 운영 경험형 — 정부 양식 부합성·심사 절차·정량 데이터 강조
+2. vc: VC·투자 경험형 — BM 매력도·시장성·성장 가능성·exit 시나리오
+3. tech: 학계·기술 검토형 — 기술 차별성·검증 방법·연구개발 계획
+4. legal: 법무·리스크 검토형 — 규제 준수·법적 리스크·운영 안정성
+5. youth: 청년정책·지역 효과형 — 청년 효과·지역 균형·정책 부합성
+
+규칙:
+- 등급은 정성 평가만: strong / good / medium / weak (정확한 점수·% 금지)
+- 각 페르소나는 자기 관점에서 강점 2개, 약점 2개, 예상 질문 5개 제시
+- 합격을 보장하지 않음. 시뮬레이션 결과임을 명시
+- JSON만 응답. 마크다운 코드블록 금지.`;
+
+  const prompt = `[신청 사업] ${target}
+[분야] ${field}
+[사업계획서 본문]
+${text}
+
+[작업] 위 5개 페르소나(gov/vc/tech/legal/youth)가 각자 평가하여 JSON으로 반환.
+
+[출력 JSON 형식]
+{
+  "overall": "5명 페르소나 평가 종합 한 문단 (200자 이내)",
+  "personas": {
+    "gov":   {"grade":"strong|good|medium|weak", "strengths":["...","..."], "weaknesses":["...","..."], "questions":["...","...","...","...","..."]},
+    "vc":    {"grade":"...", "strengths":[...], "weaknesses":[...], "questions":[...5개...]},
+    "tech":  {...},
+    "legal": {...},
+    "youth": {...}
+  },
+  "topActions": ["가장 시급한 보완 액션 3개", "...", "..."]
+}`;
+
+  try {
+    const responseText = await window.saessak.callClaude(prompt, {
+      system: systemPrompt,
+      max_tokens: 4000,
+      fallback: ""
+    });
+
+    if(!responseText) throw new Error("AI 응답을 받지 못했습니다.");
+    const m = responseText.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("응답 형식 오류");
+    const data = JSON.parse(m[0]);
+    renderResult(data, target);
+  } catch(e){
+    console.error(e);
+    document.getElementById("result-area").innerHTML = `
+      <div class="persona-card">
+        <div class="empty-msg">시뮬레이션 실패. 다시 시도해주세요.<br /><small style="color:var(--bad);">${e.message}</small></div>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "審 5명 페르소나 시뮬레이션 시작 (50 토큰)";
+  }
+});
+
+function renderResult(data, target){
+  const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
+  const gradeClass = { strong:"grade-strong", good:"grade-good", medium:"grade-medium", weak:"grade-weak" };
+
+  let personaHTML = "";
+  ["gov","vc","tech","legal","youth"].forEach(key => {
+    const p = data.personas?.[key];
+    if(!p) return;
+    const meta = PERSONA_META[key];
+    personaHTML += `
+      <div class="persona-card">
+        <div class="head">
+          <div class="emoji">${meta.emoji}</div>
+          <div class="info">
+            <div class="name">${meta.name}</div>
+            <div class="role">${meta.role}</div>
+          </div>
+          <span class="grade ${gradeClass[p.grade]||'grade-medium'}">${gradeLabel[p.grade]||'보통'}</span>
+        </div>
+        <h4>👍 강점</h4>
+        <ul class="strengths">
+          ${(p.strengths||[]).map(s => `<li>${s}</li>`).join("")}
+        </ul>
+        <h4>⚠️ 약점</h4>
+        <ul class="weaknesses">
+          ${(p.weaknesses||[]).map(s => `<li>${s}</li>`).join("")}
+        </ul>
+        <h4>❓ 예상 질문 5개</h4>
+        <div class="questions">
+          <ol>${(p.questions||[]).map(q => `<li>${q}</li>`).join("")}</ol>
+        </div>
+      </div>`;
+  });
+
+  const actionsHTML = (data.topActions||[]).map((a,i) => `
+    <p style="padding-left:18px;text-indent:-18px;">
+      <b style="color:var(--gold);">${i+1}.</b> ${a}
+    </p>
+  `).join("");
+
+  document.getElementById("result-area").innerHTML = `
+    <div class="summary-card">
+      <h3>📋 종합 평가 (신청 사업: ${target})</h3>
+      <p>${data.overall||''}</p>
+    </div>
+    ${personaHTML}
+    <div class="summary-card">
+      <h3>🎯 가장 시급한 보완 액션 3가지</h3>
+      ${actionsHTML}
+    </div>
+    <div class="footer-note">
+      🤖 가상 페르소나 시뮬레이션 결과 · 5개 캐릭터는 정부 사업 심사 일반 패턴 학습 기반 가상 캐릭터 ·
+      특정 기관·인물 지칭 아님 · 실제 심사 결과와 무관 · 합격 보장 없음 · 본 결과를 바탕으로 한 의사결정의 책임은 사용자 본인에게 있음.
+    </div>`;
+}
+</script>
+</body>
+</html>

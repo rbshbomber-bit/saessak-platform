@@ -19,8 +19,6 @@
 <link rel="apple-touch-icon" href="images/logo.png" />
 
 <script src="supabase-config.js" defer></script>
-<script src="admin-config.js" defer></script>
-<script src="ai-client.js" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
@@ -575,11 +573,8 @@ footer.site a:hover { color: var(--ink); }
       <a href="#listings">공고</a>
       <a href="#ai-matching">AI 매칭</a>
       <a href="#ai-planner">사업계획서 AI</a>
-      <a href="compare.html">비교 분석<span class="new">NEW</span></a>
-      <a href="simulate.html">심사 시뮬레이션<span class="new">NEW</span></a>
-      <a href="slides.html">발표 슬라이드<span class="new">NEW</span></a>
-      <a href="lib.html">합격 라이브러리</a>
-      <a href="mentor.html">1:1 멘토링</a>
+      <a href="lib.html">합격 라이브러리<span class="new">NEW</span></a>
+      <a href="mentor.html">1:1 멘토링<span class="new">NEW</span></a>
       <a href="#tracker">트래커</a>
       <a href="#pricing">요금</a>
     </nav>
@@ -821,26 +816,16 @@ footer.site a:hover { color: var(--ink); }
       <div class="feature reverse">
         <div class="copy">
           <div class="eyebrow">✨ NEW · 사업계획서 AI</div>
-          <h2>아이템 한 줄 → 사업계획서 초안 5분.</h2>
-          <p>예비창업패키지·청년창업사관학교 등 정부 양식에 맞춰 챕터별 <b>초안</b>을 만들어드립니다. 그 위에 본인의 데이터·차별점·검수를 더하면 완성됩니다.</p>
+          <h2>아이템 한 줄 → 사업계획서 초안 5분 완성.</h2>
+          <p>예비창업패키지·청년창업사관학교 등 정부 양식에 맞춰 챕터별 초안을 자동 생성합니다. 시장분석·BM·실행계획·재무까지.</p>
           <ul>
-            <li>K-Startup 표준 양식 기반 6개 챕터 <b>초안</b> 자동 생성</li>
-            <li>매칭된 공고에 맞춤 키워드·심사 포인트 가이드</li>
-            <li>편집 가능한 워드 문서로 다운로드 (본인 검수 필수)</li>
-            <li>구조 잡는 2~3주 → 5분 / 본인 데이터·검수는 별도</li>
+            <li>K-Startup 표준 양식 기반 6개 챕터 자동 생성</li>
+            <li>매칭된 공고에 맞춤 키워드·심사 포인트 반영</li>
+            <li>편집 가능한 워드 문서로 다운로드</li>
+            <li>2~3주 작업을 5분으로 단축</li>
           </ul>
         </div>
         <div class="art" style="background-image:url('images/tracker.png');"></div>
-      </div>
-
-      <div style="background:var(--sage-soft);border:1px solid var(--sage);border-radius:14px;padding:18px 22px;margin:24px 0 0;display:flex;gap:14px;align-items:flex-start;">
-        <div style="font-size:22px;flex-shrink:0;">🤝</div>
-        <div style="font-size:13px;line-height:1.7;color:var(--ink-2);">
-          <b style="color:var(--sage-deep);font-size:14px;">AI는 자동화가 아닌 ‘작성 보조 도구’입니다.</b><br />
-          새싹지원사업의 AI는 사용자가 작성을 시작할 수 있도록 정부 양식·구조·키워드를 잡아주는 보조 도구입니다.
-          AI 결과물은 일반론과 표준 표현으로 구성되며, <b>본인의 실제 데이터·차별점·검수가 반드시 추가</b>되어야 의미 있는 사업계획서가 됩니다.
-          본 사업계획서 AI는 정부 심사 합격을 보장하지 않으며, 신청 결과에 대한 모든 책임은 사용자 본인에게 있습니다.
-        </div>
       </div>
 
       <div class="demo-card">
@@ -1524,7 +1509,7 @@ function renderList(){
       조건에 맞는 공고가 없어요.<br /><small>필터를 줄여보세요.</small></div>`;
     return;
   }
-  c.innerHTML = filtered.map(x => cardHTML(x)).join("");
+  c.innerHTML = filtered.map(cardHTML).join("");
   bindCardActions(c);
 }
 const STAGES = [
@@ -1612,43 +1597,28 @@ async function runMatch(){
 [작업] 첨부 공고 중 적합도 높은 순으로 3~5개 선택. 각 공고에 "왜 이 사람에게 맞는지" 1~2문장.
 [출력] JSON만: { "matches": [ { "id": "공고id", "reason": "이유" } ] }`;
 
-  // 폴백 매칭 (API 실패/키 미설정 시)
-  function buildFallbackMatches(){
-    const regionMap = {
-      "서울":"capital","경기":"capital","인천":"capital",
-      "부산":"youngnam","대구":"youngnam",
-      "광주":"honam","전남":"honam",
-      "대전":"chungcheong",
-      "강원":"gangwon","제주":"jeju"
-    };
-    const userRegionCode = regionMap[region] || null;
-    return LISTINGS.map(x => ({
-      x, score: (x.field === field ? 3 : 0) +
-                (userRegionCode && x.region === userRegionCode ? 3 : 0) +
-                (x.region === "national" ? 2 : 0) +
-                (parseInt(age) <= 49 && x.age.includes("49") ? 1 : 0) +
-                (parseInt(age) <= 39 && x.age.includes("39") ? 2 : 0)
-    })).sort((a,b)=> b.score - a.score).slice(0,4)
-      .map(({x,score})=>({ id: x.id, reason: `분야·지역·연령 기준 적합도 ${score}점.` }));
-  }
-
   try {
-    const fullPrompt = prompt + "\n\n[공고 목록]\n" + JSON.stringify(LISTINGS, null, 2);
-    const text = await window.saessak.callClaude(fullPrompt, {
-      system: "당신은 한국 청년창업 지원사업 큐레이션 전문가입니다. 반드시 JSON으로만 응답하세요. 다른 설명, 마크다운 코드블록은 금지.",
-      max_tokens: 1200,
-      fallback: ""  // 빈 문자열 → 아래 catch에서 폴백 처리
-    });
-
-    if(!text || text.includes('데모 모드')){
-      // API 키 미설정 또는 빈 응답 → 룰 기반 폴백
-      renderMatches({matches: buildFallbackMatches()});
-      if(text.includes('데모 모드')){
-        out.insertAdjacentHTML('afterbegin', `<div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">⚠️ Claude API 키 미설정 — 룰 기반 매칭으로 표시됩니다.</div>`);
-      }
-      return;
+    if(!window.cowork?.askClaude){
+      const regionMap = {
+        "서울":"capital","경기":"capital","인천":"capital",
+        "부산":"youngnam","대구":"youngnam",
+        "광주":"honam","전남":"honam",
+        "대전":"chungcheong",
+        "강원":"gangwon","제주":"jeju"
+      };
+      const userRegionCode = regionMap[region] || null;
+      const matches = LISTINGS.map(x => ({
+        x, score: (x.field === field ? 3 : 0) +
+                  (userRegionCode && x.region === userRegionCode ? 3 : 0) +
+                  (x.region === "national" ? 2 : 0) +
+                  (parseInt(age) <= 49 && x.age.includes("49") ? 1 : 0) +
+                  (parseInt(age) <= 39 && x.age.includes("39") ? 2 : 0)
+      })).sort((a,b)=> b.score - a.score).slice(0,4)
+        .map(({x,score})=>({ id: x.id, reason: `(데모) 분야·지역·연령 기준 적합도 ${score}점.` }));
+      renderMatches({matches}); return;
     }
-
+    const resp = await window.cowork.askClaude(prompt, [{listings: LISTINGS}]);
+    const text = typeof resp === "string" ? resp : (resp?.text || JSON.stringify(resp));
     const m = text.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("JSON not found");
     const parsed = JSON.parse(m[0]);
@@ -1656,9 +1626,7 @@ async function runMatch(){
     renderMatches(parsed);
   } catch(e){
     console.error(e);
-    // 파싱 실패 시에도 룰 기반 폴백
-    renderMatches({matches: buildFallbackMatches()});
-    out.insertAdjacentHTML('afterbegin', `<div style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">AI 응답 파싱 실패 — 룰 기반으로 표시됩니다.</div>`);
+    out.innerHTML = `<div class="empty-state">매칭 실패. 다시 시도해주세요.<br /><small>${e.message||""}</small></div>`;
   } finally {
     btn.disabled = false; btn.textContent = "AI에게 매칭 요청 →";
   }
@@ -1742,42 +1710,30 @@ async function runPlan(){
     {"h": "6. 자금 운용 계획", "body": "..."}
   ] }`;
 
-  // 폴백 사업계획서 초안
-  const fallbackPlan = {
-    title: `${item} — ${target} 사업계획서 초안`,
-    chapters: [
-      {h:"1. 문제 정의", body: `${region} 지역의 ${field} 분야는 디지털 전환과 시장 변화로 인해 기존 사업 모델만으로는 한계에 직면해 있습니다. 청년 창업자가 진입하려 해도 정보·네트워크가 부족하여 시행착오 비용이 큽니다.`},
-      {h:"2. 솔루션·핵심 가치", body: `본 사업은 "${item}"을(를) 핵심 솔루션으로 제시합니다. 사용자가 직면한 핵심 페인 포인트를 디지털 기술의 결합으로 해소하며, 기존 대안 대비 명확한 차별점을 제공합니다.`},
-      {h:"3. 시장 분석·타깃", body: `${field} 시장 규모는 국내 약 [추정 규모] 원이며 연 [%] 성장 중입니다. 1차 타깃은 ${region} 거주 [구체 페르소나]이고, 향후 전국으로 확장 가능합니다.`},
-      {h:"4. 비즈니스 모델", body: `수익은 [구독료 / 1회 결제 / B2B 라이선스 등] 다축 모델로 구성됩니다. 1년차 목표 매출은 [N]원, 3년차 [N]원이며, 비용 구조는 호스팅·AI API·인건비 중심으로 마진 [%] 확보가 가능합니다.`},
-      {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 베타 사용자 50명 확보. M+4~M+6: 핵심 기능 고도화 및 첫 매출. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
-      {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [%], (2) 마케팅·사용자 획득 [%], (3) 인프라·운영비 [%], (4) 예비비 [%]로 배분합니다.${strength ? " 운영자 강점: " + strength : ""}`}
-    ]
-  };
-
   try {
-    const text = await window.saessak.callClaude(prompt, {
-      system: "당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다. 반드시 JSON으로만 응답하고, 마크다운 코드블록(```)은 사용하지 마세요.",
-      max_tokens: 2500,
-      fallback: ""
-    });
-
-    if(!text || text.includes('데모 모드')){
-      renderPlan(fallbackPlan);
-      if(text.includes('데모 모드')){
-        out.insertAdjacentHTML('afterbegin', `<div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">⚠️ Claude API 키 미설정 — 데모 초안으로 표시됩니다.</div>`);
-      }
-      return;
+    if(!window.cowork?.askClaude){
+      const demo = {
+        title: `${item} — ${target} 사업계획서 초안`,
+        chapters: [
+          {h:"1. 문제 정의", body: `${region} 지역의 ${field} 분야는 현재 디지털 전환과 시장 변화로 인해 기존 사업 모델만으로는 한계에 직면해 있습니다. 청년 창업자가 진입하려 해도 정보·네트워크가 부족하여 시행착오 비용이 큽니다.`},
+          {h:"2. 솔루션·핵심 가치", body: `본 사업은 "${item}"을(를) 핵심 솔루션으로 제시합니다. 사용자가 직면한 핵심 페인 포인트를 디지털 기술의 결합으로 해소하며, 기존 대안 대비 명확한 차별점을 제공합니다.`},
+          {h:"3. 시장 분석·타깃", body: `${field} 시장 규모는 국내 약 [추정 규모] 원이며 연 [%] 성장 중입니다. 1차 타깃은 ${region} 거주 [구체 페르소나]이고, 향후 전국으로 확장 가능합니다. 경쟁자는 [경쟁사명] 등이며 본 솔루션은 [차별점]에서 우위를 갖습니다.`},
+          {h:"4. 비즈니스 모델", body: `수익은 [구독료 / 1회 결제 / B2B 라이선스 등] 다축 모델로 구성됩니다. 1년차 목표 매출은 [N]원, 3년차 [N]원이며, 비용 구조는 호스팅·AI API·인건비를 중심으로 마진 [%] 확보가 가능합니다.`},
+          {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 베타 사용자 50명 확보. M+4~M+6: 핵심 기능 고도화 및 첫 매출 발생. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
+          {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [%], (2) 마케팅·사용자 획득 [%], (3) 인프라·운영비 [%], (4) 예비비 [%]로 배분합니다. 자금 집행은 분기별 마일스톤과 연동하여 효율성과 투명성을 동시에 확보합니다.${strength ? " 운영자 강점: " + strength : ""}`}
+        ]
+      };
+      renderPlan(demo); return;
     }
-
+    const resp = await window.cowork.askClaude(prompt, []);
+    const text = typeof resp === "string" ? resp : (resp?.text || JSON.stringify(resp));
     const m = text.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("JSON not found");
     const parsed = JSON.parse(m[0]);
     renderPlan(parsed);
   } catch(e){
     console.error(e);
-    renderPlan(fallbackPlan);
-    out.insertAdjacentHTML('afterbegin', `<div style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">AI 응답 파싱 실패 — 데모 초안으로 표시됩니다.</div>`);
+    out.innerHTML = `<div class="empty-state">생성 실패. 다시 시도해주세요.<br /><small>${e.message||""}</small></div>`;
   } finally {
     btn.disabled = false; btn.textContent = "✨ AI에게 사업계획서 초안 요청";
   }
@@ -1951,17 +1907,13 @@ function updateAuthUI(){
   const area = document.getElementById("auth-area");
   if(!area) return;
   if(u){
-    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
     const tokens = u.tokens != null ? u.tokens : 0;
-    const tokenDisplay = isAdmin ? '∞' : tokens.toLocaleString();
     const sub = u.subscription;
-    const planTag = isAdmin
-      ? '<span class="plan-tag subscriber" style="background:#fde68a;color:#92400e;">ADMIN</span>'
-      : (sub
-        ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
-        : '<span class="plan-tag">FREE</span>');
+    const planTag = sub
+      ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
+      : '<span class="plan-tag">FREE</span>';
     area.innerHTML = `
-      <a class="token-chip" href="#pricing"><span class="ico">蓄</span><span>토큰 ${tokenDisplay}</span></a>
+      <a class="token-chip" href="#pricing"><span class="ico">蓄</span><span>토큰 ${tokens.toLocaleString()}</span></a>
       <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
     `;
   }
@@ -1984,10 +1936,6 @@ function updateUser(updater){
 function spendTokens(amount, memo){
   const u = getCurrentUser();
   if(!u) return { ok: false, reason: "not_logged_in" };
-  // 관리자는 토큰 무제한 — 차감 없이 통과
-  if(window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u)){
-    return { ok: true, balance: Infinity, admin: true };
-  }
   if((u.tokens || 0) < amount) return { ok: false, reason: "insufficient", balance: u.tokens || 0 };
   updateUser(user => {
     user.tokens = (user.tokens || 0) - amount;
@@ -2029,34 +1977,15 @@ function incUsage(kind){
   } catch(e){}
 }
 
-// ===== 공고 데이터 로드 (1차: K-Startup API, 2차: listings.json, 3차: 인라인) =====
+// ===== listings.json 외부 로드 (있으면 덮어씀, 실패 시 인라인 데이터 사용) =====
 async function tryLoadListingsJson(){
-  // 1차 시도: /api/listings (K-Startup 실시간 공고)
-  try {
-    const resp = await fetch("/api/listings", { cache: "default" });
-    if(resp.ok){
-      const data = await resp.json();
-      if(data?.ok && Array.isArray(data.listings) && data.listings.length > 0){
-        LISTINGS = data.listings;
-        console.log(`[K-Startup] ${LISTINGS.length}건 실시간 로드 완료 (${data.updatedAt})`);
-        renderAll();
-        return;
-      } else {
-        console.warn("[K-Startup] API 응답에 listings 없음 또는 ok=false:", data?.error);
-      }
-    }
-  } catch(e){
-    console.warn("[K-Startup] /api/listings 호출 실패:", e.message);
-  }
-
-  // 2차 폴백: static listings.json
   try {
     const resp = await fetch("listings.json", { cache: "no-store" });
     if(!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     if(Array.isArray(data?.listings) && data.listings.length > 0){
       LISTINGS = data.listings;
-      console.log(`[listings.json] ${LISTINGS.length}건 폴백 로드 완료 (v${data._meta?.version || "?"})`);
+      console.log(`[listings.json] ${LISTINGS.length}건 로드 완료 (v${data._meta?.version || "?"})`);
       renderAll();
     }
   } catch(e){

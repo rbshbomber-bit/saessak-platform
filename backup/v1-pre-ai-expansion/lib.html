@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>합격 사업계획서 라이브러리 — 새싹지원사업</title>
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6; --bg-2: #f4f1ea; --card: #ffffff;
+  --ink: #14181f; --ink-2: #3a4250; --ink-3: #6c7280;
+  --line: #e6e3da; --line-2: #d7d3c7;
+  --sage: #8da888; --sage-deep: #5c7a5a; --sage-soft: #d8e3d4;
+  --cream: #f1ead9; --gold: #b9844a;
+  --good: #2f7a3c; --warn: #b45309; --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.nav-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.token-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--sage);
+  color: var(--sage-deep); font-weight: 700; font-size: 12px;
+}
+.token-chip .ico { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 14px; }
+.back { color: var(--ink-2); font-weight: 600; }
+
+.hero-bar {
+  background: linear-gradient(135deg, var(--sage-soft) 0%, var(--cream) 100%);
+  padding: 48px 0 36px;
+}
+.hero-bar h1 {
+  font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px;
+}
+.hero-bar h1 .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  color: var(--sage-deep); font-weight: 500;
+}
+.hero-bar p { color: var(--ink-2); margin: 0; font-size: 15px; }
+.hero-bar .badge {
+  display: inline-block; background: var(--gold); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  margin-bottom: 12px;
+}
+
+.filter-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin: 24px 0;
+}
+.chip {
+  font-size: 13px; font-weight: 500;
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+  color: var(--ink-2); cursor: pointer; transition: all .15s;
+  font-family: inherit;
+}
+.chip:hover { border-color: var(--ink); }
+.chip.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+main { padding: 32px 0 80px; }
+.case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 1000px) { .case-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .case-grid { grid-template-columns: 1fr; } }
+
+.case-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: all .2s; cursor: pointer;
+  position: relative;
+}
+.case-card:hover { border-color: var(--sage); box-shadow: var(--shadow-m); transform: translateY(-2px); }
+.case-card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.tag.field { background: var(--sage-soft); color: var(--sage-deep); }
+.tag.year { background: var(--bg-2); color: var(--ink-2); }
+.tag.passed { background: #ecfdf5; color: var(--good); }
+.case-card h3 { font-size: 16px; font-weight: 700; margin: 4px 0 0; line-height: 1.4; }
+.case-card .sub { font-size: 12px; color: var(--ink-3); }
+.case-card .one-line {
+  font-size: 13px; color: var(--ink-2); line-height: 1.5;
+  background: var(--bg-2); padding: 10px 12px; border-radius: 8px;
+  border-left: 3px solid var(--sage);
+}
+.case-card .money {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px; color: var(--sage-deep);
+  font-weight: 600; font-style: italic;
+}
+.case-card .actions { display: flex; gap: 6px; margin-top: 4px; }
+.btn-mini {
+  font-size: 12px; font-weight: 600;
+  padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-2); cursor: pointer; font-family: inherit;
+  flex: 1; text-align: center;
+}
+.btn-mini.primary { background: var(--ink); color: white; border-color: var(--ink); }
+.btn-mini.primary:hover { background: var(--sage-deep); }
+.btn-mini.unlocked { background: var(--sage); color: white; border-color: var(--sage); }
+
+/* 모달 */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(20,24,31,.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 100; backdrop-filter: blur(4px);
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card); border-radius: 16px;
+  padding: 32px; max-width: 720px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+  box-shadow: var(--shadow-m);
+}
+.modal h2 { margin: 0 0 6px; font-size: 22px; font-weight: 800; }
+.modal .meta { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+.modal h3 {
+  font-size: 14px; font-weight: 800;
+  margin: 18px 0 8px;
+  color: var(--sage-deep);
+  border-bottom: 2px solid var(--sage);
+  padding-bottom: 4px;
+}
+.modal p { font-size: 14px; color: var(--ink-2); line-height: 1.7; margin: 6px 0; }
+.modal .quote-box {
+  background: var(--sage-soft); padding: 14px 18px;
+  border-radius: 10px; border-left: 4px solid var(--sage);
+  font-size: 14px; color: var(--ink-2); margin: 12px 0;
+}
+.modal .footer-note {
+  margin-top: 24px; padding: 12px 14px;
+  background: #fef2f2; border: 1px solid #fecaca;
+  border-radius: 8px; font-size: 12px; color: var(--bad);
+}
+.modal .btn-row { display: flex; gap: 8px; margin-top: 20px; }
+.modal .btn-close {
+  padding: 12px; border-radius: 10px;
+  background: var(--bg-2); color: var(--ink-2);
+  border: 0; font-weight: 600; cursor: pointer; flex: 1;
+  font-family: inherit; font-size: 14px;
+}
+
+/* 토큰 부족 박스 */
+.insufficient {
+  background: var(--sage-soft); border: 1px solid var(--sage);
+  border-radius: 14px; padding: 24px; text-align: center;
+}
+.insufficient h3 {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 24px; color: var(--sage-deep);
+  margin: 0 0 8px; border: none; padding: 0;
+}
+.insufficient p { color: var(--ink-2); font-size: 14px; margin-bottom: 16px; }
+.insufficient a {
+  display: inline-block; padding: 11px 22px;
+  background: var(--ink); color: white;
+  border-radius: 8px; font-weight: 700; font-size: 13px;
+}
+
+footer.site { border-top: 1px solid var(--line); padding: 32px 0; font-size: 12px; color: var(--ink-3); margin-top: 80px; }
+footer.site .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="logo-img"></span>
+      <span class="name"><span class="accent">새싹</span>지원사업</span>
+    </a>
+    <div class="nav-right">
+      <a class="token-chip" href="index.html#pricing" id="token-display"><span class="ico">蓄</span><span>토큰 -</span></a>
+      <a class="back" href="index.html">← 메인</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero-bar">
+  <div class="container">
+    <span class="badge">⭐ PREMIUM 콘텐츠 · 1건 열람 10 토큰</span>
+    <h1><span class="han">合格</span> 합격 사업계획서 라이브러리</h1>
+    <p>실제 통과한 청년창업 사업계획서 12건 핵심 발췌 — 익명화·동의 받은 본인 작성 사례만.</p>
+  </div>
+</section>
+
+<main>
+  <div class="container">
+    <div class="filter-row">
+      <button class="chip active" data-field="all">전체</button>
+      <button class="chip" data-field="딥테크·AI">딥테크·AI</button>
+      <button class="chip" data-field="웰니스·헬스케어">웰니스·헬스케어</button>
+      <button class="chip" data-field="커머스·로컬">커머스·로컬</button>
+      <button class="chip" data-field="농업·푸드">농업·푸드</button>
+      <span style="margin-left:auto;font-size:13px;color:var(--ink-3);align-self:center;" id="count">12개 사례</span>
+    </div>
+
+    <div class="case-grid" id="grid"></div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="container">
+    <div>© 2026 새싹지원사업 · 합격 사례는 본인 동의 후 익명화 게재</div>
+    <div>
+      <a href="terms.html">이용약관</a> ·
+      <a href="terms.html#ai-disclaimer">AI 면책</a> ·
+      <a href="index.html#pricing">요금</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ===== 사용자/토큰 시스템 =====
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+const UNLOCK_KEY = "saessak_unlocked_cases";
+
+function getCurrentUser(){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]").find(u => u.id === id) || null; } catch(e){ return null; }
+}
+function updateUser(updater){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try {
+    const users = JSON.parse(localStorage.getItem(USER_KEY) || "[]");
+    const idx = users.findIndex(x => x.id === id);
+    if(idx === -1) return null;
+    users[idx] = updater(users[idx]) || users[idx];
+    localStorage.setItem(USER_KEY, JSON.stringify(users));
+    return users[idx];
+  } catch(e){ return null; }
+}
+function getUnlocked(){
+  try { return JSON.parse(localStorage.getItem(UNLOCK_KEY) || "[]"); } catch(e){ return []; }
+}
+function addUnlocked(id){
+  const cur = getUnlocked();
+  if(!cur.includes(id)) {
+    cur.push(id);
+    localStorage.setItem(UNLOCK_KEY, JSON.stringify(cur));
+  }
+}
+function refreshTokenDisplay(){
+  const u = getCurrentUser();
+  const el = document.getElementById("token-display");
+  if(!el) return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const display = isAdmin ? '∞' : (u.tokens||0).toLocaleString();
+    el.querySelector("span:last-child").textContent = `토큰 ${display}`;
+  } else {
+    el.querySelector("span:last-child").textContent = "로그인";
+  }
+}
+
+// ===== 합격 사례 12건 (익명화) =====
+const CASES = [
+  { id:"c1", field:"딥테크·AI", title:"B2B SaaS — 직장인 1:1 멘토 매칭 AI 플랫폼",
+    program:"예비창업패키지 2025", year:2025, money:"1억", region:"서울",
+    excerpt:"5년 직장 경력 후 첫 창업. 매칭 알고리즘 정확도 +28%p 향상 데이터 제시.",
+    chapters: {
+      "문제 정의": "직장인 멘토 매칭 시장은 연 3,000억 규모지만, 기존 서비스는 단순 게시판 형태로 매칭 정확도가 낮음. 사용자 페인 포인트는 1) 적합 멘토 탐색 2~3주 소요 2) 멘토 검증 부재 3) 결과 추적 불가.",
+      "솔루션": "직무·경력·관심 분야 데이터를 임베딩 기반으로 분석, 후보 멘토를 자동 매칭. 멘토 검증 시스템(전 직장 인증 + 추천서)으로 신뢰성 확보. 매칭 후 90일 추적으로 만족도 측정.",
+      "차별성": "기존 멘토 매칭 서비스 대비 매칭 정확도 +28%p, 매칭 시간 2주→3분. 도메인 특화(IT·금융·바이오) 멘토 풀 확보.",
+      "BM": "B2C 멘티 결제 (1회 15만) + B2B 기업 라이선스 (연 1,200만/팀). 1년차 매출 8,000만 달성.",
+      "심사 피드백 (운영자 추정)": "구체적 페인 포인트 + 정량 데이터(28%p) + 시제품 작동 사진 첨부가 결정적이었음."
+    }
+  },
+  { id:"c2", field:"웰니스·헬스케어", title:"시니어 복약관리 AI 챗봇 (약국 연계)",
+    program:"딥테크 창업패키지 — 헬스케어", year:2025, money:"2.5억", region:"부산",
+    excerpt:"약사 5년 경력 + 베타 사용자 200명 확보. 시니어 복약 순응도 +35% 개선 데이터.",
+    chapters: {
+      "문제 정의": "65세 이상 시니어의 복약 누락률 평균 28%. 다제 복용(5종 이상) 시 부작용 위험 ↑. 기존 약통·앱은 직관적이지 않아 시니어 채택률 저조.",
+      "솔루션": "음성 기반 복약 알림 + 약 사진 인식 + 약국 자동 연동. 시니어 친화 UI(큰 글자, 단순 인터페이스). 보호자 알림 동시 발송.",
+      "차별성": "약사 자격 보유 운영자 + 전국 200개 약국 협력 MOU. 식약처 의료기기 비등록 SaaS로 빠른 출시 가능.",
+      "BM": "약국 라이선스 (월 5만) + 보호자 프리미엄 구독 (월 9,900원). 1년차 약국 100곳 확보 목표.",
+      "심사 피드백 (운영자 추정)": "도메인 전문성(약사) + 베타 사용자 데이터(200명) + 사회 기여(시니어 안전) 3박자."
+    }
+  },
+  { id:"c3", field:"커머스·로컬", title:"로컬 농산물 D2C 큐레이션 마켓",
+    program:"인천 로컬크리에이터 양성", year:2024, money:"3,000만",
+    region:"인천", excerpt:"강화·옹진 농가 12곳과 직거래. 도시 청년 정기 구독 모델.",
+    chapters: {
+      "문제 정의": "수도권 청년이 신선한 지역 농산물에 접근하기 어려움. 농가는 유통 마진(40%+)에 시달림. 양쪽 모두 손해 보는 구조.",
+      "솔루션": "강화·옹진 농가 직거래 + 큐레이션 박스 월 정기 구독. 농가는 가격 결정권 회복, 청년은 신선·로컬·스토리.",
+      "차별성": "운영자가 강화 거주, 농가 직접 방문 큐레이션. 도서지역 특화 (강화·옹진) 1호 서비스.",
+      "BM": "구독 월 39,000원 × 500명 = 월 매출 1,950만 목표 (1년차).",
+      "심사 피드백 (운영자 추정)": "지역 청년 운영자 + 농가 12곳 사전 확보 + 도서지역 우대 가산점."
+    }
+  },
+  { id:"c4", field:"농업·푸드", title:"강화 청년농업인 영농 정착 (영농경력 2년차)",
+    program:"강화군 청년농업인 영농정착 지원", year:2024, money:"월 110만 × 3년",
+    region:"강화", excerpt:"인삼·약초 특화 + 가공품 개발 연계. 1만 평 임대 영농.",
+    chapters: {
+      "문제 정의": "강화 인삼·약초 농가의 평균 연령 65세. 후계 농업인 부재로 지역 농업 기반 흔들림.",
+      "솔루션": "도시 청년이 강화 정착하여 인삼·약초 영농 + 가공품(인삼 진액·차) D2C 판매까지. 농업 + 가공 + 직판 통합.",
+      "차별성": "단순 영농이 아닌 6차 산업 (생산+가공+체험) 통합. 강화 지역 가산점 + 영농 2년 경력 보유.",
+      "BM": "정착 지원금 + 인삼 진액 직판 (연 매출 3,000만 목표). 4년차부터 흑자 전환.",
+      "심사 피드백 (운영자 추정)": "현장 영농 경력 2년 + 강화 거주 + 6차 산업 계획서가 강점."
+    }
+  },
+  { id:"c5", field:"딥테크·AI", title:"교육 콘텐츠 자동 생성 SaaS",
+    program:"청년창업사관학교 16기", year:2024, money:"1억 + 1년 입주",
+    region:"전국 (대전 거점)", excerpt:"교사 1만 명 베타 + LLM 파인튜닝 자체 데이터셋.",
+    chapters: {
+      "문제 정의": "초중고 교사 1인당 수업 준비에 주 평균 15시간. 그중 콘텐츠 검색·재구성에 8시간.",
+      "솔루션": "교과 과정 매핑 + LLM 기반 수업 자료 자동 생성. 교사가 검토·편집만 하면 됨.",
+      "차별성": "교육부 교과 과정 데이터 풀 확보 + 교사 1만 명 베타 풀.",
+      "BM": "학교 라이선스 (연 500만 × 학급 수). 1년차 100개 학교 목표.",
+      "심사 피드백 (운영자 추정)": "교사 사용자 풀 + 교육부 협력 가능성 + 비즈니스 모델 구체성."
+    }
+  },
+  { id:"c6", field:"커머스·로컬", title:"제주 청년 게스트하우스 + 워케이션 패키지",
+    program:"제주 청년창업가 발굴·육성", year:2024, money:"3,000만",
+    region:"제주", excerpt:"제주 정착 3년차 + 누적 게스트 1,200명 데이터.",
+    chapters: {
+      "문제 정의": "원격 근무 직장인의 워케이션 수요 ↑, but 제주 숙박은 단순 게스트하우스에 그침. 업무·휴식 통합 환경 부재.",
+      "솔루션": "코워킹 공간 + 침실 통합 게스트하우스 운영. 주간 단위 워케이션 패키지 (식사·관광·교통 포함).",
+      "차별성": "제주 3년 운영 경력 + 누적 1,200명 데이터 (재방문율 32%).",
+      "BM": "패키지 주당 60만 원 × 평균 80% 점유. 연 매출 8,000만 안정 운영.",
+      "심사 피드백 (운영자 추정)": "운영 데이터 + 제주 지역 가산점 + 청년창업 우대."
+    }
+  },
+  { id:"c7", field:"웰니스·헬스케어", title:"청년 정신 건강 AI 멘토",
+    program:"예비창업패키지", year:2025, money:"7,000만",
+    region:"서울", excerpt:"임상심리사 자문 + 익명 데이터 수집 동의 기반.",
+    chapters: {
+      "문제 정의": "20~30대 청년 우울감 호소 비율 35%. 정신과 진료 진입 장벽 높음.",
+      "솔루션": "AI 기반 1차 정서 케어 + 임상심리사 연계. 익명·암호화 데이터 수집.",
+      "차별성": "임상심리사 자문단 + GDPR/한국 개인정보법 준수 설계 + 익명 동의 명확.",
+      "BM": "월 구독 9,900원 (CBT 기반 자가 학습) + 임상심리 연계 시 수수료 30%.",
+      "심사 피드백 (운영자 추정)": "사회 기여 + 임상 자문 + 데이터 윤리 설계."
+    }
+  },
+  { id:"c8", field:"딥테크·AI", title:"음성 인식 콜센터 품질 관리 AI",
+    program:"초기창업패키지 (AI 특화)", year:2024, money:"1억",
+    region:"대전", excerpt:"콜센터 3사 PoC 완료 + 평균 응대 품질 +22% 개선.",
+    chapters: {
+      "문제 정의": "콜센터 1만 통화 중 사람 QA가 검토 가능한 건 100통화 미만. 품질 사각지대 ↑.",
+      "솔루션": "음성→텍스트→감정·키워드 분석 자동화. QA 매니저는 위험 통화만 우선 검토.",
+      "차별성": "콜센터 3사 PoC 데이터 + 한국어 특화 ASR 모델 자체 보유.",
+      "BM": "기업당 연 1,200만 라이선스 × 10개사 = 1.2억 (1년차).",
+      "심사 피드백 (운영자 추정)": "PoC 3건 + 실 데이터 22% 개선 + 명확한 B2B 모델."
+    }
+  },
+  { id:"c9", field:"커머스·로컬", title:"전남 도서지역 청년 e-커머스 셀러 양성",
+    program:"전남 청년창업 활성화", year:2025, money:"2,500만",
+    region:"전남", excerpt:"전남 청년 30명 셀러 교육 + 누적 거래액 5,000만.",
+    chapters: {
+      "문제 정의": "전남 도서·산간 청년의 디지털 셀러 진입 장벽. 교육·물류 인프라 부재.",
+      "솔루션": "온라인 셀러 교육 + 공동 물류 거점 + 마케팅 지원. 청년 셀러 인큐베이팅.",
+      "차별성": "전남 5개 도서지역 청년 직접 모집 + 운영자가 e커머스 7년 경력.",
+      "BM": "셀러 거래액 수수료 10% + 교육 패키지 30만 원/명.",
+      "심사 피드백 (운영자 추정)": "지역 청년 직접 발굴 + 실제 거래액 데이터 + 도서지역 우대."
+    }
+  },
+  { id:"c10", field:"농업·푸드", title:"도시→농촌 이주 청년 가공식품 브랜드",
+    program:"농촌융복합산업 청년창업가 육성", year:2024, money:"5,000만 + 컨설팅",
+    region:"강원", excerpt:"도시 13년 경력 → 강원 정착 1년차 + 자체 가공시설 확보.",
+    chapters: {
+      "문제 정의": "도시 청년이 농촌 이주 시 영농 + 마케팅 둘 다 부담. 가공식품 진입은 더 어려움.",
+      "솔루션": "강원 산촌 농산물 직접 가공 (말린 곤드레·산나물 차) + D2C 브랜드 운영.",
+      "차별성": "도시 마케팅 경력 13년 + 강원 정착 1년 + 자체 가공시설 확보.",
+      "BM": "온라인 D2C + 카페·호텔 B2B 납품. 연 매출 8,000만 목표.",
+      "심사 피드백 (운영자 추정)": "도시 마케팅 역량 + 농촌 정착 의지 + 가공시설 자산."
+    }
+  },
+  { id:"c11", field:"웰니스·헬스케어", title:"홈 PT 영상 + 트레이너 매칭 플랫폼",
+    program:"청년창업사관학교 17기 (예정)", year:2025, money:"신청 진행 중",
+    region:"서울", excerpt:"트레이너 자격 + 베타 사용자 500명.",
+    chapters: {
+      "문제 정의": "헬스장 비용·시간 부담 → 홈 PT 수요 ↑. 그러나 영상만으로는 동기 부여 부족.",
+      "솔루션": "AI 자세 인식 + 라이브 트레이너 1:1 매칭 (월 1회 30분).",
+      "차별성": "트레이너 자격증 + 베타 사용자 500명 데이터 + AI 자세 인식 정확도 92%.",
+      "BM": "월 구독 19,900원. 1년차 1,000명 목표.",
+      "심사 피드백 (운영자 추정)": "Working prototype + 정확도 데이터 + 명확한 페르소나."
+    }
+  },
+  { id:"c12", field:"딥테크·AI", title:"한국어 법률 문서 검토 AI",
+    program:"초기창업패키지", year:2024, money:"8,500만",
+    region:"서울", excerpt:"변호사 자문단 + 법무법인 3곳 PoC.",
+    chapters: {
+      "문제 정의": "중소기업 계약서 검토 외주비 평균 30만/건. 영세 기업은 무검토 계약 비율 60%.",
+      "솔루션": "한국어 법률 LLM 파인튜닝 + 변호사 검토 워크플로우. 1차 AI 검토 + 2차 변호사 확인.",
+      "차별성": "변호사 자문단 5명 + 법무법인 3곳 PoC + 한국어 법률 데이터셋 자체 보유.",
+      "BM": "계약서 검토 1건 5만 (AI만) / 15만 (변호사 확인). 중소기업 타깃.",
+      "심사 피드백 (운영자 추정)": "변호사 네트워크 + 한국어 데이터 + 시장 페인 명확."
+    }
+  },
+];
+
+// 렌더링
+let currentFilter = "all";
+function renderGrid(){
+  const grid = document.getElementById("grid");
+  const filtered = currentFilter === "all" ? CASES : CASES.filter(c => c.field === currentFilter);
+  const unlocked = getUnlocked();
+  document.getElementById("count").textContent = `${filtered.length}개 사례`;
+  grid.innerHTML = filtered.map(c => {
+    const isUnlocked = unlocked.includes(c.id);
+    return `
+      <div class="case-card" data-id="${c.id}">
+        <div class="tags">
+          <span class="tag field">${c.field}</span>
+          <span class="tag year">${c.year}년</span>
+          <span class="tag passed">✓ 합격</span>
+        </div>
+        <h3>${c.title}</h3>
+        <div class="sub">${c.program} · ${c.region}</div>
+        <div class="money">${c.money}</div>
+        <div class="one-line">${c.excerpt}</div>
+        <div class="actions">
+          <button class="btn-mini ${isUnlocked ? 'unlocked' : 'primary'}" data-action="open">
+            ${isUnlocked ? '✓ 열람한 사례' : '🔓 10 토큰으로 열람'}
+          </button>
+        </div>
+      </div>`;
+  }).join("");
+  grid.querySelectorAll(".case-card").forEach(card => {
+    card.addEventListener("click", () => openCase(card.dataset.id));
+  });
+}
+
+function openCase(id){
+  const c = CASES.find(x => x.id === id);
+  if(!c) return;
+  const unlocked = getUnlocked();
+  const isUnlocked = unlocked.includes(id);
+  const u = getCurrentUser();
+  const COST = 10;
+
+  if(!isUnlocked){
+    if(!u){
+      if(confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")){
+        location.href = "auth.html";
+      }
+      return;
+    }
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+
+    if(!isAdmin){
+      if((u.tokens || 0) < COST){
+        showInsufficient();
+        return;
+      }
+      if(!confirm(`이 사례 열람에 ${COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - COST}\n진행하시겠습니까?`)) return;
+
+      updateUser(user => {
+        user.tokens = (user.tokens || 0) - COST;
+        if(!user.tokenLog) user.tokenLog = [];
+        user.tokenLog.unshift({
+          ts: new Date().toISOString(),
+          kind: "spend", amount: -COST, balance: user.tokens,
+          memo: `합격 사례 열람: ${c.title.slice(0,30)}`
+        });
+        return user;
+      });
+    } else {
+      console.log('[saessak] 관리자 모드 — 사례 무료 열람');
+    }
+    addUnlocked(id);
+    refreshTokenDisplay();
+  }
+  showCase(c);
+  renderGrid();
+}
+
+function showCase(c){
+  const m = document.getElementById("modal-content");
+  const chapters = Object.entries(c.chapters).map(([h, body]) =>
+    `<h3>${h}</h3><p>${body}</p>`).join("");
+  m.innerHTML = `
+    <div class="meta">${c.program} · ${c.year}년 · ${c.region} · 합격금액 ${c.money}</div>
+    <h2>${c.title}</h2>
+    <div class="quote-box">${c.excerpt}</div>
+    ${chapters}
+    <div class="footer-note">
+      ⚠️ 본 사례는 합격자 본인 동의 후 익명화·핵심 발췌한 자료입니다.
+      신청자가 그대로 표절·복제하여 제출하는 행위는 금지됩니다.
+      자기 사업·자기 데이터로 재구성하여 참고용으로만 활용하세요.
+    </div>
+    <div class="btn-row">
+      <button class="btn-close" onclick="closeModal()">닫기</button>
+    </div>`;
+  document.getElementById("modal-overlay").classList.add("open");
+}
+
+function showInsufficient(){
+  const m = document.getElementById("modal-content");
+  const u = getCurrentUser();
+  m.innerHTML = `
+    <div class="insufficient">
+      <h3>蓄 토큰 부족</h3>
+      <p>이 합격 사례 열람에 <b style="color:var(--sage-deep);">10 토큰</b>이 필요합니다.<br />
+      현재 잔액: <b style="color:var(--sage-deep);">${u?.tokens || 0} 토큰</b></p>
+      <a href="index.html#pricing">토큰 충전하기 →</a>
+      <div style="margin-top:16px;"><button class="btn-close" onclick="closeModal()">닫기</button></div>
+    </div>`;
+  document.getElementById("modal-overlay").classList.add("open");
+}
+
+function closeModal(){ document.getElementById("modal-overlay").classList.remove("open"); }
+document.getElementById("modal-overlay").addEventListener("click", e => {
+  if(e.target.id === "modal-overlay") closeModal();
+});
+
+// 필터
+document.querySelectorAll(".chip[data-field]").forEach(c => {
+  c.addEventListener("click", () => {
+    document.querySelectorAll(".chip[data-field]").forEach(x => x.classList.remove("active"));
+    c.classList.add("active");
+    currentFilter = c.dataset.field;
+    renderGrid();
+  });
+});
+
+refreshTokenDisplay();
+renderGrid();
+</script>
+</body>
+</html>

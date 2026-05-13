@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>마이페이지 — 새싹지원사업</title>
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6;
+  --bg-2: #f4f1ea;
+  --card: #ffffff;
+  --ink: #14181f;
+  --ink-2: #3a4250;
+  --ink-3: #6c7280;
+  --line: #e6e3da;
+  --line-2: #d7d3c7;
+  --sage: #8da888;
+  --sage-deep: #5c7a5a;
+  --sage-soft: #d8e3d4;
+  --cream: #f1ead9;
+  --premium: #b9844a;
+  --good: #2f7a3c;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06), 0 12px 32px rgba(20,24,31,.05);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.nav-right { display: flex; gap: 14px; align-items: center; font-size: 14px; }
+.nav-right a { color: var(--ink-2); }
+.nav-right a:hover { color: var(--ink); }
+.logout {
+  padding: 8px 14px; border-radius: 8px;
+  background: var(--bg-2); color: var(--ink-2);
+  font-weight: 600; font-size: 13px; border: 0;
+  cursor: pointer; font-family: inherit;
+}
+.logout:hover { background: var(--line); }
+
+main { padding: 48px 0 80px; }
+.greeting { margin-bottom: 36px; }
+.greeting h1 { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; }
+.greeting p { color: var(--ink-3); margin: 0; }
+
+.grid-2 {
+  display: grid; grid-template-columns: 5fr 7fr; gap: 24px;
+}
+@media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-s);
+}
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
+.card-head .more { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+
+/* 프로필 카드 */
+.profile-info { display: flex; flex-direction: column; gap: 12px; }
+.profile-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.profile-row:last-child { border-bottom: 0; }
+.profile-row .k { font-size: 13px; color: var(--ink-3); font-weight: 600; }
+.profile-row .v { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+.plan-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+}
+.plan-badge.free { background: var(--bg-2); color: var(--ink-2); }
+.plan-badge.premium { background: linear-gradient(135deg, var(--premium), #d4a064); color: white; }
+.plan-badge.enterprise { background: var(--ink); color: white; }
+
+.upgrade-banner {
+  margin-top: 16px;
+  background: linear-gradient(135deg, var(--premium), #d4a064);
+  color: white; padding: 16px 20px;
+  border-radius: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.upgrade-banner h3 { margin: 0 0 4px; font-size: 15px; font-weight: 800; }
+.upgrade-banner p { margin: 0; font-size: 12px; opacity: .9; }
+.upgrade-banner button {
+  padding: 9px 16px; border-radius: 8px;
+  background: white; color: var(--premium);
+  font-weight: 700; font-size: 13px;
+  border: 0; cursor: pointer; font-family: inherit;
+}
+
+/* 사용량 박스 */
+.usage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.usage-box {
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px;
+}
+.usage-box .lbl { font-size: 12px; color: var(--ink-3); font-weight: 600; margin-bottom: 8px; }
+.usage-box .val { font-size: 24px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+.usage-box .sub { font-size: 11px; color: var(--ink-3); }
+.usage-bar {
+  margin-top: 10px;
+  height: 6px; background: var(--bg-2); border-radius: 999px; overflow: hidden;
+}
+.usage-bar .fill { height: 100%; background: var(--sage); border-radius: 999px; transition: width .3s; }
+.usage-bar .fill.warn { background: var(--warn); }
+.usage-bar .fill.full { background: var(--bad); }
+
+/* 트래커 */
+.tracker-empty {
+  text-align: center; padding: 40px 16px;
+  color: var(--ink-3); font-size: 14px;
+  border: 2px dashed var(--line); border-radius: 12px;
+}
+.tracker-empty a {
+  color: var(--sage-deep); font-weight: 600;
+  text-decoration: underline;
+}
+
+.tracker-list { display: flex; flex-direction: column; gap: 10px; }
+.tracker-item {
+  display: grid; grid-template-columns: 1fr auto; gap: 16px;
+  padding: 14px 16px;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.tracker-item .title { font-size: 14px; font-weight: 700; margin: 0 0 4px; line-height: 1.4; }
+.tracker-item .meta { font-size: 12px; color: var(--ink-3); }
+.tracker-item .right { text-align: right; min-width: 80px; }
+.stage-tag {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 6px;
+  background: var(--sage-soft); color: var(--sage-deep);
+}
+.stage-tag.passed { background: #ecfdf5; color: var(--good); }
+.stage-tag.rejected { background: #fef2f2; color: var(--bad); }
+.stage-tag.submitted, .stage-tag.waiting { background: #fffbeb; color: var(--warn); }
+.ddl-small { font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+
+/* 빠른 액션 */
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.quick-btn {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px; border-radius: 12px;
+  background: var(--bg); border: 1px solid var(--line);
+  text-align: left; cursor: pointer; font-family: inherit;
+  transition: all .15s;
+}
+.quick-btn:hover { border-color: var(--sage); transform: translateY(-1px); }
+.quick-btn .ico { font-size: 22px; margin-bottom: 4px; }
+.quick-btn .t { font-weight: 700; font-size: 14px; }
+.quick-btn .s { font-size: 12px; color: var(--ink-3); }
+
+footer.site { border-top: 1px solid var(--line); padding: 32px 0; font-size: 12px; color: var(--ink-3); margin-top: 80px; }
+footer.site .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="logo-img"></span>
+      <span class="name"><span class="accent">새싹</span>지원사업</span>
+    </a>
+    <div class="nav-right">
+      <a href="index.html">메인</a>
+      <a href="index.html#listings">공고</a>
+      <a href="index.html#ai-matching">AI 매칭</a>
+      <button class="logout" id="logout-btn">로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="greeting">
+      <h1 id="hello">안녕하세요!</h1>
+      <p id="hello-sub">오늘은 어떤 청년창업 사업을 검토하시나요?</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- 좌측: 프로필 + 사용량 -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-head">
+            <h2>내 프로필</h2>
+            <span class="more" id="plan-badge"></span>
+          </div>
+          <div class="profile-info" id="profile-info"></div>
+
+          <div class="upgrade-banner" id="upgrade-banner" style="display:none;">
+            <div>
+              <h3>⭐ Premium 업그레이드</h3>
+              <p>사업계획서 AI 무제한 + 카톡 알림 + 1:1 컨설팅</p>
+            </div>
+            <button onclick="location.href='index.html#pricing'">월 9,900원</button>
+          </div>
+        </div>
+
+        <!-- 토큰 잔액 카드 (라이트, sage 액센트) -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600&display=swap">
+        <div class="card" style="margin-bottom:16px;background:var(--sage-soft);border-color:var(--sage);">
+          <div class="card-head">
+            <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:18px;color:var(--sage-deep);">蓄 내 토큰</h2>
+            <a class="more" href="index.html#pricing" style="color:var(--sage-deep);">충전하기 →</a>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:48px;color:var(--sage-deep);font-weight:500;letter-spacing:-.02em;line-height:1;" id="token-balance">0</div>
+          <div style="font-size:12px;color:var(--sage-deep);margin-top:6px;opacity:.8;" id="token-sub">사업계획서 AI 1회 = 20 토큰</div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--sage);font-size:12px;color:var(--ink-2);" id="sub-status">현재 구독 없음 — 단건 충전만 가능</div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-head">
+            <h2>이번 달 활동</h2>
+            <span class="more">사용 내역</span>
+          </div>
+          <div class="usage-grid">
+            <div class="usage-box">
+              <div class="lbl">AI 매칭 (무료)</div>
+              <div class="val" id="u-match-val">0</div>
+              <div class="sub">완전 무료</div>
+            </div>
+            <div class="usage-box">
+              <div class="lbl">사업계획서 AI</div>
+              <div class="val" id="u-plan-val">0</div>
+              <div class="sub" id="u-plan-sub">총 사용</div>
+            </div>
+          </div>
+          <div id="token-log" style="margin-top:16px;font-size:12px;color:var(--ink-3);"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>빠른 액션</h2></div>
+          <div class="quick-actions">
+            <button class="quick-btn" onclick="location.href='index.html#ai-matching'">
+              <span class="ico">✨</span>
+              <span class="t">AI 매칭 받기</span>
+              <span class="s">내 조건에 맞는 공고</span>
+            </button>
+            <button class="quick-btn" onclick="location.href='index.html#ai-planner'">
+              <span class="ico">📝</span>
+              <span class="t">사업계획서 AI</span>
+              <span class="s">초안 5분 생성</span>
+            </button>
+            <button class="quick-btn" onclick="location.href='index.html#listings'">
+              <span class="ico">📋</span>
+              <span class="t">공고 둘러보기</span>
+              <span class="s">전국 13개</span>
+            </button>
+            <button class="quick-btn" onclick="location.href='index.html#pricing'">
+              <span class="ico">⭐</span>
+              <span class="t">프리미엄</span>
+              <span class="s">월 9,900원</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측: 트래커 -->
+      <div>
+        <div class="card">
+          <div class="card-head">
+            <h2>내 신청 트래커</h2>
+            <a class="more" href="index.html#tracker">트래커 화면 →</a>
+          </div>
+          <div id="tracker-list"></div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div class="card-head">
+            <h2>최근 AI 매칭 기록</h2>
+          </div>
+          <div id="match-history"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="container row">
+    <div>© 2026 새싹지원사업 · 전국 17개 시도 청년창업 통합 플랫폼</div>
+    <div>
+      <a href="index.html#about">소개</a> ·
+      <a href="index.html#pricing">요금</a> ·
+      <a href="b2b-demo.html">지자체 데모</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+const TRACKER_KEY = "saessak_v3_national";
+
+function getUsers(){ try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]"); } catch(e){ return []; } }
+function getCurrentUser(){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  return getUsers().find(u => u.id === id) || null;
+}
+
+const user = getCurrentUser();
+if(!user){
+  alert("로그인이 필요합니다");
+  location.href = "auth.html";
+}
+
+// 인사
+document.getElementById("hello").textContent = `안녕하세요, ${user.name}님!`;
+const planLabel = { free:"Free", premium:"Premium", enterprise:"Enterprise" }[user.plan] || "Free";
+document.getElementById("hello-sub").textContent =
+  `현재 ${planLabel} 플랜 · ${user.region} · 관심 분야: ${user.field}`;
+
+// 프로필 정보
+const joinDate = new Date(user.joinedAt).toLocaleDateString("ko-KR");
+document.getElementById("profile-info").innerHTML = `
+  <div class="profile-row"><span class="k">이름</span><span class="v">${user.name}</span></div>
+  <div class="profile-row"><span class="k">이메일</span><span class="v">${user.email}</span></div>
+  <div class="profile-row"><span class="k">지역</span><span class="v">${user.region}</span></div>
+  <div class="profile-row"><span class="k">분야</span><span class="v">${user.field}</span></div>
+  ${user.age ? `<div class="profile-row"><span class="k">나이</span><span class="v">${user.age}세</span></div>` : ""}
+  <div class="profile-row"><span class="k">가입일</span><span class="v">${joinDate}</span></div>
+`;
+
+// 플랜 배지
+const planBadge = document.getElementById("plan-badge");
+planBadge.className = `plan-badge ${user.plan}`;
+planBadge.textContent = planLabel + " 플랜";
+
+// 업그레이드 배너 (Free 한정)
+if(user.plan === "free"){
+  document.getElementById("upgrade-banner").style.display = "flex";
+}
+
+// 사용량
+const usage = user.usage || { matches: 0, plans: 0 };
+document.getElementById("u-match-val").textContent = usage.matches;
+document.getElementById("u-plan-val").textContent = usage.plans;
+
+// 토큰 잔액
+const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(user);
+const tokens = user.tokens != null ? user.tokens : 0;
+document.getElementById("token-balance").textContent = isAdmin ? '∞' : tokens.toLocaleString();
+if(isAdmin){
+  document.getElementById("token-sub").textContent =
+    `👑 관리자 모드 · 모든 AI 기능 무제한 사용`;
+} else {
+  const plansPossible = Math.floor(tokens / 20);
+  document.getElementById("token-sub").textContent =
+    `사업계획서 AI ${plansPossible}회 분 · 1회 = 20 토큰`;
+}
+
+// 구독 상태
+const sub = user.subscription;
+const subEl = document.getElementById("sub-status");
+const SUB_LABEL = { light:"Light 流", "standard-sub":"Standard 河", "premium-sub":"Premium 海" };
+if(sub){
+  const next = new Date(sub.renewsAt).toLocaleDateString("ko-KR");
+  subEl.innerHTML = `구독 중: <b style="color:var(--sage-deep);">${SUB_LABEL[sub.plan] || sub.plan}</b> · 다음 결제 ${next} · 매달 ${sub.monthlyTokens.toLocaleString()} 토큰`;
+} else {
+  subEl.textContent = "현재 구독 없음 — 단건 충전만 가능";
+}
+
+// 토큰 사용 내역 (최근 5건)
+const log = user.tokenLog || [];
+const logEl = document.getElementById("token-log");
+if(log.length > 0){
+  logEl.innerHTML = `<b style="color:var(--ink);">최근 토큰 내역</b><br />` + log.slice(0,5).map(e => {
+    const date = new Date(e.ts).toLocaleString("ko-KR", {month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
+    const sign = e.amount > 0 ? "+" : "";
+    const color = e.amount > 0 ? "var(--good)" : "var(--bad)";
+    return `<div style="padding:4px 0;border-bottom:1px solid var(--line);"><span style="color:${color};font-weight:700;">${sign}${e.amount}</span> · ${e.memo} <span style="color:var(--ink-3);float:right;">${date}</span></div>`;
+  }).join("");
+}
+
+// 트래커
+const TODAY = new Date("2026-05-12");
+function daysLeft(s){ return Math.ceil((new Date(s) - TODAY)/(1000*60*60*24)); }
+function ddlLbl(d){ if(d<0) return "마감"; if(d===0) return "오늘"; return "D-"+d; }
+const STAGE_LABEL = { interest:"관심", preparing:"준비중", submitted:"제출", waiting:"결과대기", passed:"통과", rejected:"탈락" };
+
+let tracker = {};
+try { const d = JSON.parse(localStorage.getItem(TRACKER_KEY) || "{}"); tracker = d.saved || {}; } catch(e){}
+const trackerList = document.getElementById("tracker-list");
+const trackerIds = Object.keys(tracker);
+if(trackerIds.length === 0){
+  trackerList.innerHTML = `<div class="tracker-empty">
+    아직 저장한 공고가 없어요.<br />
+    <a href="index.html#listings">공고 보러 가기</a></div>`;
+} else {
+  // 매핑 위해 공고 정보 빠르게 (간단 inline)
+  const TITLES = {
+    "nat-pre-pkg": "예비창업패키지 2026",
+    "nat-early-pkg": "초기창업패키지 2026 (AI 특화)",
+    "nat-cys-school": "청년창업사관학교 17기",
+    "nat-wellness-deeptech": "딥테크 창업패키지 — 헬스케어·웰니스",
+    "nat-agri-conv": "농촌융복합산업 청년창업가 육성",
+    "nat-rural-relocation": "청년농촌 정착지원 + 창업자금",
+    "seoul-1000": "서울 청년창업 1000 프로젝트",
+    "gyeonggi-growth": "경기도 청년기업 성장지원",
+    "incheon-school": "인천 청년창업사관학교 (15기)",
+    "busan-pkg": "부산 청년창업 패키지 2026",
+    "jeonnam-startup": "전남 청년창업 활성화 지원",
+    "daejeon-deep": "대전 청년 딥테크 창업지원",
+    "jeju-startup": "제주 청년창업가 발굴·육성"
+  };
+  const DEADLINES = {
+    "nat-pre-pkg":"2026-06-25","nat-early-pkg":"2026-07-05","nat-cys-school":"2026-06-15",
+    "nat-wellness-deeptech":"2026-08-20","nat-agri-conv":"2026-07-31","nat-rural-relocation":"2026-09-10",
+    "seoul-1000":"2026-06-20","gyeonggi-growth":"2026-07-10","incheon-school":"2026-06-10",
+    "busan-pkg":"2026-07-15","jeonnam-startup":"2026-08-05","daejeon-deep":"2026-06-28","jeju-startup":"2026-07-25"
+  };
+  const items = trackerIds.filter(id => TITLES[id]).map(id => ({
+    id, title: TITLES[id], deadline: DEADLINES[id], stage: tracker[id].stage
+  })).sort((a,b)=> new Date(a.deadline) - new Date(b.deadline));
+  trackerList.innerHTML = `<div class="tracker-list">${items.map(it => `
+    <div class="tracker-item">
+      <div>
+        <div class="title">${it.title}</div>
+        <div class="meta">마감 ${it.deadline}</div>
+      </div>
+      <div class="right">
+        <span class="stage-tag ${it.stage}">${STAGE_LABEL[it.stage] || it.stage}</span>
+        <div class="ddl-small">${ddlLbl(daysLeft(it.deadline))}</div>
+      </div>
+    </div>`).join("")}</div>`;
+}
+
+// 매칭 기록 (단순 시뮬레이션)
+document.getElementById("match-history").innerHTML = usage.matches === 0
+  ? `<div class="tracker-empty">아직 AI 매칭 기록이 없어요.<br />
+       <a href="index.html#ai-matching">지금 매칭 받기</a></div>`
+  : `<div style="font-size:13px;color:var(--ink-2);line-height:1.7;">
+       이번 달 총 <b>${usage.matches}회</b> 매칭을 받으셨습니다.<br />
+       최근 매칭에서 가장 자주 추천된 공고:<br />
+       • 예비창업패키지 2026 (4회)<br />
+       • 초기창업패키지 AI (3회)<br />
+       • 청년창업사관학교 17기 (2회)</div>`;
+
+// 로그아웃
+document.getElementById("logout-btn").addEventListener("click", () => {
+  if(confirm("로그아웃하시겠어요?")){
+    localStorage.removeItem(CURRENT_KEY);
+    location.href = "index.html";
+  }
+});
+</script>
+</body>
+</html>

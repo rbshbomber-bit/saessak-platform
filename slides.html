@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>발표 슬라이드 자동 생성 — 새싹지원사업</title>
+<meta name="description" content="사업계획서를 10장 발표 슬라이드 구성안으로 자동 변환합니다." />
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<script src="ai-client.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6; --bg-2: #f4f1ea; --card: #ffffff;
+  --ink: #14181f; --ink-2: #3a4250; --ink-3: #6c7280;
+  --line: #e6e3da; --line-2: #d7d3c7;
+  --sage: #8da888; --sage-deep: #5c7a5a; --sage-soft: #d8e3d4;
+  --cream: #f1ead9; --gold: #b9844a;
+  --good: #2f7a3c; --warn: #b45309; --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+  --shadow-m: 0 4px 16px rgba(20,24,31,.06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.nav-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.token-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--sage);
+  color: var(--sage-deep); font-weight: 700; font-size: 12px;
+}
+.token-chip .ico { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 14px; }
+.back { color: var(--ink-2); font-weight: 600; }
+
+.hero-bar {
+  background: linear-gradient(135deg, var(--sage-soft) 0%, var(--cream) 100%);
+  padding: 48px 0 36px;
+}
+.hero-bar h1 {
+  font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px;
+}
+.hero-bar h1 .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  color: var(--sage-deep); font-weight: 500;
+}
+.hero-bar p { color: var(--ink-2); margin: 0; font-size: 15px; }
+.hero-bar .badge {
+  display: inline-block; background: var(--gold); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  margin-bottom: 12px;
+}
+
+.disclaimer-box {
+  background: var(--sage-soft); border: 1px solid var(--sage);
+  border-radius: 12px; padding: 14px 18px;
+  margin: 24px 0; display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13px; line-height: 1.7; color: var(--ink-2);
+}
+.disclaimer-box .ico { font-size: 18px; flex-shrink: 0; }
+.disclaimer-box b { color: var(--sage-deep); }
+
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 24px;
+  box-shadow: var(--shadow-s); margin: 24px 0;
+}
+.card h3 { margin: 0 0 16px; font-size: 17px; font-weight: 700; }
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--ink-2); margin-bottom: 6px;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid var(--line-2); border-radius: 10px;
+  font-size: 14px; font-family: inherit; background: var(--bg);
+  color: var(--ink);
+}
+.field textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--sage-deep);
+  background: var(--card);
+}
+
+.btn-run {
+  display: inline-block; width: 100%; padding: 14px 24px;
+  background: var(--ink); color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit;
+  transition: opacity .2s;
+}
+.btn-run:hover { opacity: .85; }
+.btn-run:disabled { background: var(--ink-3); cursor: not-allowed; }
+
+.result-area { margin-top: 24px; }
+
+.slide-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 24px;
+  box-shadow: var(--shadow-s); margin: 14px 0;
+  position: relative;
+}
+.slide-card .num {
+  position: absolute; top: 16px; right: 20px;
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 36px; color: var(--sage-soft); font-weight: 500;
+}
+.slide-card .head {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 10px;
+}
+.slide-card .pageno {
+  font-size: 11px; padding: 2px 8px; border-radius: 6px;
+  background: var(--sage-deep); color: white; font-weight: 700;
+}
+.slide-card .stage {
+  font-size: 11px; color: var(--ink-3);
+}
+.slide-card h2 {
+  margin: 0 0 12px; font-size: 18px; font-weight: 800;
+  line-height: 1.4;
+}
+.slide-card .subtitle {
+  font-size: 13px; color: var(--ink-2); margin: 0 0 14px;
+  font-style: italic;
+}
+.slide-card .bullets {
+  margin: 0; padding-left: 20px; font-size: 13px;
+  color: var(--ink-2); line-height: 1.8;
+}
+.slide-card .visual {
+  background: var(--bg-2); border: 1px dashed var(--line-2);
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 12px; color: var(--ink-3); margin-top: 12px;
+}
+.slide-card .visual b { color: var(--gold); }
+.slide-card .note {
+  background: var(--cream); border-radius: 8px;
+  padding: 10px 12px; margin-top: 10px;
+  font-size: 12px; color: var(--ink-2); line-height: 1.7;
+}
+.slide-card .note b { color: var(--sage-deep); }
+
+.actions-row {
+  display: flex; gap: 10px; margin-top: 24px;
+}
+.btn-copy, .btn-export {
+  flex: 1; padding: 12px;
+  background: var(--card); border: 1px solid var(--line-2);
+  border-radius: 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; color: var(--ink-2);
+  transition: border-color .2s, color .2s;
+}
+.btn-copy:hover, .btn-export:hover {
+  border-color: var(--sage-deep); color: var(--sage-deep);
+}
+
+.footer-note {
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 14px; font-size: 11px;
+  color: var(--ink-3); margin-top: 20px; line-height: 1.6;
+}
+
+.empty-msg {
+  text-align: center; padding: 40px 20px; color: var(--ink-3);
+  font-size: 14px;
+}
+.loading {
+  text-align: center; padding: 40px 20px; color: var(--sage-deep);
+  font-weight: 600; font-size: 15px;
+}
+.loading .han {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 20px; margin-right: 6px;
+}
+
+footer.site {
+  border-top: 1px solid var(--line);
+  padding: 32px 0; margin-top: 60px;
+  background: var(--bg-2);
+}
+.foot-row { text-align: center; font-size: 12px; color: var(--ink-3); }
+.foot-row .legal { margin-bottom: 8px; }
+.foot-row a { color: var(--ink-2); margin: 0 8px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <div class="logo-img" aria-hidden="true"></div>
+      <span class="name">새싹<span class="accent">지원사업</span></span>
+    </a>
+    <div class="nav-right">
+      <span class="token-chip" id="token-display">
+        <span class="ico">蓄</span><span>로그인</span>
+      </span>
+      <a href="index.html" class="back">← 메인</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero-bar">
+  <div class="container">
+    <span class="badge">⭐ PREMIUM · 회당 30 토큰</span>
+    <h1><span class="han">演</span> 발표 슬라이드 자동 생성</h1>
+    <p>사업계획서를 10장 발표 슬라이드 구성안(제목·핵심 메시지·시각 요소·발표 노트)으로 자동 변환. (30 토큰)</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="disclaimer-box">
+    <div class="ico">🤝</div>
+    <div>
+      <b>AI는 발표 ‘구성안’을 만들어주는 보조 도구입니다.</b><br />
+      PPT 파일 자체가 아닌 슬라이드 구성안(제목 + 핵심 메시지 + 시각 요소 제안 + 발표 노트)을 생성합니다.
+      실제 PPT는 본인이 디자인하여 완성해야 하며, 본 결과는 일반적 구성 가이드일 뿐 발표 성공을 보장하지 않습니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>1️⃣ 발표 슬라이드로 변환할 사업계획서</h3>
+    <div class="field">
+      <label>발표 시간 (분)</label>
+      <select id="d-duration">
+        <option value="5">5분 (10장 권장)</option>
+        <option value="10" selected>10분 (10장 권장)</option>
+        <option value="15">15분 (12장 권장)</option>
+        <option value="20">20분 (15장 권장)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>신청 사업</label>
+      <select id="d-target">
+        <option value="예비창업패키지">예비창업패키지</option>
+        <option value="초기창업패키지">초기창업패키지</option>
+        <option value="청년창업사관학교">청년창업사관학교</option>
+        <option value="기타 정부 발표">기타 정부 발표</option>
+        <option value="투자 IR">투자 IR (VC 대상)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>사업계획서 본문 (필수)</label>
+      <textarea id="d-text" placeholder="6개 챕터(문제정의/솔루션/시장분석/BM/추진일정/자금운용) 또는 사업 핵심 내용을 입력하세요."></textarea>
+    </div>
+    <button class="btn-run" id="d-run">演 발표 슬라이드 10장 구성 (30 토큰)</button>
+  </div>
+
+  <div id="result-area" class="result-area"></div>
+</div>
+
+<footer class="site">
+  <div class="container foot-row">
+    <div class="legal">
+      <a href="terms.html">이용약관</a> ·
+      <a href="terms.html#ai-disclaimer">AI 면책</a> ·
+      <a href="terms.html#privacy">개인정보처리방침</a>
+    </div>
+    <div>© 2026 새싹지원사업 · AI 발표 구성안 · 본인 검토·디자인 필수</div>
+  </div>
+</footer>
+
+<script>
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+const SLIDES_COST = 30;
+
+function getCurrentUser(){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]").find(u => u.id === id) || null; } catch(e){ return null; }
+}
+function updateUser(updater){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try {
+    const users = JSON.parse(localStorage.getItem(USER_KEY) || "[]");
+    const idx = users.findIndex(x => x.id === id);
+    if(idx === -1) return null;
+    users[idx] = updater(users[idx]) || users[idx];
+    localStorage.setItem(USER_KEY, JSON.stringify(users));
+    return users[idx];
+  } catch(e){ return null; }
+}
+function refreshTokenDisplay(){
+  const u = getCurrentUser();
+  const el = document.getElementById("token-display");
+  if(!el) return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const display = isAdmin ? '∞' : (u.tokens||0).toLocaleString();
+    el.querySelector("span:last-child").textContent = `토큰 ${display}`;
+  } else {
+    el.querySelector("span:last-child").textContent = "로그인";
+  }
+}
+refreshTokenDisplay();
+
+let lastResult = null;
+
+document.getElementById("d-run").addEventListener("click", async () => {
+  const u = getCurrentUser();
+  if(!u){
+    if(confirm("발표 슬라이드 생성은 회원가입/로그인이 필요합니다.")){
+      location.href = "auth.html";
+    }
+    return;
+  }
+  const text = document.getElementById("d-text").value.trim();
+  if(text.length < 100){
+    alert("사업계획서 본문을 100자 이상 입력해주세요.");
+    return;
+  }
+  const duration = parseInt(document.getElementById("d-duration").value, 10);
+  const target = document.getElementById("d-target").value;
+
+  const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+  if(!isAdmin){
+    if((u.tokens || 0) < SLIDES_COST){
+      alert(`토큰이 부족합니다. ${SLIDES_COST} 토큰이 필요합니다. 현재: ${u.tokens || 0}`);
+      return;
+    }
+    if(!confirm(`발표 슬라이드 생성에 ${SLIDES_COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - SLIDES_COST}`)) return;
+    updateUser(user => {
+      user.tokens = (user.tokens || 0) - SLIDES_COST;
+      if(!user.tokenLog) user.tokenLog = [];
+      user.tokenLog.unshift({
+        ts: new Date().toISOString(), kind: "spend",
+        amount: -SLIDES_COST, balance: user.tokens,
+        memo: `발표 슬라이드: ${target} ${duration}분`,
+      });
+      return user;
+    });
+    refreshTokenDisplay();
+  }
+
+  const btn = document.getElementById("d-run");
+  btn.disabled = true;
+  btn.textContent = "AI가 발표 구성을 짜는 중...";
+  document.getElementById("result-area").innerHTML = `
+    <div class="loading"><span class="han">演</span> ${duration}분 발표용 슬라이드 구성안 생성 중... (15~30초)</div>`;
+
+  const slideCount = duration === 5 ? 10 : duration === 10 ? 10 : duration === 15 ? 12 : 15;
+
+  const systemPrompt = `당신은 한국 청년창업 정부 사업 발표 코치입니다. 사업계획서를 ${duration}분 발표용 슬라이드 구성안으로 변환합니다.
+규칙:
+- ${slideCount}장 분량의 슬라이드 구성을 JSON으로 생성
+- 각 슬라이드: 제목, 부제목(선택), 핵심 메시지 불릿 3~5개, 시각 요소 제안, 발표 노트(말로 할 내용)
+- 합격을 보장하지 않으며 일반적 구성 가이드임을 인지
+- JSON만 응답. 마크다운 코드블록 금지.`;
+
+  const prompt = `[신청 사업] ${target}
+[발표 시간] ${duration}분 (슬라이드 ${slideCount}장)
+[사업계획서 본문]
+${text}
+
+[작업]
+위 사업계획서를 ${slideCount}장의 발표 슬라이드 구성으로 변환하세요.
+
+[JSON 출력 형식]
+{
+  "title": "발표 제목 한 줄",
+  "slides": [
+    {
+      "num": 1,
+      "stage": "오프닝 / 문제 / 솔루션 / 시장 / BM / 실행 / 자금 / 팀 / 결론 / Q&A",
+      "title": "슬라이드 제목 (5~10자)",
+      "subtitle": "부제목 (선택, 한 줄)",
+      "bullets": ["핵심 메시지 1", "핵심 메시지 2", "..."],
+      "visual": "권장 시각 요소 (예: 막대그래프, 4분면 매트릭스, 이미지, 인포그래픽 등)",
+      "note": "발표자가 말로 할 핵심 멘트 (2~3문장)"
+    },
+    ...총 ${slideCount}장
+  ]
+}`;
+
+  try {
+    const responseText = await window.saessak.callClaude(prompt, {
+      system: systemPrompt,
+      max_tokens: 4000,
+      fallback: ""
+    });
+
+    if(!responseText) throw new Error("AI 응답을 받지 못했습니다.");
+    const m = responseText.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("응답 형식 오류");
+    const data = JSON.parse(m[0]);
+    lastResult = data;
+    renderResult(data, target, duration);
+  } catch(e){
+    console.error(e);
+    document.getElementById("result-area").innerHTML = `
+      <div class="slide-card">
+        <div class="empty-msg">생성 실패. 다시 시도해주세요.<br /><small style="color:var(--bad);">${e.message}</small></div>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "演 발표 슬라이드 10장 구성 (30 토큰)";
+  }
+});
+
+function renderResult(data, target, duration){
+  const slidesHTML = (data.slides||[]).map(s => `
+    <div class="slide-card">
+      <span class="num">${String(s.num).padStart(2,'0')}</span>
+      <div class="head">
+        <span class="pageno">${String(s.num).padStart(2,'0')} / ${data.slides.length}</span>
+        <span class="stage">${s.stage||''}</span>
+      </div>
+      <h2>${s.title||''}</h2>
+      ${s.subtitle ? `<div class="subtitle">${s.subtitle}</div>` : ''}
+      <ul class="bullets">
+        ${(s.bullets||[]).map(b => `<li>${b}</li>`).join("")}
+      </ul>
+      ${s.visual ? `<div class="visual"><b>시각 요소 제안:</b> ${s.visual}</div>` : ''}
+      ${s.note ? `<div class="note"><b>발표 노트:</b> ${s.note}</div>` : ''}
+    </div>`).join("");
+
+  document.getElementById("result-area").innerHTML = `
+    <div class="slide-card" style="background:var(--sage-soft);">
+      <h2 style="color:var(--sage-deep);">📊 ${data.title || target}</h2>
+      <div style="font-size:13px;color:var(--ink-2);margin-top:6px;">
+        총 ${data.slides?.length||0}장 · 발표 시간 ${duration}분 · 생성: ${new Date().toLocaleString("ko-KR")}
+      </div>
+    </div>
+    ${slidesHTML}
+    <div class="actions-row">
+      <button class="btn-copy" onclick="copyAllSlides()">📋 전체 구성안 복사 (텍스트)</button>
+      <button class="btn-export" onclick="downloadMD()">💾 마크다운으로 저장</button>
+    </div>
+    <div class="footer-note">
+      🤖 AI 발표 구성안 · 본인 검토 및 디자인 필수 · 실제 발표 자료는 본인이 PowerPoint·Keynote·Google Slides로 작성 ·
+      발표 성공을 보장하지 않으며 본 결과는 일반적 구성 가이드입니다.
+    </div>`;
+}
+
+function generateMarkdown(){
+  if(!lastResult) return "";
+  let md = `# ${lastResult.title || '발표 슬라이드 구성안'}\n\n`;
+  md += `> 새싹지원사업 발표 슬라이드 자동 생성 · ${new Date().toLocaleString("ko-KR")}\n\n`;
+  (lastResult.slides||[]).forEach(s => {
+    md += `## 슬라이드 ${s.num}: ${s.title}\n`;
+    md += `**스테이지**: ${s.stage}\n\n`;
+    if(s.subtitle) md += `> ${s.subtitle}\n\n`;
+    md += `### 핵심 메시지\n`;
+    (s.bullets||[]).forEach(b => md += `- ${b}\n`);
+    md += `\n`;
+    if(s.visual) md += `**시각 요소**: ${s.visual}\n\n`;
+    if(s.note) md += `**발표 노트**: ${s.note}\n\n`;
+    md += `---\n\n`;
+  });
+  md += `\n_AI 자동 생성 결과물 · 본인 검토·디자인 필수 · 발표 성공 보장 없음_\n`;
+  return md;
+}
+
+function copyAllSlides(){
+  const md = generateMarkdown();
+  navigator.clipboard.writeText(md).then(() => {
+    alert("전체 슬라이드 구성안이 클립보드에 복사되었습니다. Notion·Word·Keynote에 붙여넣으세요.");
+  }).catch(() => alert("복사 실패. 브라우저 설정을 확인해주세요."));
+}
+
+function downloadMD(){
+  const md = generateMarkdown();
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `slides-${new Date().toISOString().slice(0,10)}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

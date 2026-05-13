@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI 1:1 멘토링 — 새싹지원사업</title>
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<script src="ai-client.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6; --bg-2: #f4f1ea; --card: #ffffff;
+  --ink: #14181f; --ink-2: #3a4250; --ink-3: #6c7280;
+  --line: #e6e3da; --line-2: #d7d3c7;
+  --sage: #8da888; --sage-deep: #5c7a5a; --sage-soft: #d8e3d4;
+  --cream: #f1ead9; --gold: #b9844a;
+  --good: #2f7a3c; --warn: #b45309; --bad: #b91c1c;
+  --shadow-s: 0 1px 2px rgba(20,24,31,.04), 0 2px 8px rgba(20,24,31,.04);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); height: 100%; }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: 900px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,246,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.brand .logo-img {
+  width: 32px; height: 32px;
+  background-image: url("images/logo.png");
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+.brand .name .accent { color: var(--sage-deep); }
+.nav-right { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.token-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--sage);
+  color: var(--sage-deep); font-weight: 700; font-size: 12px;
+}
+.token-chip .ico { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 14px; }
+.back { color: var(--ink-2); font-weight: 600; }
+
+.intro {
+  background: linear-gradient(135deg, var(--sage-soft) 0%, var(--cream) 100%);
+  padding: 36px 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+.intro h1 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+.intro h1 .han { font-family: "Cormorant Garamond", serif; font-style: italic; color: var(--sage-deep); font-weight: 500; }
+.intro p { color: var(--ink-2); margin: 0; font-size: 14px; }
+.intro .badge {
+  display: inline-block; background: var(--gold); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  margin-bottom: 10px;
+}
+
+/* 시작 화면 */
+.start-screen { padding: 40px 0; }
+.topic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+@media (max-width: 640px) { .topic-grid { grid-template-columns: 1fr; } }
+.topic-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 20px;
+  cursor: pointer; transition: all .15s;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.topic-card:hover { border-color: var(--sage); transform: translateY(-2px); box-shadow: var(--shadow-s); }
+.topic-card .ico {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: var(--sage-soft); border-radius: 10px;
+  display: grid; place-items: center; font-size: 20px;
+}
+.topic-card .text h3 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
+.topic-card .text p { margin: 0; font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+
+.cost-note {
+  text-align: center; margin: 24px 0 12px;
+  font-size: 13px; color: var(--ink-3);
+}
+.cost-note b { color: var(--sage-deep); font-weight: 700; }
+
+/* 챗 화면 */
+.chat-screen { display: none; flex: 1; flex-direction: column; padding: 24px 0 0; }
+.chat-screen.active { display: flex; }
+.chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.chat-header .mentor-info { display: flex; align-items: center; gap: 12px; }
+.chat-header .mentor-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--sage), var(--sage-deep));
+  display: grid; place-items: center; color: white;
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 20px; font-weight: 600;
+}
+.chat-header .mentor-name { font-weight: 700; font-size: 15px; }
+.chat-header .mentor-sub { font-size: 12px; color: var(--ink-3); }
+.chat-header .new-btn {
+  padding: 8px 14px; border-radius: 8px;
+  background: var(--bg-2); color: var(--ink-2);
+  border: 0; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+
+.chat-msgs {
+  flex: 1; overflow-y: auto;
+  padding: 24px 0;
+  display: flex; flex-direction: column; gap: 14px;
+  min-height: 400px;
+}
+.msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+.msg.user {
+  align-self: flex-end;
+  background: var(--ink); color: white;
+  border-bottom-right-radius: 4px;
+}
+.msg.bot {
+  align-self: flex-start;
+  background: var(--sage-soft); color: var(--ink);
+  border-bottom-left-radius: 4px;
+}
+.msg.bot .role {
+  font-size: 11px; font-weight: 700; color: var(--sage-deep);
+  margin-bottom: 6px; letter-spacing: .03em;
+}
+.msg.bot p { margin: 4px 0; }
+.msg.loading {
+  align-self: flex-start; background: var(--sage-soft);
+  font-size: 13px; color: var(--ink-3);
+}
+.msg.loading .dots::after {
+  content: ""; animation: dots 1.4s infinite;
+}
+@keyframes dots {
+  0%, 20% { content: "."; }
+  40% { content: ".."; }
+  60%, 100% { content: "..."; }
+}
+
+.chat-input-wrap {
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+  position: sticky; bottom: 0;
+  background: var(--bg);
+}
+.chat-input {
+  display: flex; gap: 8px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 8px 8px 8px 14px;
+  align-items: flex-end;
+}
+.chat-input textarea {
+  flex: 1; border: 0; outline: 0; resize: none;
+  font-family: inherit; font-size: 14px;
+  padding: 8px 0; min-height: 24px; max-height: 120px;
+  background: transparent; color: var(--ink); line-height: 1.5;
+}
+.chat-input button {
+  padding: 9px 16px; border-radius: 10px;
+  background: var(--ink); color: white;
+  border: 0; font-weight: 700; font-size: 13px;
+  cursor: pointer; font-family: inherit;
+  align-self: flex-end;
+}
+.chat-input button:disabled { opacity: .5; cursor: wait; }
+.chat-input button:hover:not(:disabled) { background: var(--sage-deep); }
+
+.chat-footer {
+  text-align: center; padding: 8px 0 12px;
+  font-size: 11px; color: var(--ink-3);
+}
+.chat-footer b { color: var(--sage-deep); }
+
+/* 토큰 부족 */
+.insufficient {
+  text-align: center; padding: 48px 24px;
+  background: var(--sage-soft); border: 1px solid var(--sage);
+  border-radius: 14px; margin: 24px 0;
+}
+.insufficient h2 {
+  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-size: 28px; color: var(--sage-deep); margin: 0 0 8px;
+}
+.insufficient p { color: var(--ink-2); margin-bottom: 18px; }
+.insufficient a {
+  display: inline-block; padding: 12px 24px;
+  background: var(--ink); color: white;
+  border-radius: 10px; font-weight: 700; font-size: 14px;
+}
+
+footer.site { border-top: 1px solid var(--line); padding: 20px 0; font-size: 11px; color: var(--ink-3); }
+footer.site .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="container nav">
+    <a class="brand" href="index.html">
+      <span class="logo-img"></span>
+      <span class="name"><span class="accent">새싹</span>지원사업</span>
+    </a>
+    <div class="nav-right">
+      <a class="token-chip" href="index.html#pricing" id="token-display"><span class="ico">蓄</span><span>토큰 -</span></a>
+      <a class="back" href="index.html">← 메인</a>
+    </div>
+  </div>
+</header>
+
+<section class="intro">
+  <div class="container">
+    <span class="badge">⭐ PREMIUM · 세션당 30 토큰</span>
+    <h1><span class="han">指導</span> AI 1:1 멘토링</h1>
+    <p>청년창업 도메인 학습된 AI 멘토와 1:1 대화. 한 세션 = 메시지 5~10회 자유 대화 (30 토큰).</p>
+  </div>
+</section>
+
+<!-- 시작 화면 -->
+<div class="container start-screen" id="start-screen">
+  <div style="background:var(--sage-soft);border:1px solid var(--sage);border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;gap:12px;align-items:flex-start;">
+    <div style="font-size:18px;flex-shrink:0;">🤝</div>
+    <div style="font-size:12px;line-height:1.7;color:var(--ink-2);">
+      <b style="color:var(--sage-deep);">AI 멘토는 일반 정보를 제공하는 보조 도구입니다.</b><br />
+      구체적인 합격·심사 결과를 보장하지 않으며, 본 대화 내용을 바탕으로 한 의사결정의 책임은 사용자 본인에게 있습니다.
+      특수한 상황·법무·세무 사안은 반드시 전문가 자문을 받으시기 바랍니다.
+    </div>
+  </div>
+  <h2 style="font-size:18px;margin:0 0 8px;">무엇을 상담하시겠어요?</h2>
+  <p style="color:var(--ink-3);font-size:13px;margin:0 0 20px;">아래 주제를 선택하면 멘토가 그 맥락으로 대화를 시작합니다.</p>
+  <div class="topic-grid">
+    <div class="topic-card" data-topic="match">
+      <div class="ico">✨</div>
+      <div class="text">
+        <h3>나에게 맞는 사업 추천</h3>
+        <p>나이·지역·분야·아이템을 알려드리면 적합한 정부 지원사업을 함께 골라드려요.</p>
+      </div>
+    </div>
+    <div class="topic-card" data-topic="plan">
+      <div class="ico">📝</div>
+      <div class="text">
+        <h3>사업계획서 점검</h3>
+        <p>작성한 초안을 함께 검토. 심사 포인트·개선점·정량 수치 강화 방향을 짚어드려요.</p>
+      </div>
+    </div>
+    <div class="topic-card" data-topic="market">
+      <div class="ico">📊</div>
+      <div class="text">
+        <h3>시장 분석 + 경쟁사</h3>
+        <p>TAM/SAM/SOM 산정·경쟁사 비교 매트릭스 작성을 도와드려요.</p>
+      </div>
+    </div>
+    <div class="topic-card" data-topic="bm">
+      <div class="ico">💰</div>
+      <div class="text">
+        <h3>비즈니스 모델 설계</h3>
+        <p>수익원·가격·고객 세그먼트 4축 모델을 함께 설계해요.</p>
+      </div>
+    </div>
+    <div class="topic-card" data-topic="apply">
+      <div class="ico">🎯</div>
+      <div class="text">
+        <h3>심사 통과 전략</h3>
+        <p>예창패·청창사·딥테크 등 사업별 심사 포인트를 짚어드려요.</p>
+      </div>
+    </div>
+    <div class="topic-card" data-topic="free">
+      <div class="ico">💬</div>
+      <div class="text">
+        <h3>자유 상담</h3>
+        <p>위 주제 외 자유롭게 대화. 청년창업 관련이면 무엇이든.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cost-note">
+    한 세션 = 멘토와 자유로운 대화 · 시작 시 <b>30 토큰</b> 차감
+  </div>
+</div>
+
+<!-- 챗 화면 -->
+<div class="container chat-screen" id="chat-screen">
+  <div class="chat-header">
+    <div class="mentor-info">
+      <div class="mentor-avatar">指</div>
+      <div>
+        <div class="mentor-name">새싹 멘토</div>
+        <div class="mentor-sub">청년창업 도메인 AI · <span id="topic-label"></span></div>
+      </div>
+    </div>
+    <button class="new-btn" id="new-session-btn">+ 새 세션</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs"></div>
+  <div class="chat-input-wrap">
+    <div class="chat-input">
+      <textarea id="msg-input" placeholder="멘토에게 질문하세요... (Enter 보내기, Shift+Enter 줄바꿈)" rows="1"></textarea>
+      <button id="send-btn">보내기</button>
+    </div>
+    <div class="chat-footer">
+      🤖 AI 자동 응답 · 본인 판단·검토 필수 · <b>합격 보장 없음</b> · <a href="terms.html#ai-disclaimer">면책 조항</a>
+    </div>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="container">
+    <div>© 2026 새싹지원사업</div>
+    <div>
+      <a href="terms.html">이용약관</a> ·
+      <a href="terms.html#ai-disclaimer">AI 면책</a> ·
+      <a href="index.html#pricing">요금</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const USER_KEY = "saessak_users";
+const CURRENT_KEY = "saessak_current_user";
+const SESSION_COST = 30;
+
+function getCurrentUser(){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "[]").find(u => u.id === id) || null; } catch(e){ return null; }
+}
+function updateUser(updater){
+  const id = localStorage.getItem(CURRENT_KEY);
+  if(!id) return null;
+  try {
+    const users = JSON.parse(localStorage.getItem(USER_KEY) || "[]");
+    const idx = users.findIndex(x => x.id === id);
+    if(idx === -1) return null;
+    users[idx] = updater(users[idx]) || users[idx];
+    localStorage.setItem(USER_KEY, JSON.stringify(users));
+    return users[idx];
+  } catch(e){ return null; }
+}
+function refreshTokenDisplay(){
+  const u = getCurrentUser();
+  const el = document.getElementById("token-display");
+  if(!el) return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const display = isAdmin ? '∞' : (u.tokens||0).toLocaleString();
+    el.querySelector("span:last-child").textContent = `토큰 ${display}`;
+  } else {
+    el.querySelector("span:last-child").textContent = "로그인";
+  }
+}
+
+const TOPIC_LABEL = {
+  match: "사업 추천 상담", plan: "사업계획서 점검",
+  market: "시장 분석", bm: "비즈니스 모델 설계",
+  apply: "심사 통과 전략", free: "자유 상담"
+};
+const TOPIC_GREETING = {
+  match: "안녕하세요! 청년창업 사업 추천 상담을 시작합니다. 먼저 알려주세요 — 1) 나이 2) 거주 지역 3) 관심 분야 4) 사업 아이템 한 줄. 이 정보로 가장 적합한 정부 지원사업을 함께 찾아드릴게요.",
+  plan: "사업계획서 점검 상담입니다. 작성하신 챕터 중 가장 고민되는 부분을 먼저 붙여넣어 주시거나, 사업 아이템 한 줄과 신청 사업명을 알려주세요. 함께 심사 포인트를 짚어드릴게요.",
+  market: "시장 분석 상담입니다. 분석할 사업 아이템 + 분야를 알려주세요. TAM/SAM/SOM 산정 방향과 경쟁사 매트릭스를 함께 만들어드릴게요.",
+  bm: "비즈니스 모델 설계 상담입니다. 사업 아이템 + 1차 타깃 고객을 알려주세요. 수익원 4축(B2C 결제 / 구독 / B2B / 정부) 중 어떤 조합이 맞을지 함께 설계해드릴게요.",
+  apply: "심사 통과 전략 상담입니다. 신청하려는 사업명을 알려주세요 (예: 예비창업패키지·청년창업사관학교·딥테크 헬스케어 등). 사업별 심사 포인트를 짚어드릴게요.",
+  free: "안녕하세요! 자유 상담입니다. 청년창업 관련해서 궁금한 것을 자유롭게 말씀해 주세요."
+};
+
+let currentTopic = null;
+let session = []; // {role, text}
+
+document.querySelectorAll(".topic-card").forEach(card => {
+  card.addEventListener("click", () => startSession(card.dataset.topic));
+});
+
+function startSession(topic){
+  const u = getCurrentUser();
+  if(!u){
+    if(confirm("AI 멘토링은 회원가입/로그인이 필요합니다. 로그인 페이지로 이동할까요?")){
+      location.href = "auth.html";
+    }
+    return;
+  }
+
+  const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+
+  if(!isAdmin){
+    if((u.tokens || 0) < SESSION_COST){
+      showInsufficientInline();
+      return;
+    }
+    if(!confirm(`AI 멘토링 1 세션에 ${SESSION_COST} 토큰이 사용됩니다.\n현재 잔액: ${u.tokens} → ${u.tokens - SESSION_COST}\n시작하시겠습니까?`)) return;
+
+    updateUser(user => {
+      user.tokens = (user.tokens || 0) - SESSION_COST;
+      if(!user.tokenLog) user.tokenLog = [];
+      user.tokenLog.unshift({
+        ts: new Date().toISOString(),
+        kind: "spend", amount: -SESSION_COST, balance: user.tokens,
+        memo: `AI 멘토링: ${TOPIC_LABEL[topic]}`
+      });
+      return user;
+    });
+  } else {
+    console.log('[saessak] 관리자 모드 — 토큰 차감 없이 세션 시작');
+  }
+  refreshTokenDisplay();
+
+  currentTopic = topic;
+  session = [];
+  document.getElementById("topic-label").textContent = TOPIC_LABEL[topic];
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("chat-screen").classList.add("active");
+
+  appendMsg("bot", TOPIC_GREETING[topic]);
+}
+
+function appendMsg(role, text){
+  const wrap = document.getElementById("chat-msgs");
+  const el = document.createElement("div");
+  el.className = "msg " + role;
+  if(role === "bot"){
+    el.innerHTML = `<div class="role">새싹 멘토</div>` +
+      text.split("\n").map(p => `<p>${p}</p>`).join("");
+  } else {
+    el.textContent = text;
+  }
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+  session.push({role, text});
+}
+
+function appendLoading(){
+  const wrap = document.getElementById("chat-msgs");
+  const el = document.createElement("div");
+  el.className = "msg loading";
+  el.id = "loading-msg";
+  el.innerHTML = `<span class="dots">멘토가 생각 중</span>`;
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function removeLoading(){
+  const l = document.getElementById("loading-msg");
+  if(l) l.remove();
+}
+
+async function sendMsg(){
+  const input = document.getElementById("msg-input");
+  const text = input.value.trim();
+  if(!text) return;
+  appendMsg("user", text);
+  input.value = "";
+  input.style.height = "auto";
+
+  const btn = document.getElementById("send-btn");
+  btn.disabled = true; btn.textContent = "...";
+  appendLoading();
+
+  // 시스템 프롬프트
+  const systemPrompt = `당신은 한국 청년창업 지원사업 전문 멘토입니다. 현재 ${TOPIC_LABEL[currentTopic]} 주제로 사용자와 1:1 상담 중입니다.
+- 한국어로 친근하지만 전문적으로 답하세요.
+- 답변은 3~5문장 분량, 구체적으로.
+- 정부 사업(예비창업패키지·청년창업사관학교·딥테크 헬스케어 등)을 인용할 때는 정확한 사실 위주.
+- 합격을 보장하지 마세요. "도움이 됩니다" "가능성이 있습니다" 정도로.
+- 추가 정보가 필요하면 구체적으로 물어보세요.
+
+[이전 대화]
+${session.map(m => `${m.role === "user" ? "사용자" : "멘토"}: ${m.text}`).join("\n")}
+
+[새 사용자 메시지]
+${text}
+
+위 맥락에서 멘토로서 답변해주세요.`;
+
+  // 토픽별 데모 응답 (API 실패 시 폴백)
+  const fallbackByTopic = {
+    match: "흥미로운 정보네요. 그 조건이라면 다음 사업을 살펴볼 만합니다: (1) 예비창업패키지 — 사업자등록 전이면 우선 고려, 최대 1억 사업화 자금. (2) 청년창업사관학교 — 만 39세 이하면 적합, 1년 입주+1억. (3) 지자체 청년창업 — 거주 지역별 별도 사업.\n\n구체적으로 어떤 단계인가요? (사업자등록 전/후, 시제품 유무 등)",
+    plan: "사업계획서 검토 시 다음 5가지가 결정적입니다: (1) 문제 정의의 구체성, (2) 솔루션 차별점, (3) 시제품·POC 증거, (4) BM 구체성, (5) 운영자 역량.\n\n현재 어떤 챕터가 가장 약하다고 느끼시나요?",
+    market: "시장 분석은 TAM(전체 시장) → SAM(현실적 유효 시장) → SOM(3년 도달 가능)으로 산정합니다. 각각 산정 근거가 명확해야 심사위원이 납득합니다.\n\n어떤 분야이고, 1차 타깃 고객은 누구인가요?",
+    bm: "수익 모델은 2~3축 병행이 안정적입니다. 자주 보는 조합은 (1) B2C 결제 + 정부 자금, (2) B2B 라이선스 + B2C 구독, (3) SaaS + 컨설팅.\n\n아이템과 1차 고객을 알려주시면 적합한 조합을 함께 설계해드릴게요.",
+    apply: "심사 포인트는 사업별로 다릅니다. 예비창업패키지는 '예비창업자 + 사업화 가능성', 청년창업사관학교는 '딥테크·AI 분야 + 1년 집중 육성 적합성'.\n\n어느 사업을 준비 중이신가요?",
+    free: "어떤 부분이 가장 막혀 있으신가요? 사업 아이템 발굴 단계인지, 사업계획서 작성 단계인지, 신청 후 발표 준비 단계인지 알려주시면 그 맥락에 맞춰 도와드릴게요."
+  };
+
+  try {
+    const replyText = await window.saessak.callClaude(systemPrompt, {
+      system: "당신은 한국 청년창업 지원사업 전문 멘토입니다. 친근하지만 전문적으로, 3~5문장 분량으로 구체적으로 답변하세요. 합격 보장 표현은 피하고 '도움이 됩니다' 정도로.",
+      max_tokens: 1024,
+      fallback: fallbackByTopic[currentTopic] || "구체적으로 어떤 부분이 궁금하신가요?"
+    });
+    removeLoading();
+    appendMsg("bot", replyText);
+  } catch(e){
+    console.error(e);
+    removeLoading();
+    appendMsg("bot", "(시스템 오류) 다시 시도해주세요. 토큰은 차감되지 않습니다.");
+  } finally {
+    btn.disabled = false; btn.textContent = "보내기";
+  }
+}
+
+document.getElementById("send-btn").addEventListener("click", sendMsg);
+document.getElementById("msg-input").addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault(); sendMsg();
+  }
+});
+// 자동 높이 조절
+document.getElementById("msg-input").addEventListener("input", e => {
+  e.target.style.height = "auto";
+  e.target.style.height = Math.min(120, e.target.scrollHeight) + "px";
+});
+
+document.getElementById("new-session-btn").addEventListener("click", () => {
+  if(confirm("새 세션을 시작하면 30 토큰이 추가 차감됩니다. 계속하시겠습니까?")){
+    document.getElementById("chat-screen").classList.remove("active");
+    document.getElementById("start-screen").style.display = "block";
+    document.getElementById("chat-msgs").innerHTML = "";
+    session = [];
+  }
+});
+
+function showInsufficientInline(){
+  document.getElementById("start-screen").innerHTML = `
+    <div class="insufficient">
+      <h2>蓄 토큰 부족</h2>
+      <p>AI 멘토링 1 세션에 <b>${SESSION_COST} 토큰</b>이 필요합니다.<br />
+      현재 잔액: <b>${getCurrentUser()?.tokens || 0} 토큰</b></p>
+      <a href="index.html#pricing">토큰 충전하기 →</a>
+    </div>`;
+}
+
+refreshTokenDisplay();
+</script>
+</body>
+</html>
