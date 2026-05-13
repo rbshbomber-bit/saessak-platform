@@ -222,7 +222,7 @@ footer.site {
     </a>
     <div class="nav-right">
       <span class="token-chip" id="token-display">
-        <span class="ico">蓄</span><span>로그인</span>
+        <span>로그인</span>
       </span>
       <a href="index.html" class="back">← 메인</a>
     </div>
@@ -232,7 +232,7 @@ footer.site {
 <section class="hero-bar">
   <div class="container">
     <span class="badge">⭐ PREMIUM · 회당 50 토큰</span>
-    <h1><span class="han">審</span> 심사위원 시뮬레이션</h1>
+    <h1>심사위원 시뮬레이션</h1>
     <p>5명의 가상 페르소나가 당신의 사업계획서를 다각도로 평가합니다. 예상 질문 25개 + 강점·약점 도출.</p>
   </div>
 </section>
@@ -298,7 +298,7 @@ footer.site {
       </div>
     </div>
 
-    <button class="btn-run" id="s-run">審 5명 페르소나 시뮬레이션 시작 (50 토큰)</button>
+    <button class="btn-run" id="s-run">5명 페르소나 시뮬레이션 시작 (50 토큰)</button>
   </div>
 
   <div id="result-area" class="result-area"></div>
@@ -399,7 +399,7 @@ document.getElementById("s-run").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "5명 페르소나 시뮬레이션 진행 중...";
   document.getElementById("result-area").innerHTML = `
-    <div class="loading"><span class="han">審</span> 5명 가상 페르소나가 각자 검토 중... (20~40초)</div>`;
+    <div class="loading">5명 가상 페르소나가 각자 검토 중... (20~40초)</div>`;
 
   const systemPrompt = `당신은 한국 청년창업 정부 지원사업 심사를 다각도로 시뮬레이션하는 AI입니다.
 다음 5개의 가상 페르소나로 사업계획서를 평가합니다 (모두 가상 캐릭터, 실제 인물/기관 아님):
@@ -456,7 +456,7 @@ ${text}
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "審 5명 페르소나 시뮬레이션 시작 (50 토큰)";
+    btn.textContent = "5명 페르소나 시뮬레이션 시작 (50 토큰)";
   }
 });
 

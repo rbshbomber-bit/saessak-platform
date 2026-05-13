@@ -206,7 +206,7 @@ footer.site {
     </a>
     <div class="nav-right">
       <span class="token-chip" id="token-display">
-        <span class="ico">蓄</span><span>로그인</span>
+        <span>로그인</span>
       </span>
       <a href="index.html" class="back">← 메인</a>
     </div>
@@ -216,7 +216,7 @@ footer.site {
 <section class="hero-bar">
   <div class="container">
     <span class="badge">⭐ PREMIUM · 회당 10 토큰</span>
-    <h1><span class="han">較</span> 사업계획서 비교 분석</h1>
+    <h1>사업계획서 비교 분석</h1>
     <p>당신의 사업계획서를 합격 사례 12건과 비교하여 강점·약점·보완 포인트를 도출합니다. (10 토큰)</p>
   </div>
 </section>
@@ -255,7 +255,7 @@ footer.site {
       <label>사업계획서 본문 (필수 — 6개 챕터 모두 또는 핵심 부분만)</label>
       <textarea id="c-text" placeholder="예시:&#10;1. 문제 정의 — ...&#10;2. 솔루션 — ...&#10;3. 시장 분석 — ...&#10;4. BM — ...&#10;5. 추진 일정 — ...&#10;6. 자금 운용 — ..."></textarea>
     </div>
-    <button class="btn-run" id="c-run">較 합격 사례 12건과 비교 분석 시작 (10 토큰)</button>
+    <button class="btn-run" id="c-run">합격 사례 12건과 비교 분석 시작 (10 토큰)</button>
   </div>
 
   <div id="result-area" class="result-area"></div>
@@ -348,7 +348,7 @@ document.getElementById("c-run").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "AI가 합격 사례와 비교 분석 중...";
   document.getElementById("result-area").innerHTML = `
-    <div class="loading"><span class="han">較</span> 합격 사례 12건의 패턴과 비교 분석 중... (10~20초)</div>`;
+    <div class="loading">합격 사례 12건의 패턴과 비교 분석 중... (10~20초)</div>`;
 
   const systemPrompt = `당신은 정부 청년창업 지원사업 사업계획서 심사 경험이 풍부한 전문가입니다.
 새싹지원사업 플랫폼의 합격 사업계획서 라이브러리 12건 (예비창업패키지, 청년창업사관학교, 딥테크 헬스케어 등에서 합격한 익명화 케이스)의 일반적인 패턴을 알고 있습니다.
@@ -406,7 +406,7 @@ ${text}
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "較 합격 사례 12건과 비교 분석 시작 (10 토큰)";
+    btn.textContent = "합격 사례 12건과 비교 분석 시작 (10 토큰)";
   }
 });
 

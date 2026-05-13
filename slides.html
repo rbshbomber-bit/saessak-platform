@@ -219,7 +219,7 @@ footer.site {
     </a>
     <div class="nav-right">
       <span class="token-chip" id="token-display">
-        <span class="ico">蓄</span><span>로그인</span>
+        <span>로그인</span>
       </span>
       <a href="index.html" class="back">← 메인</a>
     </div>
@@ -229,7 +229,7 @@ footer.site {
 <section class="hero-bar">
   <div class="container">
     <span class="badge">⭐ PREMIUM · 회당 30 토큰</span>
-    <h1><span class="han">演</span> 발표 슬라이드 자동 생성</h1>
+    <h1>발표 슬라이드 자동 생성</h1>
     <p>사업계획서를 10장 발표 슬라이드 구성안(제목·핵심 메시지·시각 요소·발표 노트)으로 자동 변환. (30 토큰)</p>
   </div>
 </section>
@@ -269,7 +269,7 @@ footer.site {
       <label>사업계획서 본문 (필수)</label>
       <textarea id="d-text" placeholder="6개 챕터(문제정의/솔루션/시장분석/BM/추진일정/자금운용) 또는 사업 핵심 내용을 입력하세요."></textarea>
     </div>
-    <button class="btn-run" id="d-run">演 발표 슬라이드 10장 구성 (30 토큰)</button>
+    <button class="btn-run" id="d-run">발표 슬라이드 10장 구성 (30 토큰)</button>
   </div>
 
   <div id="result-area" class="result-area"></div>
@@ -364,7 +364,7 @@ document.getElementById("d-run").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "AI가 발표 구성을 짜는 중...";
   document.getElementById("result-area").innerHTML = `
-    <div class="loading"><span class="han">演</span> ${duration}분 발표용 슬라이드 구성안 생성 중... (15~30초)</div>`;
+    <div class="loading">${duration}분 발표용 슬라이드 구성안 생성 중... (15~30초)</div>`;
 
   const slideCount = duration === 5 ? 10 : duration === 10 ? 10 : duration === 15 ? 12 : 15;
 
@@ -421,7 +421,7 @@ ${text}
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "演 발표 슬라이드 10장 구성 (30 토큰)";
+    btn.textContent = "발표 슬라이드 10장 구성 (30 토큰)";
   }
 });
 
