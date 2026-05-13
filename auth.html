@@ -207,7 +207,7 @@ h2 {
 <body>
 
 <div class="auth-card">
-  <a class="brand" href="청년창업_지원사업_웹사이트_v3.html">
+  <a class="brand" href="index.html">
     <span class="logo-img"></span>
     <span class="name"><span class="accent">새싹</span>지원사업</span>
   </a>
@@ -397,7 +397,7 @@ document.getElementById("signup-btn").addEventListener("click", () => {
   saveUsers(users);
   setCurrent(newUser.id);
   showMsg("회원가입 완료! 50 토큰이 지급되었습니다. 메인으로 이동합니다", "success");
-  setTimeout(() => { location.href = "청년창업_지원사업_웹사이트_v3.html"; }, 1200);
+  setTimeout(() => { location.href = "index.html"; }, 1200);
 });
 
 // 로그인
@@ -410,7 +410,7 @@ document.getElementById("login-btn").addEventListener("click", () => {
   if(!user) return showMsg("이메일 또는 비밀번호가 올바르지 않습니다");
   setCurrent(user.id);
   showMsg(`환영합니다, ${user.name}님!`, "success");
-  setTimeout(() => { location.href = "청년창업_지원사업_웹사이트_v3.html"; }, 1000);
+  setTimeout(() => { location.href = "index.html"; }, 1000);
 });
 
 // Enter 키
