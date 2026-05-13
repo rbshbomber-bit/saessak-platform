@@ -1511,7 +1511,7 @@ function renderList(){
       조건에 맞는 공고가 없어요.<br /><small>필터를 줄여보세요.</small></div>`;
     return;
   }
-  c.innerHTML = filtered.map(cardHTML).join("");
+  c.innerHTML = filtered.map(x => cardHTML(x)).join("");
   bindCardActions(c);
 }
 const STAGES = [
