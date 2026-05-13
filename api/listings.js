@@ -1,18 +1,14 @@
 // Vercel Serverless Function: /api/listings
 // K-Startup OpenAPI에서 정부 창업지원사업 공고를 가져와서
 // 우리 LISTINGS 구조로 변환해 반환.
-// 실패 시 static listings.json 으로 폴백.
+// XML 응답 자동 파싱. 실패 시 fallback 처리.
 //
-// 환경 변수: KSTARTUP_API_KEY (공공데이터포털 인증키, decoded 형태)
-//
-// 캐시: Vercel Edge에서 1시간 캐시 (stale-while-revalidate 10분)
+// 환경 변수: KSTARTUP_API_KEY
+// 캐시: Vercel Edge에서 1시간 (stale-while-revalidate 10분)
 
-const STATIC_FALLBACK = [
-  // 폴백용 — 실제 데이터는 K-Startup API에서 받아옴
-  // 사이트 처음 띄우거나 API 장애 시 표시되는 최소한의 시드 데이터
-];
+const STATIC_FALLBACK = [];
 
-// 분야 분류 (제목·요약 키워드 기반)
+// ===== 분류 헬퍼 =====
 function classifyField(title, summary) {
   const text = (title + ' ' + summary).toLowerCase();
   if (/ai|인공지능|딥러닝|머신러닝|llm|gpt/.test(text)) return 'ai';
@@ -27,7 +23,6 @@ function classifyField(title, summary) {
   return 'general';
 }
 
-// 지역 분류 (제목·기관명 기반)
 function classifyRegion(title, agency) {
   const text = (title + ' ' + agency);
   if (/서울|경기|인천|수도권/.test(text)) return 'capital';
@@ -39,15 +34,14 @@ function classifyRegion(title, agency) {
   return 'national';
 }
 
-// K-Startup 날짜 (YYYYMMDD 또는 YYYY-MM-DD) → YYYY-MM-DD
 function normalizeDate(d) {
   if (!d) return '';
   const s = String(d).replace(/[^0-9]/g, '');
   if (s.length === 8) return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
+  if (s.length === 14) return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
   return d;
 }
 
-// 금액 추출 (요약문에서 "최대 1억", "1억원" 등 패턴 찾기)
 function extractAmount(summary) {
   if (!summary) return '';
   const m1 = summary.match(/최대\s*(\d+(?:\.\d+)?)\s*억/);
@@ -59,22 +53,71 @@ function extractAmount(summary) {
   return '문의';
 }
 
-// K-Startup 응답 1건을 우리 LISTINGS 1건으로 변환
+// ===== 간단한 XML 파서 (K-Startup 응답 구조 전용) =====
+// <item>...</item> 블록을 추출하고, 각 블록 내부의 단순 필드를 객체로 변환
+function parseXMLItems(xml) {
+  if (!xml || typeof xml !== 'string') return [];
+
+  // CDATA 처리: <![CDATA[...]]> → 내부 텍스트로 변환
+  const cleaned = xml.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = itemRegex.exec(cleaned)) !== null) {
+    const itemXml = m[1];
+    const obj = {};
+    // 단일 레벨 태그만 추출 (중첩 X)
+    const fieldRegex = /<([\w_]+)>([\s\S]*?)<\/\1>/g;
+    let fm;
+    while ((fm = fieldRegex.exec(itemXml)) !== null) {
+      obj[fm[1]] = fm[2].trim();
+    }
+    items.push(obj);
+  }
+  return items;
+}
+
+// XML/JSON 응답에서 totalCount 추출
+function extractTotalCount(text) {
+  const m = text.match(/<totalCount>(\d+)<\/totalCount>/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+// ===== K-Startup 1건 → 우리 LISTINGS 1건 =====
 function transformItem(item, idx) {
-  // K-Startup 응답 필드명이 응답 버전마다 다를 수 있어 여러 후보 시도
-  const title = item.pblancNm || item.bsnsTitle || item.bizTitleNm || item.title || '';
-  const summary = item.bsnsSumryCn || item.bizSumryCn || item.summary || '';
-  const startDate = item.pbancRcptBgngDt || item.bizPbancBgngDt || item.startDate || '';
-  const endDate = item.pbancRcptEndDt || item.bizPbancEndDt || item.endDate || '';
-  const agency = item.pbancNtrpNm || item.jrsdInsttNm || item.agency || item.dept || '';
-  const target = item.aplyTrgtNm || item.aplyTrgt || item.target || '';
-  const url = item.detailPageUrl || item.bizPbancUrl || item.url || '';
-  const id = item.pblancId || item.bizPbancNo || item.id || `kstartup-${idx}`;
+  // 가능한 필드명 후보를 모두 시도
+  const title =
+    item.pblancNm || item.bsnsTitle || item.bizTitleNm || item.title ||
+    item.PBLANC_NM || item.BSNS_TITLE || '';
+  const summary =
+    item.bsnsSumryCn || item.bizSumryCn || item.summary ||
+    item.BSNS_SUMRY_CN || item.bsnsCn || '';
+  const startDate =
+    item.pbancRcptBgngDt || item.bizPbancBgngDt || item.startDate ||
+    item.PBANC_RCPT_BGNG_DT || '';
+  const endDate =
+    item.pbancRcptEndDt || item.bizPbancEndDt || item.endDate ||
+    item.PBANC_RCPT_END_DT || '';
+  const agency =
+    item.pbancNtrpNm || item.jrsdInsttNm || item.agency || item.dept ||
+    item.PBANC_NTRP_NM || item.JRSD_INSTT_NM || '';
+  const target =
+    item.aplyTrgtNm || item.aplyTrgt || item.target ||
+    item.APLY_TRGT_NM || item.APLY_TRGT || '';
+  const url =
+    item.detailPageUrl || item.bizPbancUrl || item.url ||
+    item.DETAIL_PAGE_URL || item.BIZ_PBANC_URL || '';
+  const id =
+    item.pblancId || item.bizPbancNo || item.id ||
+    item.PBLANC_ID || item.BIZ_PBANC_NO || `kstartup-${idx}`;
+  const supportArea =
+    item.suportBizFromObjOpttn || item.aplyMthdNm || item.supportArea || '';
 
   return {
     id: `ks-${id}`,
     title: title.trim(),
-    field: classifyField(title, summary),
+    field: classifyField(title, summary + ' ' + supportArea),
     region: classifyRegion(title, agency),
     age: /청년|만 39세|39세 이하/.test(target + summary) ? '만 39세 이하' : '제한없음',
     target: target || '예비창업자/창업기업',
@@ -89,7 +132,6 @@ function transformItem(item, idx) {
 }
 
 export default async function handler(req, res) {
-  // CORS + 캐시
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=600');
 
@@ -98,28 +140,30 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: false,
       error: 'KSTARTUP_API_KEY 환경 변수 미설정',
-      hint: 'Vercel Project Settings → Environment Variables 에서 추가하세요.',
       fallback: true,
       listings: STATIC_FALLBACK,
     });
   }
 
   try {
-    // K-Startup 사업 공고 API (창업진흥원 KISED)
-    // 엔드포인트 패턴: /B552735/kisedKstartupService01/getAnnouncementInformation01
+    // K-Startup 사업 공고 정보 조회
     const url = new URL('https://apis.data.go.kr/B552735/kisedKstartupService01/getAnnouncementInformation01');
     url.searchParams.set('serviceKey', apiKey);
     url.searchParams.set('numOfRows', '200');
     url.searchParams.set('pageNo', '1');
-    url.searchParams.set('resultType', 'json');
+    url.searchParams.set('resultType', 'json');  // 무시되더라도 시도
 
     const apiRes = await fetch(url.toString(), {
-      headers: { 'Accept': 'application/json' }
+      headers: {
+        'Accept': 'application/json,text/xml,*/*',
+        'User-Agent': 'saessak-platform/1.0 (https://saessak-platform.vercel.app)',
+      }
     });
 
+    const text = await apiRes.text();
+    const ct = (apiRes.headers.get('content-type') || '').toLowerCase();
+
     if (!apiRes.ok) {
-      const text = await apiRes.text();
-      console.error('K-Startup API HTTP error', apiRes.status, text.slice(0, 500));
       return res.status(200).json({
         ok: false,
         error: `K-Startup API ${apiRes.status}`,
@@ -129,20 +173,28 @@ export default async function handler(req, res) {
       });
     }
 
-    const data = await apiRes.json();
+    // JSON 우선 시도, 안 되면 XML 파싱
+    let items = [];
+    let parseMode = 'unknown';
 
-    // 응답 구조 후보 — K-Startup API가 가끔 구조를 바꿔서 여러 경로 시도
-    const items =
-      data?.response?.body?.items?.item ||
-      data?.response?.body?.items ||
-      data?.data ||
-      data?.items ||
-      [];
-
-    const itemsArray = Array.isArray(items) ? items : [items];
+    try {
+      const json = JSON.parse(text);
+      const candidates =
+        json?.response?.body?.items?.item ||
+        json?.response?.body?.items ||
+        json?.data ||
+        json?.items ||
+        [];
+      items = Array.isArray(candidates) ? candidates : [candidates];
+      parseMode = 'json';
+    } catch (jsonErr) {
+      // XML 파싱
+      items = parseXMLItems(text);
+      parseMode = 'xml';
+    }
 
     const today = new Date().toISOString().slice(0, 10);
-    const transformed = itemsArray
+    const transformed = items
       .filter(x => x && typeof x === 'object')
       .map((item, idx) => transformItem(item, idx))
       .filter(x => x.title && (!x.deadline || x.deadline >= today))
@@ -151,6 +203,9 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       count: transformed.length,
+      totalCount: extractTotalCount(text),
+      parseMode,
+      contentType: ct,
       updatedAt: new Date().toISOString(),
       source: 'kstartup-live',
       listings: transformed,
