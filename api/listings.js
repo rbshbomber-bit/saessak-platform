@@ -178,8 +178,10 @@ function transformItem(item, idx) {
   const rcrtPrgsYn = item.rcrt_prgs_yn || '';
   const contact = item.prch_cnpl_no || '';
 
-  const ageStr = targetAge + ' ' + target;
+  const ageStr = (targetAge + ' ' + target + ' ' + title).toLowerCase();
   const isYouth = /만 39세 이하|39세|청년|만 19세|만 20세|만 29세|만 34세/.test(ageStr);
+  // 명시적으로 청년 대상이 아닌 경우 (만 40세 이상, 시니어, 중장년 등)
+  const isExplicitlyNonYouth = !isYouth && /만 40세|만 45세|만 50세|만 65세|시니어|중장년|장년|노인|silver|senior/i.test(ageStr);
 
   const fieldKey = classifyField(title, summary, suptBizClsfc);
   const region = classifyRegion(suptRegin, agency, title);
@@ -211,6 +213,7 @@ function transformItem(item, idx) {
     applyUrl: applyUrl,
     contact: contact,
     rcrtOngoing: rcrtPrgsYn === 'Y',
+    isExplicitlyNonYouth: isExplicitlyNonYouth,
     source: 'kstartup',
   };
 }
@@ -271,6 +274,7 @@ export default async function handler(req, res) {
       .filter(x => x.title)  // 제목 있는 것만
       .filter(x => !x.deadline || x.deadline >= today)  // 마감 안 지난 것
       .filter(x => x.rcrtOngoing !== false)  // 모집 진행 중인 것 (Y만)
+      .filter(x => !x.isExplicitlyNonYouth)  // 명시적 비청년(만 40세 이상·시니어·중장년) 제외
       .sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
 
     // 청년 전용 필터
