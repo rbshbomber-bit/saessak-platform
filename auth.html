@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>회원가입 · 로그인 — 새싹지원사업</title>
+<script src="supabase-config.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
@@ -150,6 +151,44 @@ h2 {
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
+/* 구글 로그인 버튼 */
+.google-btn {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  transition: all .15s;
+}
+.google-btn:hover {
+  border-color: var(--ink);
+  background: #fafbfc;
+  box-shadow: 0 1px 4px rgba(20,24,31,.06);
+}
+.google-btn svg { flex-shrink: 0; }
+
+.divider-or {
+  text-align: center; font-size: 11px; color: var(--ink-3);
+  margin: 20px 0;
+  position: relative;
+}
+.divider-or::before, .divider-or::after {
+  content: ""; position: absolute; top: 50%;
+  width: calc(50% - 50px); height: 1px; background: var(--line);
+}
+.divider-or::before { left: 0; }
+.divider-or::after { right: 0; }
+.divider-or span {
+  background: var(--card); padding: 0 8px;
+  letter-spacing: .05em;
+}
+
 .back-link {
   display: block; text-align: center;
   font-size: 13px; color: var(--ink-3);
@@ -172,6 +211,18 @@ h2 {
     <span class="logo-img"></span>
     <span class="name"><span class="accent">새싹</span>지원사업</span>
   </a>
+
+  <!-- 구글 로그인 (가장 먼저 노출, 가장 강조) -->
+  <button id="google-btn" class="google-btn">
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+      <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+    </svg>
+    <span>구글 계정으로 계속하기</span>
+  </button>
+  <div class="divider-or"><span>또는 이메일로</span></div>
 
   <div class="tabs">
     <button class="tab active" data-tab="login">로그인</button>
@@ -378,6 +429,17 @@ if(current){
   const u = getUsers().find(x => x.id === current);
   if(u) showMsg(`이미 ${u.name}님으로 로그인 중입니다. 메인 또는 마이페이지로 이동하세요.`, "success");
 }
+
+// ===== 구글 로그인 버튼 =====
+document.getElementById("google-btn").addEventListener("click", async () => {
+  if(!window.saessak?.signInWithGoogle){
+    showMsg("Supabase 클라이언트 초기화 중. 1초 후 다시 시도하세요.", "error");
+    return;
+  }
+  showMsg("구글 로그인 페이지로 이동 중...", "success");
+  // 메인 페이지로 돌아오게 설정 (auth.html이 아닌 / 로)
+  await window.saessak.signInWithGoogle(location.origin + "/");
+});
 </script>
 </body>
 </html>
