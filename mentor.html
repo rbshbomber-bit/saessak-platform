@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AI 1:1 멘토링 — 새싹지원사업</title>
 <script src="supabase-config.js" defer></script>
+<script src="ai-client.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
@@ -460,29 +461,26 @@ ${text}
 
 위 맥락에서 멘토로서 답변해주세요.`;
 
+  // 토픽별 데모 응답 (API 실패 시 폴백)
+  const fallbackByTopic = {
+    match: "흥미로운 정보네요. 그 조건이라면 다음 사업을 살펴볼 만합니다: (1) 예비창업패키지 — 사업자등록 전이면 우선 고려, 최대 1억 사업화 자금. (2) 청년창업사관학교 — 만 39세 이하면 적합, 1년 입주+1억. (3) 지자체 청년창업 — 거주 지역별 별도 사업.\n\n구체적으로 어떤 단계인가요? (사업자등록 전/후, 시제품 유무 등)",
+    plan: "사업계획서 검토 시 다음 5가지가 결정적입니다: (1) 문제 정의의 구체성, (2) 솔루션 차별점, (3) 시제품·POC 증거, (4) BM 구체성, (5) 운영자 역량.\n\n현재 어떤 챕터가 가장 약하다고 느끼시나요?",
+    market: "시장 분석은 TAM(전체 시장) → SAM(현실적 유효 시장) → SOM(3년 도달 가능)으로 산정합니다. 각각 산정 근거가 명확해야 심사위원이 납득합니다.\n\n어떤 분야이고, 1차 타깃 고객은 누구인가요?",
+    bm: "수익 모델은 2~3축 병행이 안정적입니다. 자주 보는 조합은 (1) B2C 결제 + 정부 자금, (2) B2B 라이선스 + B2C 구독, (3) SaaS + 컨설팅.\n\n아이템과 1차 고객을 알려주시면 적합한 조합을 함께 설계해드릴게요.",
+    apply: "심사 포인트는 사업별로 다릅니다. 예비창업패키지는 '예비창업자 + 사업화 가능성', 청년창업사관학교는 '딥테크·AI 분야 + 1년 집중 육성 적합성'.\n\n어느 사업을 준비 중이신가요?",
+    free: "어떤 부분이 가장 막혀 있으신가요? 사업 아이템 발굴 단계인지, 사업계획서 작성 단계인지, 신청 후 발표 준비 단계인지 알려주시면 그 맥락에 맞춰 도와드릴게요."
+  };
+
   try {
-    if(!window.cowork?.askClaude){
-      // 폴백 — 토픽별 일반 응답
-      const fallback = {
-        match: "흥미로운 정보네요. 그 조건이라면 다음 사업을 살펴볼 만합니다: (1) 예비창업패키지 2026 — 사업자등록 전이면 우선 고려, 최대 1억 사업화 자금. (2) 청년창업사관학교 17기 — 만 39세 이하면 적합, 1년 입주+1억. (3) 지자체 청년창업 — 거주 지역별 별도 사업.\n\n구체적으로 어떤 단계인가요? (사업자등록 전/후, 시제품 유무 등)",
-        plan: "사업계획서 검토 시 다음 5가지가 결정적입니다: (1) 문제 정의의 구체성 (페인 포인트 + 정량 데이터), (2) 솔루션 차별점 (경쟁사 대비 명확한 우위), (3) 시제품·POC 증거, (4) BM 구체성 (1년차 매출 추정 근거), (5) 운영자 역량 (도메인·실행력).\n\n현재 어떤 챕터가 가장 약하다고 느끼시나요?",
-        market: "시장 분석은 3단계로 산정합니다. TAM(전체 시장) → SAM(현실적 유효 시장) → SOM(3년 도달 가능). 각각 산정 근거가 명확해야 심사위원이 납득합니다.\n\n어떤 분야이고, 1차 타깃 고객은 누구인가요?",
-        bm: "수익 모델은 1축에 집중하기보다 2~3축 병행이 안정적입니다. 청년창업 segment에서 자주 보는 조합은 (1) B2C 결제 + 정부 자금, (2) B2B 라이선스 + B2C 구독, (3) SaaS + 컨설팅 부가.\n\n아이템과 1차 고객을 알려주시면 적합한 조합을 함께 설계해드릴게요.",
-        apply: "심사 포인트는 사업별로 다릅니다. 예비창업패키지는 '예비창업자 + 사업화 가능성', 청년창업사관학교는 '딥테크·AI 분야 + 1년 집중 육성 적합성', 딥테크 헬스케어는 'AI 헬스케어 도메인 + 시장 검증'.\n\n어느 사업을 준비 중이신가요?",
-        free: "어떤 부분이 가장 막혀 있으신가요? 사업 아이템 발굴 단계인지, 사업계획서 작성 단계인지, 신청 후 발표 준비 단계인지 알려주시면 그 맥락에 맞춰 도와드릴게요."
-      };
-      setTimeout(() => {
-        removeLoading();
-        appendMsg("bot", "(데모 응답) " + (fallback[currentTopic] || "구체적으로 어떤 부분이 궁금하신가요?"));
-        btn.disabled = false; btn.textContent = "보내기";
-      }, 1200);
-      return;
-    }
-    const resp = await window.cowork.askClaude(systemPrompt, []);
-    const replyText = typeof resp === "string" ? resp : (resp?.text || "응답을 받지 못했습니다.");
+    const replyText = await window.saessak.callClaude(systemPrompt, {
+      system: "당신은 한국 청년창업 지원사업 전문 멘토입니다. 친근하지만 전문적으로, 3~5문장 분량으로 구체적으로 답변하세요. 합격 보장 표현은 피하고 '도움이 됩니다' 정도로.",
+      max_tokens: 1024,
+      fallback: fallbackByTopic[currentTopic] || "구체적으로 어떤 부분이 궁금하신가요?"
+    });
     removeLoading();
     appendMsg("bot", replyText);
   } catch(e){
+    console.error(e);
     removeLoading();
     appendMsg("bot", "(시스템 오류) 다시 시도해주세요. 토큰은 차감되지 않습니다.");
   } finally {

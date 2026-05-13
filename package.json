@@ -1,0 +1,9 @@
+{
+  "name": "saessak-jiwon",
+  "version": "1.0.0",
+  "description": "새싹지원사업 - 한국 청년창업 지원사업 큐레이션 + AI 매칭 플랫폼",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

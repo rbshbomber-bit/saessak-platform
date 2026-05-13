@@ -19,6 +19,7 @@
 <link rel="apple-touch-icon" href="images/logo.png" />
 
 <script src="supabase-config.js" defer></script>
+<script src="ai-client.js" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
@@ -1597,28 +1598,43 @@ async function runMatch(){
 [작업] 첨부 공고 중 적합도 높은 순으로 3~5개 선택. 각 공고에 "왜 이 사람에게 맞는지" 1~2문장.
 [출력] JSON만: { "matches": [ { "id": "공고id", "reason": "이유" } ] }`;
 
+  // 폴백 매칭 (API 실패/키 미설정 시)
+  function buildFallbackMatches(){
+    const regionMap = {
+      "서울":"capital","경기":"capital","인천":"capital",
+      "부산":"youngnam","대구":"youngnam",
+      "광주":"honam","전남":"honam",
+      "대전":"chungcheong",
+      "강원":"gangwon","제주":"jeju"
+    };
+    const userRegionCode = regionMap[region] || null;
+    return LISTINGS.map(x => ({
+      x, score: (x.field === field ? 3 : 0) +
+                (userRegionCode && x.region === userRegionCode ? 3 : 0) +
+                (x.region === "national" ? 2 : 0) +
+                (parseInt(age) <= 49 && x.age.includes("49") ? 1 : 0) +
+                (parseInt(age) <= 39 && x.age.includes("39") ? 2 : 0)
+    })).sort((a,b)=> b.score - a.score).slice(0,4)
+      .map(({x,score})=>({ id: x.id, reason: `분야·지역·연령 기준 적합도 ${score}점.` }));
+  }
+
   try {
-    if(!window.cowork?.askClaude){
-      const regionMap = {
-        "서울":"capital","경기":"capital","인천":"capital",
-        "부산":"youngnam","대구":"youngnam",
-        "광주":"honam","전남":"honam",
-        "대전":"chungcheong",
-        "강원":"gangwon","제주":"jeju"
-      };
-      const userRegionCode = regionMap[region] || null;
-      const matches = LISTINGS.map(x => ({
-        x, score: (x.field === field ? 3 : 0) +
-                  (userRegionCode && x.region === userRegionCode ? 3 : 0) +
-                  (x.region === "national" ? 2 : 0) +
-                  (parseInt(age) <= 49 && x.age.includes("49") ? 1 : 0) +
-                  (parseInt(age) <= 39 && x.age.includes("39") ? 2 : 0)
-      })).sort((a,b)=> b.score - a.score).slice(0,4)
-        .map(({x,score})=>({ id: x.id, reason: `(데모) 분야·지역·연령 기준 적합도 ${score}점.` }));
-      renderMatches({matches}); return;
+    const fullPrompt = prompt + "\n\n[공고 목록]\n" + JSON.stringify(LISTINGS, null, 2);
+    const text = await window.saessak.callClaude(fullPrompt, {
+      system: "당신은 한국 청년창업 지원사업 큐레이션 전문가입니다. 반드시 JSON으로만 응답하세요. 다른 설명, 마크다운 코드블록은 금지.",
+      max_tokens: 1200,
+      fallback: ""  // 빈 문자열 → 아래 catch에서 폴백 처리
+    });
+
+    if(!text || text.includes('데모 모드')){
+      // API 키 미설정 또는 빈 응답 → 룰 기반 폴백
+      renderMatches({matches: buildFallbackMatches()});
+      if(text.includes('데모 모드')){
+        out.insertAdjacentHTML('afterbegin', `<div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">⚠️ Claude API 키 미설정 — 룰 기반 매칭으로 표시됩니다.</div>`);
+      }
+      return;
     }
-    const resp = await window.cowork.askClaude(prompt, [{listings: LISTINGS}]);
-    const text = typeof resp === "string" ? resp : (resp?.text || JSON.stringify(resp));
+
     const m = text.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("JSON not found");
     const parsed = JSON.parse(m[0]);
@@ -1626,7 +1642,9 @@ async function runMatch(){
     renderMatches(parsed);
   } catch(e){
     console.error(e);
-    out.innerHTML = `<div class="empty-state">매칭 실패. 다시 시도해주세요.<br /><small>${e.message||""}</small></div>`;
+    // 파싱 실패 시에도 룰 기반 폴백
+    renderMatches({matches: buildFallbackMatches()});
+    out.insertAdjacentHTML('afterbegin', `<div style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">AI 응답 파싱 실패 — 룰 기반으로 표시됩니다.</div>`);
   } finally {
     btn.disabled = false; btn.textContent = "AI에게 매칭 요청 →";
   }
@@ -1710,30 +1728,42 @@ async function runPlan(){
     {"h": "6. 자금 운용 계획", "body": "..."}
   ] }`;
 
+  // 폴백 사업계획서 초안
+  const fallbackPlan = {
+    title: `${item} — ${target} 사업계획서 초안`,
+    chapters: [
+      {h:"1. 문제 정의", body: `${region} 지역의 ${field} 분야는 디지털 전환과 시장 변화로 인해 기존 사업 모델만으로는 한계에 직면해 있습니다. 청년 창업자가 진입하려 해도 정보·네트워크가 부족하여 시행착오 비용이 큽니다.`},
+      {h:"2. 솔루션·핵심 가치", body: `본 사업은 "${item}"을(를) 핵심 솔루션으로 제시합니다. 사용자가 직면한 핵심 페인 포인트를 디지털 기술의 결합으로 해소하며, 기존 대안 대비 명확한 차별점을 제공합니다.`},
+      {h:"3. 시장 분석·타깃", body: `${field} 시장 규모는 국내 약 [추정 규모] 원이며 연 [%] 성장 중입니다. 1차 타깃은 ${region} 거주 [구체 페르소나]이고, 향후 전국으로 확장 가능합니다.`},
+      {h:"4. 비즈니스 모델", body: `수익은 [구독료 / 1회 결제 / B2B 라이선스 등] 다축 모델로 구성됩니다. 1년차 목표 매출은 [N]원, 3년차 [N]원이며, 비용 구조는 호스팅·AI API·인건비 중심으로 마진 [%] 확보가 가능합니다.`},
+      {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 베타 사용자 50명 확보. M+4~M+6: 핵심 기능 고도화 및 첫 매출. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
+      {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [%], (2) 마케팅·사용자 획득 [%], (3) 인프라·운영비 [%], (4) 예비비 [%]로 배분합니다.${strength ? " 운영자 강점: " + strength : ""}`}
+    ]
+  };
+
   try {
-    if(!window.cowork?.askClaude){
-      const demo = {
-        title: `${item} — ${target} 사업계획서 초안`,
-        chapters: [
-          {h:"1. 문제 정의", body: `${region} 지역의 ${field} 분야는 현재 디지털 전환과 시장 변화로 인해 기존 사업 모델만으로는 한계에 직면해 있습니다. 청년 창업자가 진입하려 해도 정보·네트워크가 부족하여 시행착오 비용이 큽니다.`},
-          {h:"2. 솔루션·핵심 가치", body: `본 사업은 "${item}"을(를) 핵심 솔루션으로 제시합니다. 사용자가 직면한 핵심 페인 포인트를 디지털 기술의 결합으로 해소하며, 기존 대안 대비 명확한 차별점을 제공합니다.`},
-          {h:"3. 시장 분석·타깃", body: `${field} 시장 규모는 국내 약 [추정 규모] 원이며 연 [%] 성장 중입니다. 1차 타깃은 ${region} 거주 [구체 페르소나]이고, 향후 전국으로 확장 가능합니다. 경쟁자는 [경쟁사명] 등이며 본 솔루션은 [차별점]에서 우위를 갖습니다.`},
-          {h:"4. 비즈니스 모델", body: `수익은 [구독료 / 1회 결제 / B2B 라이선스 등] 다축 모델로 구성됩니다. 1년차 목표 매출은 [N]원, 3년차 [N]원이며, 비용 구조는 호스팅·AI API·인건비를 중심으로 마진 [%] 확보가 가능합니다.`},
-          {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 베타 사용자 50명 확보. M+4~M+6: 핵심 기능 고도화 및 첫 매출 발생. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
-          {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [%], (2) 마케팅·사용자 획득 [%], (3) 인프라·운영비 [%], (4) 예비비 [%]로 배분합니다. 자금 집행은 분기별 마일스톤과 연동하여 효율성과 투명성을 동시에 확보합니다.${strength ? " 운영자 강점: " + strength : ""}`}
-        ]
-      };
-      renderPlan(demo); return;
+    const text = await window.saessak.callClaude(prompt, {
+      system: "당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다. 반드시 JSON으로만 응답하고, 마크다운 코드블록(```)은 사용하지 마세요.",
+      max_tokens: 2500,
+      fallback: ""
+    });
+
+    if(!text || text.includes('데모 모드')){
+      renderPlan(fallbackPlan);
+      if(text.includes('데모 모드')){
+        out.insertAdjacentHTML('afterbegin', `<div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">⚠️ Claude API 키 미설정 — 데모 초안으로 표시됩니다.</div>`);
+      }
+      return;
     }
-    const resp = await window.cowork.askClaude(prompt, []);
-    const text = typeof resp === "string" ? resp : (resp?.text || JSON.stringify(resp));
+
     const m = text.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("JSON not found");
     const parsed = JSON.parse(m[0]);
     renderPlan(parsed);
   } catch(e){
     console.error(e);
-    out.innerHTML = `<div class="empty-state">생성 실패. 다시 시도해주세요.<br /><small>${e.message||""}</small></div>`;
+    renderPlan(fallbackPlan);
+    out.insertAdjacentHTML('afterbegin', `<div style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">AI 응답 파싱 실패 — 데모 초안으로 표시됩니다.</div>`);
   } finally {
     btn.disabled = false; btn.textContent = "✨ AI에게 사업계획서 초안 요청";
   }
