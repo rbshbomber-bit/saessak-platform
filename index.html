@@ -419,10 +419,18 @@ header.site {
 .listing .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
 /* 권역별 컬러 */
-.tag.capital      { background: #dbeafe; color: #1e40af; }  /* 수도권 */
-.tag.youngnam     { background: #fee2e2; color: #991b1b; }  /* 영남 */
-.tag.honam        { background: #d1fae5; color: #065f46; }  /* 호남 */
-.tag.chungcheong  { background: #ddd6fe; color: #5b21b6; }  /* 충청 */
+/* 17개 시도 + 전국 컬러 */
+.tag.seoul, .tag.gyeonggi, .tag.incheon       { background: #dbeafe; color: #1e40af; }  /* 수도권 톤 */
+.tag.busan, .tag.daegu, .tag.ulsan,
+.tag.gyeongbuk, .tag.gyeongnam                 { background: #fee2e2; color: #991b1b; }  /* 영남 톤 */
+.tag.gwangju, .tag.jeonbuk, .tag.jeonnam       { background: #d1fae5; color: #065f46; }  /* 호남 톤 */
+.tag.daejeon, .tag.sejong,
+.tag.chungbuk, .tag.chungnam                   { background: #ddd6fe; color: #5b21b6; }  /* 충청 톤 */
+/* 호환성: 옛 권역 클래스도 유지 */
+.tag.capital      { background: #dbeafe; color: #1e40af; }
+.tag.youngnam     { background: #fee2e2; color: #991b1b; }
+.tag.honam        { background: #d1fae5; color: #065f46; }
+.tag.chungcheong  { background: #ddd6fe; color: #5b21b6; }
 .tag.gangwon      { background: #cffafe; color: #155e75; }  /* 강원 */
 .tag.jeju         { background: #fef3c7; color: #92400e; }  /* 제주 */
 .tag.national     { background: #f3f4f6; color: #374151; }  /* 전국 */
@@ -805,13 +813,24 @@ footer.site a:hover { color: var(--ink); }
         <div class="curation-top">
           <div class="region-chips">
             <button class="chip active" data-region="all">전체</button>
-            <button class="chip" data-region="capital">수도권</button>
-            <button class="chip" data-region="youngnam">영남</button>
-            <button class="chip" data-region="honam">호남</button>
-            <button class="chip" data-region="chungcheong">충청</button>
+            <button class="chip" data-region="national">전국</button>
+            <button class="chip" data-region="seoul">서울</button>
+            <button class="chip" data-region="gyeonggi">경기</button>
+            <button class="chip" data-region="incheon">인천</button>
+            <button class="chip" data-region="busan">부산</button>
+            <button class="chip" data-region="daegu">대구</button>
+            <button class="chip" data-region="ulsan">울산</button>
+            <button class="chip" data-region="gwangju">광주</button>
+            <button class="chip" data-region="daejeon">대전</button>
+            <button class="chip" data-region="sejong">세종</button>
             <button class="chip" data-region="gangwon">강원</button>
+            <button class="chip" data-region="chungbuk">충북</button>
+            <button class="chip" data-region="chungnam">충남</button>
+            <button class="chip" data-region="jeonbuk">전북</button>
+            <button class="chip" data-region="jeonnam">전남</button>
+            <button class="chip" data-region="gyeongbuk">경북</button>
+            <button class="chip" data-region="gyeongnam">경남</button>
             <button class="chip" data-region="jeju">제주</button>
-            <button class="chip" data-region="national">전국 단위</button>
           </div>
           <div class="search-box">
             <span style="font-size:14px;color:var(--ink-3)">🔍</span>
@@ -911,12 +930,18 @@ footer.site a:hover { color: var(--ink); }
               <option value="인천">인천</option>
               <option value="부산">부산</option>
               <option value="대구">대구</option>
-              <option value="대전">대전</option>
+              <option value="울산">울산</option>
               <option value="광주">광주</option>
-              <option value="전남">전남</option>
+              <option value="대전">대전</option>
+              <option value="세종">세종</option>
               <option value="강원">강원</option>
+              <option value="충북">충북</option>
+              <option value="충남">충남</option>
+              <option value="전북">전북</option>
+              <option value="전남">전남</option>
+              <option value="경북">경북</option>
+              <option value="경남">경남</option>
               <option value="제주">제주</option>
-              <option value="기타">기타 시도</option>
             </select>
           </div>
           <div class="field"><label>관심 분야</label>
@@ -1455,33 +1480,33 @@ let LISTINGS = [
     summary:"도시→농촌 이주 청년 대상. 영농+창업 결합 패키지.", url:"https://www.nonghyup.com/" },
 
   // 수도권 (서울/경기/인천) 3개
-  { id:"seoul-1000", region:"capital", regionLabel:"서울", title:"서울 청년창업 1000 프로젝트",
+  { id:"seoul-1000", region:"seoul", regionLabel:"서울", title:"서울 청년창업 1000 프로젝트",
     org:"서울시 + 서울창업허브", field:"딥테크·AI", age:"만 39세 이하", money:"최대 5,000만원 + 공간 + 멘토링",
     types:["자금","공간","멘토링"], moneyMax: 50000000, deadline:"2026-06-20",
     summary:"서울 거주·예비 창업자 대상. 강남·성수·마곡 거점 입주 우선.", url:"https://www.seoulstartuphub.com/" },
-  { id:"gyeonggi-growth", region:"capital", regionLabel:"경기", title:"경기도 청년기업 성장지원",
+  { id:"gyeonggi-growth", region:"gyeonggi", regionLabel:"경기", title:"경기도 청년기업 성장지원",
     org:"경기도경제과학진흥원", field:"커머스·로컬", age:"만 18~39세", money:"최대 3,000만원 + 컨설팅",
     types:["자금","멘토링"], moneyMax: 30000000, deadline:"2026-07-10",
     summary:"경기도 거주·소재 청년기업 사업화·마케팅 자금 지원.", url:"https://www.gbsa.or.kr/" },
-  { id:"incheon-school", region:"capital", regionLabel:"인천", title:"인천 청년창업사관학교 (15기)",
+  { id:"incheon-school", region:"incheon", regionLabel:"인천", title:"인천 청년창업사관학교 (15기)",
     org:"인천창조경제혁신센터", field:"딥테크·AI", age:"만 39세 이하", money:"최대 1억원 + 입주 + 멘토링",
     types:["자금","공간","멘토링","교육"], moneyMax: 100000000, deadline:"2026-06-10",
     summary:"AI·딥테크·웰니스 등 유망 분야 청년 스타트업 1년 집중 육성.", url:"https://www.k-startup.go.kr/" },
 
   // 영남 (부산) 1개
-  { id:"busan-pkg", region:"youngnam", regionLabel:"부산", title:"부산 청년창업 패키지 2026",
+  { id:"busan-pkg", region:"busan", regionLabel:"부산", title:"부산 청년창업 패키지 2026",
     org:"부산창조경제혁신센터", field:"커머스·로컬", age:"만 18~39세", money:"최대 5,000만원 + 입주",
     types:["자금","공간","멘토링"], moneyMax: 50000000, deadline:"2026-07-15",
     summary:"부산 거주·소재 청년 스타트업. 해양·관광·로컬 분야 우대.", url:"https://ccei.creativekorea.or.kr/busan/" },
 
   // 호남 (전남) 1개
-  { id:"jeonnam-startup", region:"honam", regionLabel:"전남", title:"전남 청년창업 활성화 지원",
+  { id:"jeonnam-startup", region:"jeonnam", regionLabel:"전남", title:"전남 청년창업 활성화 지원",
     org:"전남창조경제혁신센터", field:"농업·푸드", age:"만 18~45세", money:"최대 3,000만원",
     types:["자금","멘토링"], moneyMax: 30000000, deadline:"2026-08-05",
     summary:"전남 거주·예비 청년창업가. 농수산·푸드·로컬 분야 가산점.", url:"https://ccei.creativekorea.or.kr/jeonnam/" },
 
   // 충청 (대전) 1개
-  { id:"daejeon-deep", region:"chungcheong", regionLabel:"대전", title:"대전 청년 딥테크 창업지원",
+  { id:"daejeon-deep", region:"daejeon", regionLabel:"대전", title:"대전 청년 딥테크 창업지원",
     org:"대전테크노파크 + 대전시", field:"딥테크·AI", age:"만 18~39세", money:"최대 5,000만원 + R&D 자금",
     types:["자금","멘토링","교육"], moneyMax: 50000000, deadline:"2026-06-28",
     summary:"대덕연구단지 연계 딥테크 청년창업가 집중 육성.", url:"https://www.djtp.or.kr/" },
@@ -1500,8 +1525,17 @@ const LABELS = {
   deadlineRanges: { "d14":"2주 이내","d30":"1개월 이내","d60":"2개월 이내","d60plus":"2개월 이상 남음" }
 };
 const REGION_LABELS = {
-  all:"전체", capital:"수도권", youngnam:"영남", honam:"호남",
-  chungcheong:"충청", gangwon:"강원", jeju:"제주", national:"전국 단위"
+  all:"전체", national:"전국",
+  seoul:"서울", gyeonggi:"경기", incheon:"인천",
+  busan:"부산", daegu:"대구", ulsan:"울산",
+  gwangju:"광주", daejeon:"대전", sejong:"세종",
+  gangwon:"강원",
+  chungbuk:"충북", chungnam:"충남",
+  jeonbuk:"전북", jeonnam:"전남",
+  gyeongbuk:"경북", gyeongnam:"경남",
+  jeju:"제주",
+  // 호환성: 옛 권역 코드도 라벨 유지
+  capital:"수도권", youngnam:"영남", honam:"호남", chungcheong:"충청"
 };
 const GROUP_TITLES = { fields:"분야", types:"지원유형", moneyRanges:"지원금", deadlineRanges:"마감일" };
 
@@ -1552,9 +1586,11 @@ function applyFilters(){
     if(state.deadlineRanges.length && !state.deadlineRanges.some(r => matchesDeadlineRange(x, r))) return false;
     if(state.search){
       const s = state.search.toLowerCase();
+      const regionLabel = (x.regionLabel || REGION_LABELS[x.region] || '').toLowerCase();
       if(!(x.title.toLowerCase().includes(s) ||
            x.org.toLowerCase().includes(s) ||
-           x.summary.toLowerCase().includes(s))) return false;
+           x.summary.toLowerCase().includes(s) ||
+           regionLabel.includes(s))) return false;
     }
     return true;
   });
@@ -1789,11 +1825,14 @@ async function runMatch(){
   // 폴백 매칭 (API 실패/키 미설정 시)
   function buildFallbackMatches(){
     const regionMap = {
-      "서울":"capital","경기":"capital","인천":"capital",
-      "부산":"youngnam","대구":"youngnam",
-      "광주":"honam","전남":"honam",
-      "대전":"chungcheong",
-      "강원":"gangwon","제주":"jeju"
+      "서울":"seoul","경기":"gyeonggi","인천":"incheon",
+      "부산":"busan","대구":"daegu","울산":"ulsan",
+      "광주":"gwangju","대전":"daejeon","세종":"sejong",
+      "강원":"gangwon",
+      "충북":"chungbuk","충남":"chungnam",
+      "전북":"jeonbuk","전남":"jeonnam",
+      "경북":"gyeongbuk","경남":"gyeongnam",
+      "제주":"jeju"
     };
     const userRegionCode = regionMap[region] || null;
     return LISTINGS.map(x => ({
