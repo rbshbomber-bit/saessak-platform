@@ -158,20 +158,25 @@
     const client = await initSupabaseClient();
     if(!client) return;
 
+    function refreshPageAuthUI(){
+      if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
+      if(typeof window.refreshTokenDisplay === 'function') window.refreshTokenDisplay();
+    }
+
     const { data: sessionData } = await client.auth.getSession();
     const session = sessionData && sessionData.session;
     if(session){
       syncSupabaseToLocal(session);
+      refreshPageAuthUI();
     }
 
     client.auth.onAuthStateChange((event, sess) => {
-      if(event === 'SIGNED_IN' && sess){
+      if((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && sess){
         syncSupabaseToLocal(sess);
-        if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
-        if(typeof window.refreshTokenDisplay === 'function') window.refreshTokenDisplay();
+        refreshPageAuthUI();
       } else if(event === 'SIGNED_OUT'){
         localStorage.removeItem(SUPA_CURRENT_KEY);
-        if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
+        refreshPageAuthUI();
       }
     });
 

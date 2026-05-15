@@ -2246,21 +2246,23 @@ function updateAuthUI(){
   const u = getCurrentUser();
   const area = document.getElementById("auth-area");
   if(!area) return;
-  if(u){
-    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
-    const tokens = u.tokens != null ? u.tokens : 0;
-    const tokenDisplay = isAdmin ? '∞' : tokens.toLocaleString();
-    const sub = u.subscription;
-    const planTag = isAdmin
-      ? '<span class="plan-tag subscriber" style="background:#fde68a;color:#92400e;">ADMIN</span>'
-      : (sub
-        ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
-        : '<span class="plan-tag">FREE</span>');
-    area.innerHTML = `
-      <a class="token-chip" href="#pricing"><span>토큰 ${tokenDisplay}</span></a>
-      <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
-    `;
+  if(!u){
+    area.innerHTML = `<a class="nav-cta" href="auth.html" id="auth-cta">로그인</a>`;
+    return;
   }
+  const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+  const tokens = u.tokens != null ? u.tokens : 0;
+  const tokenDisplay = isAdmin ? '∞' : tokens.toLocaleString();
+  const sub = u.subscription;
+  const planTag = isAdmin
+    ? '<span class="plan-tag subscriber" style="background:#fde68a;color:#92400e;">ADMIN</span>'
+    : (sub
+      ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
+      : '<span class="plan-tag">FREE</span>');
+  area.innerHTML = `
+    <a class="token-chip" href="#pricing"><span>토큰 ${tokenDisplay}</span></a>
+    <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
+  `;
 }
 function getCurrentUserFull(){
   return getCurrentUser();
