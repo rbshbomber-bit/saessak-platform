@@ -289,9 +289,13 @@ header.site {
   background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius-m); padding: 24px;
   display: flex; flex-direction: column; gap: 10px;
+  width: 100%; text-align: left; font: inherit; color: inherit;
+  cursor: pointer;
   transition: all .2s;
 }
-.field-card:hover { border-color: var(--sage); transform: translateY(-2px); box-shadow: var(--shadow-m); }
+.field-card:hover,
+.field-card:focus-visible { border-color: var(--sage); transform: translateY(-2px); box-shadow: var(--shadow-m); outline: none; }
+.field-card.active { border-color: var(--sage-deep); box-shadow: 0 0 0 3px rgba(141,168,136,.22), var(--shadow-m); }
 .field-card .icon {
   width: 48px; height: 48px; background: var(--sage-soft);
   border-radius: 12px; display: grid; place-items: center;
@@ -815,10 +819,10 @@ footer.site a:hover { color: var(--ink); }
         <p>지원사업은 분야마다 심사 기준이 다릅니다. 우리는 분야별로 깊게 정리합니다.</p>
       </div>
       <div class="fields-row">
-        <div class="field-card"><div class="icon">✦</div><h3>딥테크·AI</h3><p>예비·초기창업패키지, 청년창업사관학교, K-Startup.</p></div>
-        <div class="field-card"><div class="icon">💗</div><h3>웰니스·헬스케어</h3><p>디지털 헬스, 시니어 케어, 약국·웰니스 융합.</p></div>
-        <div class="field-card"><div class="icon">🛍️</div><h3>커머스·로컬</h3><p>로컬크리에이터, 청년몰, 도시·지역 비즈니스.</p></div>
-        <div class="field-card"><div class="icon">🌾</div><h3>농업·푸드</h3><p>청년농업인 정착, 농촌융복합, 푸드테크.</p></div>
+        <button type="button" class="field-card" data-field-filter="딥테크·AI"><div class="icon">✦</div><h3>딥테크·AI</h3><p>예비·초기창업패키지, 청년창업사관학교, K-Startup.</p></button>
+        <button type="button" class="field-card" data-field-filter="웰니스·헬스케어"><div class="icon">💗</div><h3>웰니스·헬스케어</h3><p>디지털 헬스, 시니어 케어, 약국·웰니스 융합.</p></button>
+        <button type="button" class="field-card" data-field-filter="커머스·로컬"><div class="icon">🛍️</div><h3>커머스·로컬</h3><p>로컬크리에이터, 청년몰, 도시·지역 비즈니스.</p></button>
+        <button type="button" class="field-card" data-field-filter="농업·푸드"><div class="icon">🌾</div><h3>농업·푸드</h3><p>청년농업인 정착, 농촌융복합, 푸드테크.</p></button>
       </div>
     </div>
   </section>
@@ -1562,6 +1566,12 @@ const LABELS = {
   moneyRanges: { "under-1000":"1,000만 이하","1000-5000":"1,000만~5,000만","5000-10000":"5,000만~1억","over-10000":"1억 이상","loan":"융자 지원" },
   deadlineRanges: { "d14":"2주 이내","d30":"1개월 이내","d60":"2개월 이내","d60plus":"2개월 이상 남음" }
 };
+const FIELD_ALIASES = {
+  "딥테크·AI": ["딥테크·AI", "AI·딥테크", "딥테크", "AI"],
+  "웰니스·헬스케어": ["웰니스·헬스케어", "헬스케어", "바이오"],
+  "커머스·로컬": ["커머스·로컬", "커머스", "문화·콘텐츠", "소셜·복지", "일반"],
+  "농업·푸드": ["농업·푸드", "푸드"]
+};
 const REGION_LABELS = {
   all:"전체", national:"전국",
   seoul:"서울", gyeonggi:"경기", incheon:"인천",
@@ -1623,10 +1633,14 @@ function matchesDeadlineRange(x, range){
   if(range === "d60plus") return d > 60;
   return false;
 }
+function matchesField(x){
+  if(!state.fields.length) return true;
+  return state.fields.some(field => (FIELD_ALIASES[field] || [field]).includes(x.field));
+}
 function applyFilters(){
   return LISTINGS.filter(x => {
     if(state.region !== "all" && x.region !== state.region) return false;
-    if(state.fields.length && !state.fields.includes(x.field)) return false;
+    if(!matchesField(x)) return false;
     if(state.types.length && !x.types.some(t => state.types.includes(t))) return false;
     if(state.moneyRanges.length && !state.moneyRanges.some(r => matchesMoneyRange(x, r))) return false;
     if(state.deadlineRanges.length && !state.deadlineRanges.some(r => matchesDeadlineRange(x, r))) return false;
@@ -1720,6 +1734,28 @@ function syncCheckboxes(){
       pill.classList.toggle("checked", checked);
     });
   });
+}
+function syncFieldCards(){
+  document.querySelectorAll(".field-card[data-field-filter]").forEach(card => {
+    card.classList.toggle("active", state.fields.includes(card.dataset.fieldFilter));
+  });
+}
+function applyFieldShortcut(field){
+  state.region = "all";
+  state.search = "";
+  state.fields = [field];
+  state.types = [];
+  state.moneyRanges = [];
+  state.deadlineRanges = [];
+
+  const regionSelect = document.getElementById("region-select");
+  const searchInput = document.getElementById("search-input");
+  if(regionSelect) regionSelect.value = "all";
+  if(searchInput) searchInput.value = "";
+
+  syncCheckboxes();
+  renderAll();
+  document.getElementById("listings")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function renderList(){
   const c = document.getElementById("list-container");
@@ -1821,7 +1857,7 @@ function bindCardActions(scope){
     });
   });
 }
-function renderAll(){ renderActiveFilters(); renderList(); renderTracker(); updateDeadlineBanner(); }
+function renderAll(){ syncFieldCards(); renderActiveFilters(); renderList(); renderTracker(); updateDeadlineBanner(); }
 
 function updateDeadlineBanner(){
   const banner = document.getElementById("deadline-banner");
@@ -2449,6 +2485,9 @@ document.addEventListener("DOMContentLoaded", () => {
       state.region = c.dataset.region;
       renderAll();
     });
+  });
+  document.querySelectorAll(".field-card[data-field-filter]").forEach(card => {
+    card.addEventListener("click", () => applyFieldShortcut(card.dataset.fieldFilter));
   });
   document.getElementById("search-input").addEventListener("input", e => {
     state.search = e.target.value; renderList();
