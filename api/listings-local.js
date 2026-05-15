@@ -1,6 +1,6 @@
 // Vercel Serverless Function: /api/listings-local
-// K-Startup에 안 올라오는 강화·인천 지역 공고 보강 스크래퍼
-// 4개 소스: 강화군청 / 강화일자리센터 / 인천CCEI / 인천 청년정책 포털
+// K-Startup에 안 올라오는 지역·전국 청년지원사업 공고 보강 스크래퍼
+// 소스: 강화군청 / 강화일자리센터 / 전국 창조경제혁신센터 / 인천 청년정책 포털
 
 // ===== 유틸 =====
 function decodeEntities(s) {
@@ -17,6 +17,53 @@ function decodeEntities(s) {
 
 function clean(s) {
   return (s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function classifyField(title) {
+  const text = title || '';
+  if (/AI|인공지능|딥테크|빅데이터|로봇|반도체|기술|R&D/i.test(text)) return '딥테크';
+  if (/바이오|헬스|의료|웰니스|메디컬/i.test(text)) return '헬스케어';
+  if (/농업|농식품|푸드|식품|로컬|관광/i.test(text)) return '농업·푸드';
+  if (/콘텐츠|문화|예술|미디어|영상/i.test(text)) return '문화·콘텐츠';
+  if (/소셜|사회적|돌봄|복지/i.test(text)) return '소셜·복지';
+  if (/입주|보육|공간/i.test(text)) return '시설·공간';
+  if (/교육|아카데미|캠프|스쿨/i.test(text)) return '창업교육';
+  return '일반';
+}
+
+function classifyTypes(title) {
+  const text = title || '';
+  const types = [];
+  if (/지원금|사업화|자금|바우처|보조금|모집|지원사업/.test(text)) types.push('자금');
+  if (/입주|공간|보육|센터/.test(text)) types.push('공간');
+  if (/멘토|컨설팅|액셀러|IR|투자/.test(text)) types.push('멘토링');
+  if (/교육|아카데미|캠프|스쿨|강의/.test(text)) types.push('교육');
+  if (/판로|수출|해외|마케팅|전시/.test(text)) types.push('판로');
+  return types.length ? types : ['자금'];
+}
+
+const CCEI_CENTERS = [
+  { name: '서울', region: 'seoul' },
+  { name: '경기', region: 'gyeonggi' },
+  { name: '인천', region: 'incheon' },
+  { name: '부산', region: 'busan' },
+  { name: '대구', region: 'daegu' },
+  { name: '울산', region: 'ulsan' },
+  { name: '광주', region: 'gwangju' },
+  { name: '대전', region: 'daejeon' },
+  { name: '세종', region: 'sejong' },
+  { name: '강원', region: 'gangwon' },
+  { name: '충북', region: 'chungbuk' },
+  { name: '충남', region: 'chungnam' },
+  { name: '전북', region: 'jeonbuk' },
+  { name: '전남', region: 'jeonnam' },
+  { name: '경북', region: 'gyeongbuk' },
+  { name: '경남', region: 'gyeongnam' },
+  { name: '제주', region: 'jeju' },
+];
+
+function isRelevantSupportTitle(title) {
+  return /(청년|창업|스타트업|예비창업|초기창업|벤처|소상공인|로컬|창업기업|사업화|입주|보육|액셀러|IR|투자|지원사업)/.test(title);
 }
 
 async function fetchWithTimeout(url, ms = 6000) {
@@ -136,11 +183,10 @@ async function fetchGanghwaJob() {
   return results.slice(0, 30);
 }
 
-// ===== 3) 인천창조경제혁신센터 (사업공고) =====
-async function fetchCCEI() {
+// ===== 3) 전국 창조경제혁신센터 (사업공고) =====
+async function fetchCCEICenter(center) {
   const baseUrl = 'https://ccei.creativekorea.or.kr';
-  // 인천 지부 사업공고 목록 (center_searching=인천)
-  const listUrl = `${baseUrl}/service/business_list.do?center_searching=%EC%9D%B8%EC%B2%9C&pn=1`;
+  const listUrl = `${baseUrl}/service/business_list.do?center_searching=${encodeURIComponent(center.name)}&pn=1`;
   const html = await fetchHtml(listUrl);
   if (!html) return [];
 
@@ -155,25 +201,31 @@ async function fetchCCEI() {
     const title = decodeEntities(clean(m[2]));
     if (title.length < 5) continue;
     if (/(로그인|회원가입|메뉴|이전|다음)/.test(title)) continue;
+    if (!isRelevantSupportTitle(title)) continue;
     seen.add(id);
     results.push({
-      id: `ccei-incheon-${id}`,
+      id: `ccei-${center.region}-${id}`,
       title,
-      region: 'incheon',
-      regionLabel: '인천',
-      org: '인천창조경제혁신센터',
-      field: '일반',
+      region: center.region,
+      regionLabel: center.name,
+      org: `${center.name}창조경제혁신센터`,
+      field: classifyField(title),
       age: '만 39세 이하',
       money: '문의',
-      types: ['자금', '멘토링'],
+      types: classifyTypes(title),
       moneyMax: 0,
       deadline: '',
-      summary: '인천창조경제혁신센터 사업공고',
+      summary: `${center.name}창조경제혁신센터 사업공고 — 상세는 원본 페이지에서 확인`,
       url: `${baseUrl}/service/business_view.do?seq=${id}`,
-      source: 'ccei-incheon',
+      source: `ccei-${center.region}`,
     });
   }
-  return results.slice(0, 30);
+  return results.slice(0, 20);
+}
+
+async function fetchCCEIAll() {
+  const settled = await Promise.allSettled(CCEI_CENTERS.map(fetchCCEICenter));
+  return settled.flatMap(result => result.status === 'fulfilled' ? result.value : []);
 }
 
 // ===== 4) 인천 청년정책 포털 =====
@@ -227,15 +279,21 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=1800');
 
   try {
-    // 4개 소스 병렬 fetch — 한 곳 실패해도 다른 거 동작
+    // 공식 소스 병렬 fetch — 한 곳 실패해도 다른 거 동작
     const [ganghwaGov, ganghwaJob, ccei, incheonYouth] = await Promise.all([
       fetchGanghwaGov().catch(e => { console.error('ganghwa-gov', e.message); return []; }),
       fetchGanghwaJob().catch(e => { console.error('ganghwa-job', e.message); return []; }),
-      fetchCCEI().catch(e => { console.error('ccei', e.message); return []; }),
+      fetchCCEIAll().catch(e => { console.error('ccei', e.message); return []; }),
       fetchIncheonYouth().catch(e => { console.error('incheon-youth', e.message); return []; }),
     ]);
 
-    const all = [...ganghwaGov, ...ganghwaJob, ...ccei, ...incheonYouth];
+    const seen = new Set();
+    const all = [...ganghwaGov, ...ganghwaJob, ...ccei, ...incheonYouth].filter(item => {
+      const key = `${item.title}|${item.org}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     return res.status(200).json({
       ok: true,
@@ -243,7 +301,7 @@ export default async function handler(req, res) {
       sources: {
         ganghwaGov: ganghwaGov.length,
         ganghwaJob: ganghwaJob.length,
-        ccei: ccei.length,
+        cceiAll: ccei.length,
         incheonYouth: incheonYouth.length,
       },
       updatedAt: new Date().toISOString(),
