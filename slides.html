@@ -8,6 +8,7 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="usage-limit.js" defer></script>
 <script src="ai-history.js" defer></script>
 <script src="docx-gen.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
@@ -360,6 +361,13 @@ document.getElementById("d-run").addEventListener("click", async () => {
   const target = document.getElementById("d-target").value;
 
   const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+
+  // 일일 사용 한도 체크 (어뷰징 방지, 관리자 자동 우회)
+  if (window.saessak.checkLimit && !window.saessak.checkLimit('slides')) {
+    alert(window.saessak.getLimitMessage('slides'));
+    return;
+  }
+
   if(!isAdmin){
     if((u.tokens || 0) < SLIDES_COST){
       alert(`토큰이 부족합니다. ${SLIDES_COST} 토큰이 필요합니다. 현재: ${u.tokens || 0}`);
@@ -439,6 +447,8 @@ ${text}
     window.saessak?.handOff?.({ source: 'slides', target, planText: text });
     window._currentSlidesData = { data, target, duration, text };
     renderResult(data, target, duration);
+    // 성공 후 일일 사용량 기록
+    window.saessak.recordUsage && window.saessak.recordUsage('slides');
   } catch(e){
     console.error(e);
     document.getElementById("result-area").innerHTML = `

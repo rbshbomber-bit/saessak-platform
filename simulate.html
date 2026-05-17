@@ -8,6 +8,7 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="usage-limit.js" defer></script>
 <script src="ai-history.js" defer></script>
 <script src="docx-gen.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
@@ -395,6 +396,13 @@ document.getElementById("s-run").addEventListener("click", async () => {
   const field = document.getElementById("s-field").value;
 
   const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+
+  // 일일 사용 한도 체크 (어뷰징 방지, 관리자 자동 우회)
+  if (window.saessak.checkLimit && !window.saessak.checkLimit('simulate')) {
+    alert(window.saessak.getLimitMessage('simulate'));
+    return;
+  }
+
   if(!isAdmin){
     if((u.tokens || 0) < SIMULATE_COST){
       alert(`토큰이 부족합니다. ${SIMULATE_COST} 토큰이 필요해요. 현재 잔액: ${u.tokens || 0} 토큰\n\n메인 페이지 → 요금제에서 충전하시거나, 구독을 시작하세요.`);
@@ -467,6 +475,8 @@ ${text}
     if(!m) throw new Error("응답 형식 오류");
     const data = JSON.parse(m[0]);
     renderResult(data, target);
+    // 성공 후 일일 사용량 기록
+    window.saessak.recordUsage && window.saessak.recordUsage('simulate');
   } catch(e){
     console.error(e);
     document.getElementById("result-area").innerHTML = `

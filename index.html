@@ -35,6 +35,7 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="usage-limit.js" defer></script>
 <script src="ai-history.js" defer></script>
 <script src="docx-gen.js" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
@@ -1898,9 +1899,16 @@ async function runMatch(){
   const field = document.getElementById("m-field").value;
   const note = document.getElementById("m-note").value || "";
 
+  // 일일 사용 한도 체크 (어뷰징 방지, 관리자 자동 우회)
+  if (window.saessak.checkLimit && !window.saessak.checkLimit('match')) {
+    alert(window.saessak.getLimitMessage('match'));
+    return;
+  }
+
   btn.disabled = true; btn.textContent = "AI 분석 중...";
   out.innerHTML = `<div class="loading">AI가 13개 공고를 검토 중입니다...</div>`;
   incUsage("match");
+  window.saessak.recordUsage && window.saessak.recordUsage('match');
 
   const prompt = `당신은 한국 청년창업 지원사업 큐레이션 전문가입니다.
 사용자 프로필에 가장 적합한 공고 3~5개를 골라주세요.
@@ -2055,9 +2063,16 @@ async function runPlan(){
     }
   }
 
+  // 일일 사용 한도 체크 (어뷰징 방지, 관리자 자동 우회)
+  if (window.saessak.checkLimit && !window.saessak.checkLimit('planner')) {
+    alert(window.saessak.getLimitMessage('planner'));
+    return;
+  }
+
   btn.disabled = true; btn.textContent = "AI가 사업계획서 초안 작성 중...";
   out.innerHTML = `<div class="loading">⏳ 6개 챕터 자동 생성 중... (10~20초)</div>`;
   incUsage("plan");
+  window.saessak.recordUsage && window.saessak.recordUsage('planner');
 
   const prompt = `당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다.
 다음 정보로 "${target}" 양식에 맞는 사업계획서 초안을 작성하세요.

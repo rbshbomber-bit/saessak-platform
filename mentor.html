@@ -7,6 +7,7 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
+<script src="usage-limit.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap">
@@ -395,6 +396,12 @@ function startSession(topic){
 
   const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
 
+  // 일일 사용 한도 체크 (어뷰징 방지, 관리자 자동 우회)
+  if (window.saessak.checkLimit && !window.saessak.checkLimit('mentor')) {
+    alert(window.saessak.getLimitMessage('mentor'));
+    return;
+  }
+
   if(!isAdmin){
     if((u.tokens || 0) < SESSION_COST){
       showInsufficientInline();
@@ -415,6 +422,8 @@ function startSession(topic){
   } else {
     console.log('[saessak] 관리자 모드 — 토큰 차감 없이 세션 시작');
   }
+  // 세션 시작 단위로 일일 사용량 기록
+  window.saessak.recordUsage && window.saessak.recordUsage('mentor');
   refreshTokenDisplay();
 
   currentTopic = topic;
