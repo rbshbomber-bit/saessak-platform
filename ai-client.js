@@ -11,7 +11,7 @@
    * @param {object} [options]
    * @param {string} [options.system] - 시스템 프롬프트
    * @param {number} [options.max_tokens=1024]
-   * @param {string} [options.model] - 기본: claude-opus-4-6 (최상위 모델)
+   * @param {string} [options.model] - 기본: claude-opus-4-7 (Anthropic 최상위 모델)
    * @param {Array}  [options.attachments] - [{type:'image', media_type, data:base64}]
    * @param {string} [options.fallback] - API 실패 시 대체 텍스트
    * @returns {Promise<string>} 응답 텍스트

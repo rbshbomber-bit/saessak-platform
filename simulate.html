@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>심사위원 시뮬레이션 — 새싹지원사업</title>
+<title>심사위원 시뮬레이션 — 새싹매치</title>
 <meta name="description" content="가상 심사위원 5명 페르소나가 당신의 사업계획서를 검토합니다. 예상 질문 + 답변 가이드 포함." />
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
@@ -220,7 +220,7 @@ footer.site {
   <div class="container nav">
     <a class="brand" href="index.html">
       <div class="logo-img" aria-hidden="true"></div>
-      <span class="name">새싹<span class="accent">지원사업</span></span>
+      <span class="name"><span class="accent">새싹</span>매치</span>
     </a>
     <div class="nav-right">
       <span class="token-chip" id="token-display">
@@ -233,7 +233,7 @@ footer.site {
 
 <section class="hero-bar">
   <div class="container">
-    <span class="badge">⭐ Opus 4.6 · 회당 80 토큰</span>
+    <span class="badge">⭐ Opus 4.7 · 회당 80 토큰</span>
     <h1>심사위원 시뮬레이션</h1>
     <p>5명의 가상 페르소나가 당신의 사업계획서를 다각도로 평가합니다. 예상 질문 25개 + 강점·약점 도출.</p>
   </div>
@@ -313,7 +313,7 @@ footer.site {
       <a href="terms.html#ai-disclaimer">AI 면책</a> ·
       <a href="terms.html#privacy">개인정보처리방침</a>
     </div>
-    <div>© 2026 새싹지원사업 · 가상 시뮬레이션 · 실제 심사와 무관 · 합격 보장 없음</div>
+    <div>© 2026 새싹매치 · 가상 시뮬레이션 · 실제 심사와 무관 · 합격 보장 없음</div>
   </div>
 </footer>
 
@@ -580,7 +580,7 @@ function downloadSimDocx(){
     subtitle: '5명 가상 페르소나 평가 결과',
     sections,
     filename: `심사시뮬레이션_${cur.target}_${new Date().toISOString().slice(0,10)}`,
-    footerNote: '🤖 가상 페르소나 시뮬레이션 결과 · 실제 심사와 무관 · 합격 보장 없음 · 새싹지원사업'
+    footerNote: '🤖 가상 페르소나 시뮬레이션 결과 · 실제 심사와 무관 · 합격 보장 없음 · 새싹매치'
   }).catch(e => alert('다운로드 실패: ' + e.message));
 }
 </script>

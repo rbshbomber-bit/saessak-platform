@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>사업계획서 비교 분석 — 새싹지원사업</title>
+<title>사업계획서 비교 분석 — 새싹매치</title>
 <meta name="description" content="당신의 사업계획서를 합격 사례 12건과 비교 분석하여 강점·약점을 짚어드립니다." />
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
@@ -204,7 +204,7 @@ footer.site {
   <div class="container nav">
     <a class="brand" href="index.html">
       <div class="logo-img" aria-hidden="true"></div>
-      <span class="name">새싹<span class="accent">지원사업</span></span>
+      <span class="name"><span class="accent">새싹</span>매치</span>
     </a>
     <div class="nav-right">
       <span class="token-chip" id="token-display">
@@ -270,7 +270,7 @@ footer.site {
       <a href="terms.html#ai-disclaimer">AI 면책</a> ·
       <a href="terms.html#privacy">개인정보처리방침</a>
     </div>
-    <div>© 2026 새싹지원사업 · AI 자동 응답 · 본인 판단·검토 필수 · 합격 보장 없음</div>
+    <div>© 2026 새싹매치 · AI 자동 응답 · 본인 판단·검토 필수 · 합격 보장 없음</div>
   </div>
 </footer>
 
@@ -370,7 +370,7 @@ document.getElementById("c-run").addEventListener("click", async () => {
     <div class="loading">합격 사례 12건의 패턴과 비교 분석 중... (10~20초)</div>`;
 
   const systemPrompt = `당신은 정부 청년창업 지원사업 사업계획서 심사 경험이 풍부한 전문가입니다.
-새싹지원사업 플랫폼의 합격 사업계획서 라이브러리 12건 (예비창업패키지, 청년창업사관학교, 딥테크 헬스케어 등에서 합격한 익명화 케이스)의 일반적인 패턴을 알고 있습니다.
+새싹매치 플랫폼의 합격 사업계획서 라이브러리 12건 (예비창업패키지, 청년창업사관학교, 딥테크 헬스케어 등에서 합격한 익명화 케이스)의 일반적인 패턴을 알고 있습니다.
 
 다음 규칙으로 답변하세요:
 - 정확한 합격률 % 추정은 금지. 정성적 평가만.
@@ -502,7 +502,7 @@ function downloadDocx(){
   ];
   window.saessak.downloadDocx({
     title: `${cur.target} 비교 분석 결과`,
-    subtitle: '새싹지원사업 AI 비교 분석',
+    subtitle: '새싹매치 AI 비교 분석',
     sections,
     filename: `비교분석_${cur.target}_${new Date().toISOString().slice(0,10)}`
   }).catch(e => alert('다운로드 실패: ' + e.message));

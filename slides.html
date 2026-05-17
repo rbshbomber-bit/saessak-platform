@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>발표 슬라이드 자동 생성 — 새싹지원사업</title>
+<title>발표 슬라이드 자동 생성 — 새싹매치</title>
 <meta name="description" content="사업계획서를 10장 발표 슬라이드 구성안으로 자동 변환합니다." />
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
@@ -217,7 +217,7 @@ footer.site {
   <div class="container nav">
     <a class="brand" href="index.html">
       <div class="logo-img" aria-hidden="true"></div>
-      <span class="name">새싹<span class="accent">지원사업</span></span>
+      <span class="name"><span class="accent">새싹</span>매치</span>
     </a>
     <div class="nav-right">
       <span class="token-chip" id="token-display">
@@ -230,7 +230,7 @@ footer.site {
 
 <section class="hero-bar">
   <div class="container">
-    <span class="badge">⭐ Opus 4.6 · 회당 30 토큰</span>
+    <span class="badge">⭐ Opus 4.7 · 회당 30 토큰</span>
     <h1>발표 슬라이드 자동 생성</h1>
     <p>사업계획서를 10장 발표 슬라이드 구성안(제목·핵심 메시지·시각 요소·발표 노트)으로 자동 변환. (30 토큰)</p>
   </div>
@@ -284,7 +284,7 @@ footer.site {
       <a href="terms.html#ai-disclaimer">AI 면책</a> ·
       <a href="terms.html#privacy">개인정보처리방침</a>
     </div>
-    <div>© 2026 새싹지원사업 · AI 발표 구성안 · 본인 검토·디자인 필수</div>
+    <div>© 2026 새싹매치 · AI 발표 구성안 · 본인 검토·디자인 필수</div>
   </div>
 </footer>
 
@@ -493,7 +493,7 @@ function renderResult(data, target, duration){
 function generateMarkdown(){
   if(!lastResult) return "";
   let md = `# ${lastResult.title || '발표 슬라이드 구성안'}\n\n`;
-  md += `> 새싹지원사업 발표 슬라이드 자동 생성 · ${new Date().toLocaleString("ko-KR")}\n\n`;
+  md += `> 새싹매치 발표 슬라이드 자동 생성 · ${new Date().toLocaleString("ko-KR")}\n\n`;
   (lastResult.slides||[]).forEach(s => {
     md += `## 슬라이드 ${s.num}: ${s.title}\n`;
     md += `**스테이지**: ${s.stage}\n\n`;
@@ -534,7 +534,7 @@ function downloadSlidesDocx(){
     subtitle: `${cur.data.slides?.length||0}장 · ${cur.duration}분 발표용`,
     sections,
     filename: `발표슬라이드_${cur.target}_${new Date().toISOString().slice(0,10)}`,
-    footerNote: '🤖 AI 발표 구성안 · 본인 검토·디자인 필수 · 발표 성공 보장 없음 · 새싹지원사업'
+    footerNote: '🤖 AI 발표 구성안 · 본인 검토·디자인 필수 · 발표 성공 보장 없음 · 새싹매치'
   }).catch(e => alert('다운로드 실패: ' + e.message));
 }
 

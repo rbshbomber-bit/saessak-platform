@@ -3,16 +3,30 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>새싹지원사업 — 전국 청년창업 지원사업 통합 플랫폼</title>
+<title>새싹매치 — 전국 청년창업 지원사업 매칭 플랫폼</title>
 <meta name="description" content="전국 17개 시도 청년창업 지원사업을 한 곳에. AI가 골라주고, 사업계획서까지 자동 생성." />
 
 <!-- SEO + Open Graph (카톡·SNS 공유 시 미리보기) -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content="새싹지원사업 — 전국 청년창업 지원사업 통합 플랫폼" />
+<meta property="og:title" content="새싹매치 — 전국 청년창업 지원사업 매칭 플랫폼" />
 <meta property="og:description" content="전국 청년창업 공고를 한 곳에. AI가 내 조건에 맞는 사업 골라주고, 사업계획서 초안 5분 자동 생성." />
 <meta property="og:image" content="images/hero.png" />
+<meta property="og:url" content="https://saessak-platform.vercel.app/" />
 <meta property="og:locale" content="ko_KR" />
-<meta property="og:site_name" content="새싹지원사업" />
+<meta property="og:site_name" content="새싹매치" />
+
+<!-- Schema.org: 구글이 사이트 이름을 정확히 인식하도록 명시 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "새싹매치",
+  "alternateName": ["Saessak Match", "새싹"],
+  "url": "https://saessak-platform.vercel.app/",
+  "description": "전국 17개 시도 청년창업 지원사업을 AI가 매칭해주는 플랫폼",
+  "inLanguage": "ko-KR"
+}
+</script>
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="theme-color" content="#5c7a5a" />
 <link rel="icon" href="images/logo.png" type="image/png" />
@@ -289,13 +303,9 @@ header.site {
   background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius-m); padding: 24px;
   display: flex; flex-direction: column; gap: 10px;
-  width: 100%; text-align: left; font: inherit; color: inherit;
-  cursor: pointer;
   transition: all .2s;
 }
-.field-card:hover,
-.field-card:focus-visible { border-color: var(--sage); transform: translateY(-2px); box-shadow: var(--shadow-m); outline: none; }
-.field-card.active { border-color: var(--sage-deep); box-shadow: 0 0 0 3px rgba(141,168,136,.22), var(--shadow-m); }
+.field-card:hover { border-color: var(--sage); transform: translateY(-2px); box-shadow: var(--shadow-m); }
 .field-card .icon {
   width: 48px; height: 48px; background: var(--sage-soft);
   border-radius: 12px; display: grid; place-items: center;
@@ -705,7 +715,7 @@ footer.site a:hover { color: var(--ink); }
   🚧 <b>베타 운영 중</b> — AI 매칭·사업계획서 정식 가동 <b>2026년 7월</b> · 결제 시스템 정식 가동 <b>2026년 8월</b> · 현재는 시연 모드
 </div>
 <div class="promo">
-  ✨ <span class="em">Anthropic 최상위 모델</span> — 사업계획서·심사·멘토링 모두 <b>Claude Opus 4.6</b> 사용 · <a href="#pricing">요금 보기 →</a>
+  ✨ <span class="em">Anthropic 최상위 모델</span> — 사업계획서·심사·멘토링 모두 <b>Claude Opus 4.7</b> 사용 · <a href="#pricing">요금 보기 →</a>
 </div>
 <div id="deadline-banner" class="promo" style="background:#b91c1c;display:none;">
   ⏰ <b>마감 임박</b> — <span id="deadline-count">0</span>건의 공고가 D-3 이내로 마감됩니다 · <a href="#listings" onclick="filterDeadlineSoon(event)">바로가기 →</a>
@@ -715,7 +725,7 @@ footer.site a:hover { color: var(--ink); }
   <div class="container nav">
     <a class="brand" href="#top">
       <span class="logo-img"></span>
-      <span class="name"><span class="accent">새싹</span>지원사업</span>
+      <span class="name"><span class="accent">새싹</span>매치</span>
     </a>
     <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">☰</button>
     <nav class="nav-links" id="nav-links">
@@ -819,10 +829,10 @@ footer.site a:hover { color: var(--ink); }
         <p>지원사업은 분야마다 심사 기준이 다릅니다. 우리는 분야별로 깊게 정리합니다.</p>
       </div>
       <div class="fields-row">
-        <button type="button" class="field-card" data-field-filter="딥테크·AI"><div class="icon">✦</div><h3>딥테크·AI</h3><p>예비·초기창업패키지, 청년창업사관학교, K-Startup.</p></button>
-        <button type="button" class="field-card" data-field-filter="웰니스·헬스케어"><div class="icon">💗</div><h3>웰니스·헬스케어</h3><p>디지털 헬스, 시니어 케어, 약국·웰니스 융합.</p></button>
-        <button type="button" class="field-card" data-field-filter="커머스·로컬"><div class="icon">🛍️</div><h3>커머스·로컬</h3><p>로컬크리에이터, 청년몰, 도시·지역 비즈니스.</p></button>
-        <button type="button" class="field-card" data-field-filter="농업·푸드"><div class="icon">🌾</div><h3>농업·푸드</h3><p>청년농업인 정착, 농촌융복합, 푸드테크.</p></button>
+        <div class="field-card"><div class="icon">✦</div><h3>딥테크·AI</h3><p>예비·초기창업패키지, 청년창업사관학교, K-Startup.</p></div>
+        <div class="field-card"><div class="icon">💗</div><h3>웰니스·헬스케어</h3><p>디지털 헬스, 시니어 케어, 약국·웰니스 융합.</p></div>
+        <div class="field-card"><div class="icon">🛍️</div><h3>커머스·로컬</h3><p>로컬크리에이터, 청년몰, 도시·지역 비즈니스.</p></div>
+        <div class="field-card"><div class="icon">🌾</div><h3>농업·푸드</h3><p>청년농업인 정착, 농촌융복합, 푸드테크.</p></div>
       </div>
     </div>
   </section>
@@ -948,7 +958,7 @@ footer.site a:hover { color: var(--ink); }
         <div class="copy">
           <div class="eyebrow">AI 매칭 · 무료</div>
           <h2>당신의 조건에 맞는 공고만 골라줍니다.</h2>
-          <p>나이·지역·관심 분야·사업 메모만 알려주시면, AI가 실시간 공고 중 가장 적합한 3~5개를 찾아 이유까지 설명해드립니다.</p>
+          <p>나이·지역·관심 분야·사업 메모만 알려주시면, AI가 전국 13개 공고 중 가장 적합한 3~5개를 찾아 이유까지 설명해드립니다.</p>
           <ul>
             <li>중앙부처 + 17개 시도 공고 통합 분석</li>
             <li>마감 임박 + 적합도 동시 고려</li>
@@ -1027,7 +1037,7 @@ footer.site a:hover { color: var(--ink); }
         <div style="font-size:22px;flex-shrink:0;">🤝</div>
         <div style="font-size:13px;line-height:1.7;color:var(--ink-2);">
           <b style="color:var(--sage-deep);font-size:14px;">AI는 자동화가 아닌 ‘작성 보조 도구’입니다.</b><br />
-          새싹지원사업의 AI는 사용자가 작성을 시작할 수 있도록 정부 양식·구조·키워드를 잡아주는 보조 도구입니다.
+          새싹매치의 AI는 사용자가 작성을 시작할 수 있도록 정부 양식·구조·키워드를 잡아주는 보조 도구입니다.
           AI 결과물은 일반론과 표준 표현으로 구성되며, <b>본인의 실제 데이터·차별점·검수가 반드시 추가</b>되어야 의미 있는 사업계획서가 됩니다.
           본 사업계획서 AI는 정부 심사 합격을 보장하지 않으며, 신청 결과에 대한 모든 책임은 사용자 본인에게 있습니다.
         </div>
@@ -1036,7 +1046,7 @@ footer.site a:hover { color: var(--ink); }
       <div class="demo-card">
         <div class="head-row">
           <h3>사업계획서 AI 체험</h3>
-          <span class="premium-badge">⭐ Opus 4.6 · 20토큰</span>
+          <span class="premium-badge">⭐ Opus 4.7 · 20토큰</span>
         </div>
         <div class="match-form" id="plan-form">
           <div class="field full">
@@ -1470,7 +1480,7 @@ footer.site a:hover { color: var(--ink); }
 
 <footer class="site">
   <div class="container row" style="margin-bottom: 16px;">
-    <div>© 2026 새싹지원사업 · 전국 17개 시도 청년창업 통합 플랫폼 · 베타 운영 중</div>
+    <div>© 2026 새싹매치 · 전국 17개 시도 청년창업 지원사업 매칭 플랫폼 · 베타 운영 중</div>
     <div>
       <a href="terms.html">이용약관</a> ·
       <a href="terms.html#privacy">개인정보처리방침</a> ·
@@ -1493,7 +1503,7 @@ footer.site a:hover { color: var(--ink); }
 </div>
 
 <script>
-// ===== 데이터 — K-Startup + 전국 지역 보강 API 우선, 실패 시 인라인 폴백 =====
+// ===== 데이터 (전국 13개) — listings.json fetch 우선, 실패 시 인라인 폴백 =====
 let LISTINGS = [
   // 전국 단위 (중앙부처) 6개
   { id:"nat-pre-pkg", region:"national", regionLabel:"전국", title:"예비창업패키지 2026",
@@ -1504,10 +1514,10 @@ let LISTINGS = [
     org:"창업진흥원 / K-Startup", field:"딥테크·AI", age:"창업 3년 이내", money:"최대 1억원",
     types:["자금","멘토링"], moneyMax: 100000000, deadline:"2026-07-05",
     summary:"AI·빅데이터 분야 초기 스타트업 사업화 + 시제품 고도화. 205억 배정.", url:"https://www.k-startup.go.kr/" },
-  { id:"nat-cys-school", region:"national", regionLabel:"전국", title:"청년창업사관학교 17기",
-    org:"중소벤처기업진흥공단", field:"딥테크·AI", age:"만 39세 이하", money:"최대 1억원 + 1년 입주",
-    types:["자금","공간","멘토링","교육"], moneyMax: 100000000, deadline:"2026-06-15",
-    summary:"전국 14개 거점. AI·로봇·딥테크 청년 스타트업 집중 육성.", url:"https://start.kosmes.or.kr/" },
+  { id:"nat-cys-school", region:"national", regionLabel:"전국", title:"청년창업사관학교 — 차기 회차 (2027.1~2월 모집 예정)",
+    org:"중소벤처기업진흥공단", field:"딥테크·AI", age:"만 39세 이하 (창업 3년 이내)", money:"최대 1억원 + 1년 입주",
+    types:["자금","공간","멘토링","교육"], moneyMax: 100000000, deadline:"2027-02-13",
+    summary:"전국 18개 캠퍼스. 2026년 18기(1.30~2.13)는 모집 종료, 현재 운영 중. 차기 모집은 2027년 1~2월 예정. 사업계획서·시제품 사전 준비 권장.", url:"https://start.kosmes.or.kr/" },
   { id:"nat-wellness-deeptech", region:"national", regionLabel:"전국", title:"딥테크 창업패키지 — 헬스케어·웰니스",
     org:"중기부 / K-Startup", field:"웰니스·헬스케어", age:"창업 7년 이내", money:"최대 3억원",
     types:["자금","멘토링"], moneyMax: 300000000, deadline:"2026-08-20",
@@ -1566,12 +1576,6 @@ const LABELS = {
   moneyRanges: { "under-1000":"1,000만 이하","1000-5000":"1,000만~5,000만","5000-10000":"5,000만~1억","over-10000":"1억 이상","loan":"융자 지원" },
   deadlineRanges: { "d14":"2주 이내","d30":"1개월 이내","d60":"2개월 이내","d60plus":"2개월 이상 남음" }
 };
-const FIELD_ALIASES = {
-  "딥테크·AI": ["딥테크·AI", "AI·딥테크", "딥테크", "AI"],
-  "웰니스·헬스케어": ["웰니스·헬스케어", "헬스케어", "바이오"],
-  "커머스·로컬": ["커머스·로컬", "커머스", "문화·콘텐츠", "소셜·복지", "일반"],
-  "농업·푸드": ["농업·푸드", "푸드"]
-};
 const REGION_LABELS = {
   all:"전체", national:"전국",
   seoul:"서울", gyeonggi:"경기", incheon:"인천",
@@ -1593,8 +1597,7 @@ const state = {
   filterOpen: false, saved: {}
 };
 const STORAGE_KEY = "saessak_v3_national";
-const TODAY = new Date();
-TODAY.setHours(0, 0, 0, 0);
+const TODAY = new Date("2026-05-12");
 
 function loadStorage(){
   try { const r = localStorage.getItem(STORAGE_KEY);
@@ -1603,15 +1606,9 @@ function loadStorage(){
 function saveStorage(){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({saved: state.saved})); } catch(e){}
 }
-function hasDeadline(s){
-  return !!s && !Number.isNaN(new Date(s).getTime());
-}
-function daysLeft(s){
-  if(!hasDeadline(s)) return null;
-  return Math.ceil((new Date(s) - TODAY)/(1000*60*60*24));
-}
-function ddlCls(d){ if(d === null) return "normal"; if(d<0) return ""; if(d<=14) return "soon"; return "normal"; }
-function ddlLbl(d){ if(d === null) return "상시·확인 필요"; if(d<0) return "마감"; if(d===0) return "오늘 마감"; return "D-"+d; }
+function daysLeft(s){ return Math.ceil((new Date(s) - TODAY)/(1000*60*60*24)); }
+function ddlCls(d){ if(d<0) return ""; if(d<=14) return "soon"; return "normal"; }
+function ddlLbl(d){ if(d<0) return "마감"; if(d===0) return "오늘 마감"; return "D-"+d; }
 
 function matchesMoneyRange(x, range){
   if(range === "loan") return x.types.includes("융자");
@@ -1625,7 +1622,6 @@ function matchesMoneyRange(x, range){
 }
 function matchesDeadlineRange(x, range){
   const d = daysLeft(x.deadline);
-  if(d === null) return false;
   if(d < 0) return false;
   if(range === "d14")     return d <= 14;
   if(range === "d30")     return d <= 30;
@@ -1633,14 +1629,10 @@ function matchesDeadlineRange(x, range){
   if(range === "d60plus") return d > 60;
   return false;
 }
-function matchesField(x){
-  if(!state.fields.length) return true;
-  return state.fields.some(field => (FIELD_ALIASES[field] || [field]).includes(x.field));
-}
 function applyFilters(){
   return LISTINGS.filter(x => {
     if(state.region !== "all" && x.region !== state.region) return false;
-    if(!matchesField(x)) return false;
+    if(state.fields.length && !state.fields.includes(x.field)) return false;
     if(state.types.length && !x.types.some(t => state.types.includes(t))) return false;
     if(state.moneyRanges.length && !state.moneyRanges.some(r => matchesMoneyRange(x, r))) return false;
     if(state.deadlineRanges.length && !state.deadlineRanges.some(r => matchesDeadlineRange(x, r))) return false;
@@ -1657,10 +1649,9 @@ function applyFilters(){
 }
 function applySort(arr){
   const a = arr.slice();
-  const deadlineValue = x => hasDeadline(x.deadline) ? new Date(x.deadline).getTime() : Number.MAX_SAFE_INTEGER;
   switch(state.sort){
-    case "deadline-asc":  return a.sort((p,q)=> deadlineValue(p) - deadlineValue(q));
-    case "deadline-desc": return a.sort((p,q)=> deadlineValue(q) - deadlineValue(p));
+    case "deadline-asc":  return a.sort((p,q)=> new Date(p.deadline) - new Date(q.deadline));
+    case "deadline-desc": return a.sort((p,q)=> new Date(q.deadline) - new Date(p.deadline));
     case "money-desc":    return a.sort((p,q)=> q.moneyMax - p.moneyMax);
     case "money-asc":     return a.sort((p,q)=> p.moneyMax - q.moneyMax);
     default: return a;
@@ -1678,7 +1669,7 @@ function cardHTML(x, why){
       <h4>${x.title}</h4>
       <div class="org">${x.org} · ${x.age}</div>
       <div class="meta-row">
-        <span class="ddl ${ddlCls(days)}">${ddlLbl(days)}${hasDeadline(x.deadline) ? ` · ${x.deadline}` : ""}</span>
+        <span class="ddl ${ddlCls(days)}">${ddlLbl(days)} · ${x.deadline}</span>
         <span class="money">${x.money}</span>
       </div>
       <div class="type-row">${x.types.map(t => `<span class="tag type">${LABELS.types[t]||t}</span>`).join("")}</div>
@@ -1735,28 +1726,6 @@ function syncCheckboxes(){
     });
   });
 }
-function syncFieldCards(){
-  document.querySelectorAll(".field-card[data-field-filter]").forEach(card => {
-    card.classList.toggle("active", state.fields.includes(card.dataset.fieldFilter));
-  });
-}
-function applyFieldShortcut(field){
-  state.region = "all";
-  state.search = "";
-  state.fields = [field];
-  state.types = [];
-  state.moneyRanges = [];
-  state.deadlineRanges = [];
-
-  const regionSelect = document.getElementById("region-select");
-  const searchInput = document.getElementById("search-input");
-  if(regionSelect) regionSelect.value = "all";
-  if(searchInput) searchInput.value = "";
-
-  syncCheckboxes();
-  renderAll();
-  document.getElementById("listings")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
 function renderList(){
   const c = document.getElementById("list-container");
   const filtered = applySort(applyFilters());
@@ -1797,7 +1766,7 @@ function renderTracker(){
         <h4>${item.title}</h4>
         <div class="org">${item.org}</div>
         <div class="meta-row">
-          <span class="ddl ${ddlCls(days)}">${ddlLbl(days)}${hasDeadline(item.deadline) ? ` · ${item.deadline}` : ""}</span>
+          <span class="ddl ${ddlCls(days)}">${ddlLbl(days)} · ${item.deadline}</span>
           <span class="money">${item.money}</span>
         </div>
         <div class="tracker-stages">
@@ -1857,7 +1826,7 @@ function bindCardActions(scope){
     });
   });
 }
-function renderAll(){ syncFieldCards(); renderActiveFilters(); renderList(); renderTracker(); updateDeadlineBanner(); }
+function renderAll(){ renderActiveFilters(); renderList(); renderTracker(); updateDeadlineBanner(); }
 
 function updateDeadlineBanner(){
   const banner = document.getElementById("deadline-banner");
@@ -1896,14 +1865,20 @@ async function runMatch(){
   const note = document.getElementById("m-note").value || "";
 
   btn.disabled = true; btn.textContent = "AI 분석 중...";
-  out.innerHTML = `<div class="loading">AI가 실시간 공고를 검토 중입니다...</div>`;
+  out.innerHTML = `<div class="loading">AI가 13개 공고를 검토 중입니다...</div>`;
   incUsage("match");
 
   const prompt = `당신은 한국 청년창업 지원사업 큐레이션 전문가입니다.
 사용자 프로필에 가장 적합한 공고 3~5개를 골라주세요.
 [프로필] 나이: ${age}세 / 지역: ${region} / 관심분야: ${field} / 메모: ${note || "(없음)"}
 [작업] 첨부 공고 중 적합도 높은 순으로 3~5개 선택. 각 공고에 "왜 이 사람에게 맞는지" 1~2문장.
-[출력] JSON만: { "matches": [ { "id": "공고id", "reason": "이유" } ] }`;
+
+[중요 - 표현 규칙]
+- 합격률·합격 확률·% 등 정량 수치 사용 절대 금지.
+- 적합도는 "매우 강함 / 강함 / 보통 / 약함" 4단계 정성 평가로만 표현.
+- "합격합니다", "통과합니다" 등 확정 표현 금지. "유리합니다", "참고해볼 만합니다" 등 가능성 표현 사용.
+
+[출력] JSON만: { "matches": [ { "id": "공고id", "reason": "적합도 [매우 강함|강함|보통|약함] — 이유 1~2문장" } ] }`;
 
   // 폴백 매칭 (API 실패/키 미설정 시)
   function buildFallbackMatches(){
@@ -1918,14 +1893,40 @@ async function runMatch(){
       "제주":"jeju"
     };
     const userRegionCode = regionMap[region] || null;
-    return LISTINGS.map(x => ({
-      x, score: (x.field === field ? 3 : 0) +
-                (userRegionCode && x.region === userRegionCode ? 3 : 0) +
-                (x.region === "national" ? 2 : 0) +
-                (parseInt(age) <= 49 && x.age.includes("49") ? 1 : 0) +
-                (parseInt(age) <= 39 && x.age.includes("39") ? 2 : 0)
-    })).sort((a,b)=> b.score - a.score).slice(0,4)
-      .map(({x,score})=>({ id: x.id, reason: `분야·지역·연령 기준 적합도 ${score}점.` }));
+    const userAge = parseInt(age) || 99;
+    return LISTINGS.map(x => {
+      const fieldMatch = x.field === field;
+      const regionMatch = userRegionCode && x.region === userRegionCode;
+      const nationalMatch = x.region === "national";
+      const ageMatch39 = userAge <= 39 && (x.age || "").includes("39");
+      const ageMatch49 = userAge <= 49 && (x.age || "").includes("49");
+
+      const score = (fieldMatch ? 3 : 0)
+                  + (regionMatch ? 3 : 0)
+                  + (nationalMatch ? 2 : 0)
+                  + (ageMatch39 ? 2 : 0)
+                  + (ageMatch49 ? 1 : 0);
+
+      // 정성 4단계 라벨 (정량 점수·% 노출 금지 원칙)
+      let fitLabel;
+      if (score >= 7)      fitLabel = "매우 강함";
+      else if (score >= 5) fitLabel = "강함";
+      else if (score >= 3) fitLabel = "보통";
+      else                 fitLabel = "약함";
+
+      const matched = [];
+      if (fieldMatch)    matched.push("관심분야");
+      if (regionMatch)   matched.push("거주지역");
+      if (nationalMatch) matched.push("전국 대상");
+      if (ageMatch39 || ageMatch49) matched.push("연령 조건");
+
+      const reason = matched.length
+        ? `적합도 ${fitLabel} — ${matched.join("·")} 일치. 본인 사업 아이템·시제품·자금계획 등을 확인 후 신청 판단을 권장합니다.`
+        : `적합도 ${fitLabel} — 입력 조건과 직접 매치는 약합니다. 사업 분야·연령 등을 확인 후 검토해보세요.`;
+
+      return { x, score, reason };
+    }).sort((a,b)=> b.score - a.score).slice(0,4)
+      .map(({x,reason})=>({ id: x.id, reason }));
   }
 
   try {
@@ -1963,7 +1964,7 @@ async function runMatch(){
 function renderMatches(parsed){
   const out = document.getElementById("match-result");
   out.innerHTML = `
-    <div style="margin: 24px 0 12px; font-size: 13px; color: var(--ink-3); font-weight: 600;">${parsed.matches.length}개 매칭 — 적합도 순</div>
+    <div style="margin: 24px 0 12px; font-size: 13px; color: var(--ink-3); font-weight: 600;">${parsed.matches.length}개 매칭 — 적합도 높은 순 (정성 평가, 합격 보장 아님)</div>
     <div class="card-grid">
       ${parsed.matches.map(m => {
         const item = LISTINGS.find(x=>x.id===m.id);
@@ -2118,7 +2119,7 @@ function renderPlan(parsed){
 
       <!-- 하단 면책 워터마크 -->
       <div style="margin-top:32px;padding:14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);text-align:center;">
-        🤖 AI 자동 생성 · 본인 검토 후 사용 · 합격 보장 없음 · © 새싹지원사업 베타
+        🤖 AI 자동 생성 · 본인 검토 후 사용 · 합격 보장 없음 · © 새싹매치 베타
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
@@ -2140,7 +2141,7 @@ function renderPlan(parsed){
       subtitle: `${cur.target} 신청용 초안`,
       sections,
       filename: `사업계획서_${cur.target}_${new Date().toISOString().slice(0,10)}`,
-      footerNote: '🤖 AI 자동 생성 초안 · 본인 검토 후 사용 · 합격 보장 없음 · 새싹지원사업'
+      footerNote: '🤖 AI 자동 생성 초안 · 본인 검토 후 사용 · 합격 보장 없음 · 새싹매치'
     }).catch(e => alert('다운로드 실패: ' + e.message));
   });
 }
@@ -2167,7 +2168,7 @@ function openModal(kind){
       <p style="font-size:14px;background:var(--bg);padding:12px;border-radius:8px;color:var(--ink-2);">📞 운영자 직통: 010-XXXX-XXXX<br />📧 이메일: rbshbomber@gmail.com</p>
       <div class="btn-row">
         <button class="btn secondary" onclick="closeModal()">닫기</button>
-        <a class="btn primary" href="mailto:rbshbomber@gmail.com?subject=새싹지원사업 지자체 화이트라벨 상담">이메일 보내기</a>
+        <a class="btn primary" href="mailto:rbshbomber@gmail.com?subject=새싹매치 지자체 화이트라벨 상담">이메일 보내기</a>
       </div>`;
   } else if(kind === "download"){
     html = `
@@ -2282,23 +2283,21 @@ function updateAuthUI(){
   const u = getCurrentUser();
   const area = document.getElementById("auth-area");
   if(!area) return;
-  if(!u){
-    area.innerHTML = `<a class="nav-cta" href="auth.html" id="auth-cta">로그인</a>`;
-    return;
+  if(u){
+    const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+    const tokens = u.tokens != null ? u.tokens : 0;
+    const tokenDisplay = isAdmin ? '∞' : tokens.toLocaleString();
+    const sub = u.subscription;
+    const planTag = isAdmin
+      ? '<span class="plan-tag subscriber" style="background:#fde68a;color:#92400e;">ADMIN</span>'
+      : (sub
+        ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
+        : '<span class="plan-tag">FREE</span>');
+    area.innerHTML = `
+      <a class="token-chip" href="#pricing"><span>토큰 ${tokenDisplay}</span></a>
+      <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
+    `;
   }
-  const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
-  const tokens = u.tokens != null ? u.tokens : 0;
-  const tokenDisplay = isAdmin ? '∞' : tokens.toLocaleString();
-  const sub = u.subscription;
-  const planTag = isAdmin
-    ? '<span class="plan-tag subscriber" style="background:#fde68a;color:#92400e;">ADMIN</span>'
-    : (sub
-      ? `<span class="plan-tag subscriber">${sub.plan.toUpperCase()}</span>`
-      : '<span class="plan-tag">FREE</span>');
-  area.innerHTML = `
-    <a class="token-chip" href="#pricing"><span>토큰 ${tokenDisplay}</span></a>
-    <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
-  `;
 }
 function getCurrentUserFull(){
   return getCurrentUser();
@@ -2364,7 +2363,7 @@ function incUsage(kind){
 }
 
 // ===== 공고 데이터 로드 =====
-// 메인: K-Startup 실시간 + 전국 지역 보강 스크래핑 병렬
+// 메인: K-Startup 실시간 + 지역 보강(강화·인천 스크래핑) 병렬
 // 폴백: listings.json → 인라인 데이터
 async function tryLoadListingsJson(){
   // K-Startup + 지역 보강 병렬 호출
@@ -2383,14 +2382,14 @@ async function tryLoadListingsJson(){
     console.warn("[K-Startup] API 응답 없음 또는 실패");
   }
 
-  // 2) 전국 지역 보강 — 중복 제거 후 추가
+  // 2) 지역 보강 (강화·인천 — 중복 제거 후 추가)
   if (localResp.status === 'fulfilled' && localResp.value?.ok && Array.isArray(localResp.value.listings)) {
     const existing = new Set(combined.map(x => `${x.title}|${x.org || ''}`));
     const localUnique = localResp.value.listings.filter(x =>
       !existing.has(`${x.title}|${x.org || ''}`)
     );
     combined = [...combined, ...localUnique];
-    console.log(`[Local/National] ${localResp.value.count}건 수신 (중복 제외 ${localUnique.length}건 추가)`, localResp.value.sources);
+    console.log(`[Local] ${localResp.value.count}건 수신 (중복 제외 ${localUnique.length}건 추가)`, localResp.value.sources);
   } else {
     console.warn("[Local] 지역 보강 API 응답 없음 또는 실패");
   }
@@ -2485,9 +2484,6 @@ document.addEventListener("DOMContentLoaded", () => {
       state.region = c.dataset.region;
       renderAll();
     });
-  });
-  document.querySelectorAll(".field-card[data-field-filter]").forEach(card => {
-    card.addEventListener("click", () => applyFieldShortcut(card.dataset.fieldFilter));
   });
   document.getElementById("search-input").addEventListener("input", e => {
     state.search = e.target.value; renderList();
