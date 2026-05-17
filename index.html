@@ -412,10 +412,33 @@ header.site {
 .active-filter.reset:hover { color: var(--ink); border-color: var(--ink); }
 .filter-panel {
   display: none; background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius-m); padding: 20px 22px; margin-bottom: 20px;
+  border-radius: var(--radius-m); padding: 20px 22px 0; margin-bottom: 20px;
   box-shadow: var(--shadow-s);
 }
 .filter-panel.open { display: block; }
+.filter-actions {
+  position: sticky; bottom: 0; z-index: 5;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; padding: 16px 0;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  background: var(--card);
+}
+.filter-action-reset {
+  padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--line); background: transparent;
+  font-size: 13px; font-weight: 600; color: var(--ink-3);
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.filter-action-reset:hover { color: var(--ink); border-color: var(--ink-3); }
+.filter-action-apply {
+  padding: 11px 22px; border-radius: 8px; border: none;
+  background: var(--ink); color: #fff;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all .12s; letter-spacing: -.01em;
+}
+.filter-action-apply:hover { background: var(--sage-deep); }
+.filter-action-apply #filter-action-count { font-weight: 800; }
 .filter-group { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .filter-group:first-child { padding-top: 0; }
 .filter-group:last-child { border-bottom: 0; padding-bottom: 0; }
@@ -944,6 +967,14 @@ footer.site a:hover { color: var(--ink); }
               <label class="cb-pill"><input type="checkbox" value="d60" /><span class="box"></span>2개월 이내</label>
               <label class="cb-pill"><input type="checkbox" value="d60plus" /><span class="box"></span>2개월 이상 남음</label>
             </div>
+          </div>
+
+          <!-- 패널 하단 액션 바: 체크는 즉시 반영되지만, 사용자가 '봤다는 의식'을 갖도록 명시적 닫기 버튼 -->
+          <div class="filter-actions">
+            <button class="filter-action-reset" id="filter-action-reset" type="button">↺ 전체 초기화</button>
+            <button class="filter-action-apply" id="filter-action-apply" type="button">
+              <span id="filter-action-count">0</span>건 결과 보기 →
+            </button>
           </div>
         </div>
         <div class="card-grid" id="list-container"></div>
@@ -1730,6 +1761,9 @@ function renderList(){
   const c = document.getElementById("list-container");
   const filtered = applySort(applyFilters());
   document.getElementById("results-count").textContent = `총 ${filtered.length}개 공고`;
+  // 패널 하단 액션 바의 결과 카운트도 동기화
+  const actionCount = document.getElementById("filter-action-count");
+  if (actionCount) actionCount.textContent = filtered.length;
   if(!filtered.length){
     c.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
       <div style="width:80px;height:80px;margin:0 auto 16px;border-radius:16px;background:var(--sage-soft);display:grid;place-items:center;font-size:32px;">🔎</div>
@@ -2496,6 +2530,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("filter-panel").classList.toggle("open", state.filterOpen);
     document.getElementById("filter-toggle").classList.toggle("open", state.filterOpen);
     document.getElementById("filter-arrow").textContent = state.filterOpen ? "▴" : "▾";
+  });
+
+  // 패널 하단 액션 바
+  document.getElementById("filter-action-reset")?.addEventListener("click", () => {
+    state.fields = []; state.types = []; state.moneyRanges = []; state.deadlineRanges = [];
+    syncCheckboxes(); renderAll();
+  });
+  document.getElementById("filter-action-apply")?.addEventListener("click", () => {
+    // 변경은 이미 즉시 반영됨. 이 버튼은 패널을 닫고 결과로 부드럽게 스크롤시키는 역할.
+    state.filterOpen = false;
+    document.getElementById("filter-panel").classList.remove("open");
+    document.getElementById("filter-toggle").classList.remove("open");
+    document.getElementById("filter-arrow").textContent = "▾";
+    document.getElementById("list-container")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   document.querySelectorAll(".checkbox-list").forEach(list => {
     const g = list.dataset.group;
