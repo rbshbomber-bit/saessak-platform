@@ -543,7 +543,7 @@ document.getElementById("new-session-btn").addEventListener("click", () => {
 function showInsufficientInline(){
   document.getElementById("start-screen").innerHTML = `
     <div class="insufficient">
-      <h2>蓄 토큰 부족</h2>
+      <h2>토큰 부족</h2>
       <p>AI 멘토링 1 세션에 <b>${SESSION_COST} 토큰</b>이 필요합니다.<br />
       현재 잔액: <b>${getCurrentUser()?.tokens || 0} 토큰</b></p>
       <a href="index.html#pricing">토큰 충전하기 →</a>

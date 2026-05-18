@@ -571,7 +571,7 @@ const LISTINGS = [
     url:"https://www.nonghyup.com/" }
 ];
 
-const TODAY = new Date("2026-05-12");
+const TODAY = new Date();
 function daysLeft(s){ return Math.ceil((new Date(s) - TODAY)/(1000*60*60*24)); }
 function ddlCls(d){ if(d<0) return ""; if(d<=14) return "soon"; return "normal"; }
 function ddlLbl(d){ if(d<0) return "마감"; if(d===0) return "오늘 마감"; return "D-"+d; }

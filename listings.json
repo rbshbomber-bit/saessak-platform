@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "version": "1.0",
-    "lastUpdated": "2026-05-12",
-    "source": "운영자 큐레이션 + K-Startup·비즈인포 OpenAPI 연동 예정",
-    "note": "이 JSON은 v3 HTML이 fetch로 로드합니다. 운영자는 이 파일만 수정하면 됨."
+    "version": "1.1",
+    "lastUpdated": "2026-05-18",
+    "source": "운영자 큐레이션 + K-Startup OpenAPI 실시간 연동 (api/listings.js)",
+    "note": "이 JSON은 K-Startup API 실패 시 2차 폴백. 1차는 api/listings.js, 3차는 index.html 인라인."
   },
   "listings": [
     { "id":"nat-pre-pkg", "region":"national", "regionLabel":"전국", "title":"예비창업패키지 2026",
@@ -14,10 +14,10 @@
       "org":"창업진흥원 / K-Startup", "field":"딥테크·AI", "age":"창업 3년 이내", "money":"최대 1억원",
       "types":["자금","멘토링"], "moneyMax": 100000000, "deadline":"2026-07-05",
       "summary":"AI·빅데이터 분야 초기 스타트업 사업화 + 시제품 고도화. 205억 배정.", "url":"https://www.k-startup.go.kr/" },
-    { "id":"nat-cys-school", "region":"national", "regionLabel":"전국", "title":"청년창업사관학교 17기",
-      "org":"중소벤처기업진흥공단", "field":"딥테크·AI", "age":"만 39세 이하", "money":"최대 1억원 + 1년 입주",
-      "types":["자금","공간","멘토링","교육"], "moneyMax": 100000000, "deadline":"2026-06-15",
-      "summary":"전국 14개 거점. AI·로봇·딥테크 청년 스타트업 집중 육성.", "url":"https://start.kosmes.or.kr/" },
+    { "id":"nat-cys-school", "region":"national", "regionLabel":"전국", "title":"청년창업사관학교 — 차기 회차 (2027.1~2월 모집 예정)",
+      "org":"중소벤처기업진흥공단", "field":"딥테크·AI", "age":"만 39세 이하 (창업 3년 이내)", "money":"최대 1억원 + 1년 입주",
+      "types":["자금","공간","멘토링","교육"], "moneyMax": 100000000, "deadline":"2027-02-13",
+      "summary":"전국 18개 캠퍼스. 2026년 18기는 모집 종료·운영 중. 차기 모집은 2027년 1~2월 예정. 사업계획서·시제품 사전 준비 권장.", "url":"https://start.kosmes.or.kr/" },
     { "id":"nat-wellness-deeptech", "region":"national", "regionLabel":"전국", "title":"딥테크 창업패키지 — 헬스케어·웰니스",
       "org":"중기부 / K-Startup", "field":"웰니스·헬스케어", "age":"창업 7년 이내", "money":"최대 3억원",
       "types":["자금","멘토링"], "moneyMax": 300000000, "deadline":"2026-08-20",
