@@ -24,13 +24,37 @@ function classifyField(title, summary, sptBizClsfc) {
 function classifyRegion(suptRegin, agency, title) {
   // K-Startup의 supt_regin은 "전국", "서울", "경기", "부산" 등 17개 시도 단위
   if (!suptRegin) suptRegin = '';
-  const r = (suptRegin + ' ' + agency + ' ' + title).toLowerCase();
-  // 정확도 우선 — 시도명 매칭
-  if (/전국|전체 권역|전\s*국/.test(suptRegin)) return 'national';
+
+  // === 1단계: supt_regin (시도 필드) 우선 검사 — 가장 신뢰도 높음 ===
+  // 이 필드가 채워져 있으면 다른 곳의 단어(역량강화 등)는 무시
+  if (suptRegin && suptRegin.trim().length > 0) {
+    const sr = suptRegin;
+    if (/전국|전체 권역|전\s*국/.test(sr)) return 'national';
+    if (/서울/.test(sr)) return 'seoul';
+    if (/경기/.test(sr)) return 'gyeonggi';
+    if (/인천/.test(sr)) return 'incheon';
+    if (/부산/.test(sr)) return 'busan';
+    if (/대구/.test(sr)) return 'daegu';
+    if (/울산/.test(sr)) return 'ulsan';
+    if (/광주/.test(sr)) return 'gwangju';
+    if (/대전/.test(sr)) return 'daejeon';
+    if (/세종/.test(sr)) return 'sejong';
+    if (/강원/.test(sr)) return 'gangwon';
+    if (/충북|충청북도/.test(sr)) return 'chungbuk';
+    if (/충남|충청남도/.test(sr)) return 'chungnam';
+    if (/전북|전라북도/.test(sr)) return 'jeonbuk';
+    if (/전남|전라남도/.test(sr)) return 'jeonnam';
+    if (/경북|경상북도/.test(sr)) return 'gyeongbuk';
+    if (/경남|경상남도/.test(sr)) return 'gyeongnam';
+    if (/제주/.test(sr)) return 'jeju';
+  }
+
+  // === 2단계: supt_regin 비어있을 때만 agency + title로 추정 ===
+  const r = (agency + ' ' + title).toLowerCase();
   if (/서울/.test(r)) return 'seoul';
   if (/경기/.test(r)) return 'gyeonggi';
-  // 인천 — 시·군·구 보강 (강화군·옹진군 포함)
-  if (/인천|강화군?|옹진군?|미추홀|남동구|부평구|계양구|연수구/.test(r)) return 'incheon';
+  // 인천 — 시·군·구 보강 (강화군·옹진군 정확 매칭, "역량강화" 같은 단어 제외)
+  if (/인천|강화군|옹진군|미추홀|남동구|부평구|계양구|연수구/.test(r)) return 'incheon';
   if (/부산/.test(r)) return 'busan';
   if (/대구/.test(r)) return 'daegu';
   if (/울산/.test(r)) return 'ulsan';
