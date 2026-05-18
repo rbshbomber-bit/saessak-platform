@@ -351,6 +351,104 @@ header.site {
   padding-left: 4px;
 }
 .region-hint b { color: var(--sage-deep); }
+
+/* === 지역 체크박스 그리드 (다중 선택) === */
+.region-check-wrap {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  margin-bottom: 14px;
+}
+.region-check-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.region-check-title {
+  font-size: 13px; font-weight: 700; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+}
+.region-check-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 7px;
+  border-radius: 999px;
+  background: var(--sage-soft); color: var(--sage-deep);
+  font-size: 11px; font-weight: 800;
+}
+.region-check-actions {
+  display: flex; gap: 6px;
+}
+.region-check-btn {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 10px; border-radius: 7px;
+  background: var(--bg-2); border: 1px solid var(--line);
+  color: var(--ink-2); cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.region-check-btn:hover { background: var(--line); color: var(--ink); }
+.region-check-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+@media (max-width: 720px) {
+  .region-check-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.region-check-item {
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .12s;
+  font-size: 13px;
+  user-select: none;
+}
+.region-check-item:hover {
+  border-color: var(--sage);
+  background: var(--card);
+}
+.region-check-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 4px;
+  background: var(--card);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all .12s;
+}
+.region-check-item input[type="checkbox"]:checked {
+  background: var(--sage-deep);
+  border-color: var(--sage-deep);
+}
+.region-check-item input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 4px; height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.region-check-item.checked {
+  background: var(--sage-soft);
+  border-color: var(--sage);
+}
+.region-check-item.checked .region-check-label {
+  color: var(--sage-deep);
+  font-weight: 700;
+}
+.region-check-label {
+  color: var(--ink-2);
+  font-weight: 500;
+}
 .chip {
   font-size: 13px; font-weight: 500;
   padding: 8px 14px; border-radius: 999px;
@@ -870,48 +968,29 @@ footer.site a:hover { color: var(--ink); }
         <p>중앙부처 + 17개 시도 권역별 통합. 지원 유형·금액 범위·마감 일정으로 자유롭게 좁혀보세요.</p>
       </div>
       <div class="curation-wrap">
-        <div class="curation-top">
-          <div class="region-select-wrap">
-            <label for="region-select" class="region-label">지역</label>
-            <select id="region-select" class="region-dropdown">
-              <option value="all">전체</option>
-              <option value="national">전국 단위 (중앙부처)</option>
-              <optgroup label="수도권">
-                <option value="seoul">서울</option>
-                <option value="gyeonggi">경기</option>
-                <option value="incheon">인천</option>
-              </optgroup>
-              <optgroup label="영남권">
-                <option value="busan">부산</option>
-                <option value="daegu">대구</option>
-                <option value="ulsan">울산</option>
-                <option value="gyeongbuk">경북</option>
-                <option value="gyeongnam">경남</option>
-              </optgroup>
-              <optgroup label="호남권">
-                <option value="gwangju">광주</option>
-                <option value="jeonbuk">전북</option>
-                <option value="jeonnam">전남</option>
-              </optgroup>
-              <optgroup label="충청권">
-                <option value="daejeon">대전</option>
-                <option value="sejong">세종</option>
-                <option value="chungbuk">충북</option>
-                <option value="chungnam">충남</option>
-              </optgroup>
-              <optgroup label="강원·제주">
-                <option value="gangwon">강원</option>
-                <option value="jeju">제주</option>
-              </optgroup>
-            </select>
+        <div class="region-check-wrap">
+          <div class="region-check-head">
+            <div class="region-check-title">
+              <span>지역 선택</span>
+              <span class="region-check-count" id="region-check-count">전체</span>
+            </div>
+            <div class="region-check-actions">
+              <button type="button" class="region-check-btn" id="region-check-all">전체 선택</button>
+              <button type="button" class="region-check-btn" id="region-check-clear">전체 해제</button>
+            </div>
           </div>
-          <div class="search-box">
+          <div class="region-check-grid" id="region-check-grid">
+            <!-- JS로 동적 렌더 -->
+          </div>
+        </div>
+        <div class="curation-top">
+          <div class="search-box" style="flex:1;">
             <span style="font-size:14px;color:var(--ink-3)">🔍</span>
             <input id="search-input" placeholder="공고명·주관기관·시군구 검색 (예: 강화, 관악)" />
           </div>
         </div>
         <div class="region-hint">
-          💡 <b>강화군·관악구·마포구</b> 같은 시군구 단위는 위 검색창에 입력하세요. 시도 단위는 드롭다운에서 선택.
+          💡 <b>강화군·관악구·마포구</b> 같은 시군구 단위는 위 검색창에 입력하세요. 시도 단위는 체크박스에서 다중 선택 가능.
         </div>
         <div class="curation-controls">
           <select class="sort-select" id="sort-select">
@@ -1628,7 +1707,7 @@ const REGION_LABELS = {
 const GROUP_TITLES = { fields:"분야", types:"지원유형", moneyRanges:"지원금", deadlineRanges:"마감일" };
 
 const state = {
-  region: "all", search: "", sort: "deadline-asc",
+  region: "all", regions: [], search: "", sort: "deadline-asc",
   fields: [], types: [], moneyRanges: [], deadlineRanges: [],
   filterOpen: false, saved: {}
 };
@@ -1667,7 +1746,8 @@ function matchesDeadlineRange(x, range){
 }
 function applyFilters(){
   return LISTINGS.filter(x => {
-    if(state.region !== "all" && x.region !== state.region) return false;
+    // 지역 다중 선택: 빈 배열이면 전체, 아니면 선택된 지역만
+    if(state.regions.length > 0 && !state.regions.includes(x.region)) return false;
     if(state.fields.length && !state.fields.includes(x.field)) return false;
     if(state.types.length && !x.types.some(t => state.types.includes(t))) return false;
     if(state.moneyRanges.length && !state.moneyRanges.some(r => matchesMoneyRange(x, r))) return false;
@@ -2521,20 +2601,93 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStorage();
   updateAuthUI();
   tryLoadListingsJson();
-  // 지역 드롭다운 핸들러
-  const regionSelect = document.getElementById("region-select");
-  if (regionSelect) {
-    regionSelect.addEventListener("change", e => {
-      state.region = e.target.value;
-      renderAll();
+  // === 지역 체크박스 그리드 (18개 다중 선택) ===
+  const REGION_ORDER = [
+    { code: "national", label: "전국" },
+    { code: "seoul", label: "서울" },
+    { code: "gyeonggi", label: "경기" },
+    { code: "incheon", label: "인천" },
+    { code: "busan", label: "부산" },
+    { code: "daegu", label: "대구" },
+    { code: "ulsan", label: "울산" },
+    { code: "gyeongbuk", label: "경북" },
+    { code: "gyeongnam", label: "경남" },
+    { code: "gwangju", label: "광주" },
+    { code: "jeonbuk", label: "전북" },
+    { code: "jeonnam", label: "전남" },
+    { code: "daejeon", label: "대전" },
+    { code: "sejong", label: "세종" },
+    { code: "chungbuk", label: "충북" },
+    { code: "chungnam", label: "충남" },
+    { code: "gangwon", label: "강원" },
+    { code: "jeju", label: "제주" }
+  ];
+  function renderRegionCheckboxes(){
+    const grid = document.getElementById("region-check-grid");
+    if (!grid) return;
+    grid.innerHTML = REGION_ORDER.map(r => {
+      const checked = state.regions.includes(r.code);
+      return `<label class="region-check-item ${checked ? "checked" : ""}" data-region="${r.code}">
+        <input type="checkbox" ${checked ? "checked" : ""} value="${r.code}" />
+        <span class="region-check-label">${r.label}</span>
+      </label>`;
+    }).join("");
+    // 체크박스 change 이벤트
+    grid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener("change", e => {
+        const code = e.target.value;
+        if (e.target.checked) {
+          if (!state.regions.includes(code)) state.regions.push(code);
+        } else {
+          state.regions = state.regions.filter(r => r !== code);
+        }
+        // visual 즉시 갱신 + 카운트 + 리스트
+        const item = e.target.closest(".region-check-item");
+        if (item) item.classList.toggle("checked", e.target.checked);
+        updateRegionCheckCount();
+        renderList();
+      });
     });
   }
+  function updateRegionCheckCount(){
+    const el = document.getElementById("region-check-count");
+    if (!el) return;
+    if (state.regions.length === 0) {
+      el.textContent = "전체";
+      el.style.background = "var(--sage-soft)";
+      el.style.color = "var(--sage-deep)";
+    } else {
+      el.textContent = `${state.regions.length}개 선택`;
+      el.style.background = "var(--sage-deep)";
+      el.style.color = "white";
+    }
+  }
+  renderRegionCheckboxes();
+  updateRegionCheckCount();
+  // 전체 선택/해제 버튼
+  const btnAll = document.getElementById("region-check-all");
+  const btnClear = document.getElementById("region-check-clear");
+  if (btnAll) btnAll.addEventListener("click", () => {
+    state.regions = REGION_ORDER.map(r => r.code);
+    renderRegionCheckboxes();
+    updateRegionCheckCount();
+    renderList();
+  });
+  if (btnClear) btnClear.addEventListener("click", () => {
+    state.regions = [];
+    renderRegionCheckboxes();
+    updateRegionCheckCount();
+    renderList();
+  });
   // 호환성: 옛 칩 구조가 남아 있다면 그것도 작동
   document.querySelectorAll(".region-chips .chip").forEach(c => {
     c.addEventListener("click", () => {
       document.querySelectorAll(".region-chips .chip").forEach(x=>x.classList.remove("active"));
       c.classList.add("active");
-      state.region = c.dataset.region;
+      const code = c.dataset.region;
+      state.regions = (code === "all") ? [] : [code];
+      renderRegionCheckboxes();
+      updateRegionCheckCount();
       renderAll();
     });
   });
