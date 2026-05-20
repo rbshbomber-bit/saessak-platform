@@ -63,7 +63,7 @@ export default async function handler(req, res) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: model || 'claude-opus-4-7',
+        model: model || 'claude-haiku-4-5-20251001',
         max_tokens: max_tokens || 1024,
         system: system || '당신은 한국의 청년창업 지원사업을 도와주는 친절한 전문 컨설턴트입니다. 한국어로 명확하고 실용적으로 답변하세요.',
         messages
