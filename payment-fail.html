@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결제 실패 — 새싹매치</title>
+  <style>
+    :root {
+      --ink: #14181f;
+      --ink-2: #444;
+      --ink-3: #888;
+      --card: #fff;
+      --cream: #fbfaf6;
+      --radius-l: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-l);
+      padding: 48px 40px;
+      max-width: 440px; width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+    .icon { font-size: 56px; margin-bottom: 16px; }
+    h1 { font-size: 26px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+    p  { font-size: 15px; color: var(--ink-2); line-height: 1.6; margin-bottom: 8px; }
+    .error-box {
+      background: #fff5f5;
+      border: 1px solid #fca5a5;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 16px 0 24px;
+      font-size: 13px; color: #991b1b;
+      text-align: left;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--ink); color: #fff;
+      padding: 14px 32px; border-radius: 10px;
+      font-size: 15px; font-weight: 700;
+      text-decoration: none; cursor: pointer;
+      border: none;
+    }
+    .btn-ghost {
+      background: transparent; color: var(--ink-2);
+      border: 1px solid #ddd; margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">❌</div>
+    <h1>결제가 취소되었습니다</h1>
+    <p>결제가 완료되지 않았습니다. 아무 금액도 청구되지 않았습니다.</p>
+    <div class="error-box" id="error-detail">사유를 불러오는 중...</div>
+    <a class="btn" href="/#pricing" id="retry-btn">다시 시도하기</a>
+    <a class="btn btn-ghost" href="/">홈으로</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const code   = params.get('code');
+    const msg    = params.get('message');
+    const errorBox = document.getElementById('error-detail');
+
+    if (code || msg) {
+      errorBox.textContent = (code ? `[${code}] ` : '') + (msg || '알 수 없는 오류');
+    } else {
+      errorBox.textContent = '결제가 취소되었거나 오류가 발생했습니다.';
+    }
+  </script>
+</body>
+</html>
