@@ -1,171 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>결제 완료 — 새싹매치</title>
-  <style>
-    :root {
-      --ink: #14181f;
-      --ink-2: #444;
-      --ink-3: #888;
-      --sage: #4a7c59;
-      --sage-soft: #edf3ef;
-      --card: #fff;
-      --cream: #fbfaf6;
-      --radius-l: 16px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
-      background: var(--cream);
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 24px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius-l);
-      padding: 48px 40px;
-      max-width: 480px; width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    }
-    .icon { font-size: 56px; margin-bottom: 16px; }
-    h1 { font-size: 26px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
-    p  { font-size: 15px; color: var(--ink-2); line-height: 1.6; margin-bottom: 8px; }
-    .token-badge {
-      display: inline-block;
-      background: var(--sage-soft);
-      color: var(--sage);
-      font-size: 20px; font-weight: 800;
-      padding: 12px 24px; border-radius: 999px;
-      margin: 16px 0 24px;
-    }
-    .btn {
-      display: inline-block;
-      background: var(--ink); color: #fff;
-      padding: 14px 32px; border-radius: 10px;
-      font-size: 15px; font-weight: 700;
-      text-decoration: none; cursor: pointer;
-      border: none;
-    }
-    .btn-ghost {
-      background: transparent; color: var(--ink-2);
-      border: 1px solid #ddd; margin-left: 8px;
-    }
-    .order-info {
-      margin-top: 24px;
-      font-size: 12px; color: var(--ink-3);
-    }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 4px solid var(--sage-soft);
-      border-top-color: var(--sage);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .hidden { display: none; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>결제 완료 — 새싹매치</title>
+<script src="supabase-config.js" defer></script>
+<script src="admin-config.js" defer></script>
+<script src="payments.js" defer></script>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+:root { --bg:#fbfaf6; --card:#fff; --ink:#14181f; --ink-2:#3a4250; --ink-3:#6c7280; --line:#e6e3da; --sage:#8da888; --sage-deep:#5c7a5a; --sage-soft:#d8e3d4; --bad:#b91c1c; --good:#2f7a3c; }
+* { box-sizing: border-box; }
+body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; background:var(--bg); color:var(--ink); font-family:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+.card { width:100%; max-width:520px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:32px; box-shadow:0 4px 16px rgba(20,24,31,.06),0 12px 32px rgba(20,24,31,.05); }
+.brand { display:flex; align-items:center; gap:8px; font-weight:800; margin-bottom:24px; }
+.brand img { width:32px; height:32px; }
+h1 { margin:0 0 8px; font-size:26px; letter-spacing:-.02em; }
+p { margin:0; color:var(--ink-2); line-height:1.65; }
+.box { margin:20px 0; padding:16px; border-radius:12px; background:var(--sage-soft); border:1px solid var(--sage); color:var(--sage-deep); font-weight:700; }
+.error { background:#fef2f2; border-color:#fecaca; color:var(--bad); }
+.actions { display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+a { display:inline-flex; justify-content:center; padding:11px 16px; border-radius:10px; text-decoration:none; font-size:14px; font-weight:700; }
+.primary { background:var(--ink); color:white; }
+.ghost { background:var(--bg); color:var(--ink-2); border:1px solid var(--line); }
+</style>
 </head>
 <body>
-  <!-- 처리 중 -->
-  <div class="card" id="loading-view">
-    <div class="spinner"></div>
-    <h1>결제 확인 중...</h1>
-    <p>잠시만 기다려 주세요.</p>
+<main class="card">
+  <div class="brand"><img src="images/logo.png" alt="" /><span>새싹매치</span></div>
+  <h1 id="title">결제 승인 중입니다</h1>
+  <p id="desc">토스페이먼츠 결제 정보를 확인하고 토큰을 적립하고 있어요.</p>
+  <div class="box" id="result">잠시만 기다려주세요.</div>
+  <div class="actions">
+    <a class="primary" href="mypage.html">마이페이지</a>
+    <a class="ghost" href="index.html#pricing">요금제로 돌아가기</a>
   </div>
-
-  <!-- 성공 -->
-  <div class="card hidden" id="success-view">
-    <div class="icon">🎉</div>
-    <h1>결제 완료!</h1>
-    <p>토큰이 계정에 지급되었습니다.</p>
-    <div class="token-badge" id="token-amount">+0 토큰</div>
-    <p style="margin-bottom:24px;">이제 AI 매칭·사업계획서·심사 시뮬레이션을 바로 이용하세요.</p>
-    <a class="btn" href="/">홈으로 돌아가기</a>
-    <a class="btn btn-ghost" href="/#ai-planner">사업계획서 작성하기</a>
-    <p class="order-info">주문번호: <span id="order-id-display">—</span></p>
-  </div>
-
-  <!-- 오류 -->
-  <div class="card hidden" id="error-view">
-    <div class="icon">⚠️</div>
-    <h1>결제 처리 오류</h1>
-    <p id="error-message">결제 확인 중 오류가 발생했습니다. 결제는 완료됐으나 토큰이 지급되지 않은 경우 아래 주문번호와 함께 문의해 주세요.</p>
-    <p class="order-info" style="margin-top:16px;">주문번호: <span id="error-order-id">—</span></p>
-    <br/>
-    <a class="btn" href="/">홈으로 돌아가기</a>
-  </div>
-
-  <!-- supabase-config.js와 호환되는 localStorage 접근 -->
-  <script src="supabase-config.js"></script>
-  <script>
-    (async function () {
-      const params = new URLSearchParams(location.search);
-      const paymentKey = params.get('paymentKey');
-      const orderId    = params.get('orderId');
-      const amount     = params.get('amount');
-
-      function show(id) {
-        ['loading-view', 'success-view', 'error-view'].forEach(v => {
-          document.getElementById(v).classList.toggle('hidden', v !== id);
-        });
-      }
-
-      if (!paymentKey || !orderId || !amount) {
-        document.getElementById('error-message').textContent = '결제 정보가 없습니다. 홈에서 다시 시도해주세요.';
-        show('error-view');
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/payment/confirm', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || data.error || '승인 실패');
-        }
-
-        // localStorage 토큰 업데이트
-        const userId = localStorage.getItem('saessak_current_user');
-        if (userId && data.tokens) {
-          try {
-            const users = JSON.parse(localStorage.getItem('saessak_users') || '[]');
-            const user  = users.find(u => u.id === userId);
-            if (user) {
-              user.tokens = (user.tokens || 0) + data.tokens;
-              user.tokenLog = user.tokenLog || [];
-              user.tokenLog.push({
-                ts:      new Date().toISOString(),
-                kind:    'purchase',
-                amount:  data.tokens,
-                balance: user.tokens,
-                memo:    `토스페이먼츠 결제 — ${data.packageId} (${orderId})`,
-              });
-              localStorage.setItem('saessak_users', JSON.stringify(users));
-            }
-          } catch (e) {
-            console.warn('[payment-success] localStorage 업데이트 실패:', e);
-          }
-        }
-
-        document.getElementById('token-amount').textContent = `+${data.tokens.toLocaleString()} 토큰`;
-        document.getElementById('order-id-display').textContent = orderId;
-        show('success-view');
-
-      } catch (e) {
-        document.getElementById('error-message').textContent = e.message;
-        document.getElementById('error-order-id').textContent = orderId;
-        show('error-view');
-      }
-    })();
-  </script>
+</main>
+<script>
+async function confirmPayment(){
+  const params = new URLSearchParams(location.search);
+  const paymentKey = params.get("paymentKey");
+  const orderId = params.get("orderId");
+  const amount = Number(params.get("amount"));
+  const result = document.getElementById("result");
+  if(!paymentKey || !orderId || !amount){
+    result.className = "box error";
+    result.textContent = "결제 승인 정보가 부족합니다. 다시 시도해주세요.";
+    return;
+  }
+  try {
+    const res = await fetch("/api/toss-confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentKey, orderId, amount })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.message || data.error || "결제 승인 실패");
+    const applied = window.saessak?.payments?.applyPaidProduct(data);
+    if(!applied?.ok) throw new Error("결제는 승인됐지만 로그인 정보가 없어 토큰 적립을 완료하지 못했습니다.");
+    document.getElementById("title").textContent = "결제가 완료됐습니다";
+    document.getElementById("desc").textContent = "토큰이 계정에 반영됐습니다. 바로 이어서 신청 준비를 시작할 수 있어요.";
+    result.textContent = `${data.product.label} · +${data.product.tokens.toLocaleString()} 토큰 적립 완료`;
+  } catch(err){
+    console.error(err);
+    document.getElementById("title").textContent = "결제 확인이 필요합니다";
+    result.className = "box error";
+    result.textContent = err.message || "결제 승인 중 문제가 발생했습니다.";
+  }
+}
+window.addEventListener("load", confirmPayment);
+</script>
 </body>
 </html>

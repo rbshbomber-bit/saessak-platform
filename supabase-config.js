@@ -1,6 +1,6 @@
 /*!
  * supabase-config.js
- * 새싹지원사업 — Supabase Auth 통합 (구글 로그인 + 기존 localStorage 호환)
+ * 새싹지원사업 — Supabase Auth 통합 (구글/카카오/네이버 로그인 + 기존 localStorage 호환)
  *
  * 작동:
  * 1) 페이지 로드 시 Supabase 클라이언트 초기화
@@ -82,12 +82,12 @@
         supabaseId: u.id,
         name: name,
         email: email,
-        password: '__google_oauth__',
+        password: '__oauth__',
         region: meta.region || '서울',
         field: meta.field || '딥테크·AI',
         age: meta.age || null,
         avatar: meta.avatar_url || meta.picture || null,
-        provider: (u.app_metadata && u.app_metadata.provider) || 'google',
+        provider: (u.app_metadata && u.app_metadata.provider) || 'oauth',
         plan: 'free',
         joinedAt: new Date().toISOString(),
         usage: { matches: 0, plans: 0 },
@@ -98,7 +98,7 @@
           kind: 'signup-bonus',
           amount: 50,
           balance: 50,
-          memo: '구글 회원가입 보너스 — 50 토큰'
+          memo: '소셜 회원가입 보너스 — 50 토큰'
         }]
       };
       users.push(local);
@@ -116,7 +116,7 @@
   }
 
   // ===== 공개 헬퍼 함수들 =====
-  window.saessak.signInWithGoogle = async function(redirectTo){
+  window.saessak.signInWithOAuthProvider = async function(provider, redirectTo){
     // SDK·클라이언트 준비 대기 (최대 8초)
     for(let i = 0; i < 80; i++){
       if(window.saessak.supabase) break;
@@ -129,13 +129,23 @@
     }
     const target = redirectTo || (location.origin + '/');
     const { error } = await client.auth.signInWithOAuth({
-      provider: 'google',
+      provider: provider,
       options: { redirectTo: target }
     });
     if(error){
-      alert('구글 로그인 실패: ' + error.message);
+      alert('소셜 로그인 실패: ' + error.message);
       console.error(error);
     }
+  };
+
+  window.saessak.signInWithGoogle = function(redirectTo){
+    return window.saessak.signInWithOAuthProvider('google', redirectTo);
+  };
+  window.saessak.signInWithKakao = function(redirectTo){
+    return window.saessak.signInWithOAuthProvider('kakao', redirectTo);
+  };
+  window.saessak.signInWithNaver = function(redirectTo){
+    return window.saessak.signInWithOAuthProvider('naver', redirectTo);
   };
 
   window.saessak.signOut = async function(){
@@ -158,25 +168,20 @@
     const client = await initSupabaseClient();
     if(!client) return;
 
-    function refreshPageAuthUI(){
-      if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
-      if(typeof window.refreshTokenDisplay === 'function') window.refreshTokenDisplay();
-    }
-
     const { data: sessionData } = await client.auth.getSession();
     const session = sessionData && sessionData.session;
     if(session){
       syncSupabaseToLocal(session);
-      refreshPageAuthUI();
     }
 
     client.auth.onAuthStateChange((event, sess) => {
-      if((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && sess){
+      if(event === 'SIGNED_IN' && sess){
         syncSupabaseToLocal(sess);
-        refreshPageAuthUI();
+        if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
+        if(typeof window.refreshTokenDisplay === 'function') window.refreshTokenDisplay();
       } else if(event === 'SIGNED_OUT'){
         localStorage.removeItem(SUPA_CURRENT_KEY);
-        refreshPageAuthUI();
+        if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
       }
     });
 

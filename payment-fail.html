@@ -1,80 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>결제 실패 — 새싹매치</title>
-  <style>
-    :root {
-      --ink: #14181f;
-      --ink-2: #444;
-      --ink-3: #888;
-      --card: #fff;
-      --cream: #fbfaf6;
-      --radius-l: 16px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
-      background: var(--cream);
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 24px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius-l);
-      padding: 48px 40px;
-      max-width: 440px; width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    }
-    .icon { font-size: 56px; margin-bottom: 16px; }
-    h1 { font-size: 26px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
-    p  { font-size: 15px; color: var(--ink-2); line-height: 1.6; margin-bottom: 8px; }
-    .error-box {
-      background: #fff5f5;
-      border: 1px solid #fca5a5;
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin: 16px 0 24px;
-      font-size: 13px; color: #991b1b;
-      text-align: left;
-    }
-    .btn {
-      display: inline-block;
-      background: var(--ink); color: #fff;
-      padding: 14px 32px; border-radius: 10px;
-      font-size: 15px; font-weight: 700;
-      text-decoration: none; cursor: pointer;
-      border: none;
-    }
-    .btn-ghost {
-      background: transparent; color: var(--ink-2);
-      border: 1px solid #ddd; margin-left: 8px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>결제 실패 — 새싹매치</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+:root { --bg:#fbfaf6; --card:#fff; --ink:#14181f; --ink-2:#3a4250; --ink-3:#6c7280; --line:#e6e3da; --bad:#b91c1c; }
+* { box-sizing: border-box; }
+body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; background:var(--bg); color:var(--ink); font-family:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+.card { width:100%; max-width:520px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:32px; box-shadow:0 4px 16px rgba(20,24,31,.06),0 12px 32px rgba(20,24,31,.05); }
+.brand { display:flex; align-items:center; gap:8px; font-weight:800; margin-bottom:24px; }
+.brand img { width:32px; height:32px; }
+h1 { margin:0 0 8px; font-size:26px; letter-spacing:-.02em; }
+p { margin:0; color:var(--ink-2); line-height:1.65; }
+.box { margin:20px 0; padding:16px; border-radius:12px; background:#fef2f2; border:1px solid #fecaca; color:var(--bad); font-weight:700; }
+.actions { display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+a { display:inline-flex; justify-content:center; padding:11px 16px; border-radius:10px; text-decoration:none; font-size:14px; font-weight:700; }
+.primary { background:var(--ink); color:white; }
+.ghost { background:var(--bg); color:var(--ink-2); border:1px solid var(--line); }
+</style>
 </head>
 <body>
-  <div class="card">
-    <div class="icon">❌</div>
-    <h1>결제가 취소되었습니다</h1>
-    <p>결제가 완료되지 않았습니다. 아무 금액도 청구되지 않았습니다.</p>
-    <div class="error-box" id="error-detail">사유를 불러오는 중...</div>
-    <a class="btn" href="/#pricing" id="retry-btn">다시 시도하기</a>
-    <a class="btn btn-ghost" href="/">홈으로</a>
+<main class="card">
+  <div class="brand"><img src="images/logo.png" alt="" /><span>새싹매치</span></div>
+  <h1>결제가 완료되지 않았습니다</h1>
+  <p>카드 인증 취소, 한도, 비밀번호 오류 등으로 결제가 중단됐을 수 있어요. 다시 시도해도 토큰이 중복 적립되지는 않습니다.</p>
+  <div class="box" id="message">결제 실패 정보를 확인하는 중입니다.</div>
+  <div class="actions">
+    <a class="primary" href="index.html#pricing">다시 결제하기</a>
+    <a class="ghost" href="mypage.html">마이페이지</a>
   </div>
-
-  <script>
-    const params = new URLSearchParams(location.search);
-    const code   = params.get('code');
-    const msg    = params.get('message');
-    const errorBox = document.getElementById('error-detail');
-
-    if (code || msg) {
-      errorBox.textContent = (code ? `[${code}] ` : '') + (msg || '알 수 없는 오류');
-    } else {
-      errorBox.textContent = '결제가 취소되었거나 오류가 발생했습니다.';
-    }
-  </script>
+</main>
+<script>
+const params = new URLSearchParams(location.search);
+const code = params.get("code") || "PAYMENT_FAILED";
+const message = params.get("message") || "결제가 승인되지 않았습니다.";
+document.getElementById("message").textContent = `${code} · ${message}`;
+</script>
 </body>
 </html>

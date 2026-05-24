@@ -313,7 +313,7 @@ tr:hover { background: var(--bg); }
       <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
         <div class="kpi"><div class="lbl">전체 가입자</div><div class="val" id="users-real">0</div><div class="delta">실시간 카운트</div></div>
         <div class="kpi"><div class="lbl">Free 플랜</div><div class="val" id="users-free">0</div><div class="delta">실시간 카운트</div></div>
-        <div class="kpi"><div class="lbl">Premium 플랜</div><div class="val" id="users-premium">0</div><div class="delta">결제 시스템 연동 전</div></div>
+        <div class="kpi"><div class="lbl">Premium 플랜</div><div class="val" id="users-premium">0</div><div class="delta">첫 구독 후 집계</div></div>
       </div>
 
       <div class="card">
@@ -357,9 +357,9 @@ tr:hover { background: var(--bg); }
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div class="lbl">이번 달 매출</div><div class="val">₩4,237,000</div><div class="delta">▲ +34% MoM</div></div>
-        <div class="kpi"><div class="lbl">토큰 충전 매출 (월)</div><div class="val">₩0</div><div class="delta">결제 시스템 연동 전</div></div>
-        <div class="kpi"><div class="lbl">월 구독 매출 (월)</div><div class="val">₩0</div><div class="delta">결제 시스템 연동 전</div></div>
+        <div class="kpi"><div class="lbl">이번 달 매출</div><div class="val">₩0</div><div class="delta">토스 승인 완료 건 기준</div></div>
+        <div class="kpi"><div class="lbl">토큰 충전 매출 (월)</div><div class="val">₩0</div><div class="delta">첫 결제 후 집계</div></div>
+        <div class="kpi"><div class="lbl">월 구독 매출 (월)</div><div class="val">₩0</div><div class="delta">첫 구독 후 집계</div></div>
         <div class="kpi"><div class="lbl">토큰 소비 (월)</div><div class="val" id="kpi-tokens-spent">0</div><div class="delta">실시간 카운트</div></div>
       </div>
 
@@ -367,7 +367,7 @@ tr:hover { background: var(--bg); }
         <div style="font-size:32px;margin-bottom:10px;">💳</div>
         <h3 style="margin:0 0 8px;font-size:15px;">결제 데이터 — 베타 운영 직후라 비어있어요.</h3>
         <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.7;">
-          토스페이먼츠 PG 연동(2026년 8월 예정) 후부터 실제 결제 내역이 표시됩니다.
+          토스페이먼츠 결제 승인 완료 건부터 실제 결제 내역이 표시됩니다.
           판매 추이·결제 내역 표는 첫 결제 발생 시 자동 활성화됩니다.
           가짜 시뮬레이션 데이터는 사용하지 않습니다.
         </p>

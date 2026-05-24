@@ -38,6 +38,7 @@
 <script src="usage-limit.js" defer></script>
 <script src="ai-history.js" defer></script>
 <script src="docx-gen.js" defer></script>
+<script src="payments.js" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
@@ -829,12 +830,103 @@ footer.site a:hover { color: var(--ink); }
 .modal .price-sub { font-size: 13px; color: var(--ink-3); }
 .modal .btn-row { display: flex; gap: 8px; margin-top: 24px; }
 .modal .btn-row .btn { flex: 1; padding: 12px; justify-content: center; }
+
+/* GreatStream Agent 소개 섹션 */
+#greatstream-agent .section-head { margin-bottom: 8px; }
+#greatstream-agent .section-head h2 {
+  font-size: 36px; letter-spacing: -.02em; margin: 0 0 14px;
+  color: var(--ink); line-height: 1.25;
+}
+#greatstream-agent .section-head p {
+  max-width: 720px;
+}
+.as-soon-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  background: var(--sage-soft); color: var(--sage-deep);
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  margin-bottom: 14px;
+}
+.as-soon-chip::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--sage-deep);
+}
+.as-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 18px; margin-top: 40px;
+}
+@media (max-width: 900px) {
+  .as-cards { grid-template-columns: 1fr; }
+  #greatstream-agent .section-head h2 { font-size: 28px; }
+}
+.as-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 26px 24px 22px;
+  transition: border-color .15s, transform .15s;
+}
+.as-card:hover { border-color: var(--sage); transform: translateY(-2px); }
+.as-card-dot {
+  position: absolute; top: 24px; right: 24px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--sage);
+  box-shadow: 0 0 0 4px var(--sage-soft);
+}
+.as-card-dot::after {
+  content: ""; position: absolute; inset: -10px;
+  border-radius: 50%; border: 1px solid var(--sage);
+  animation: as-pulse 2.4s ease-out infinite;
+}
+@keyframes as-pulse {
+  0% { opacity: .55; transform: scale(.6); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+.as-card-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  color: var(--sage-deep); text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.as-card h3 {
+  font-size: 18px; line-height: 1.4; margin: 0 0 12px;
+  color: var(--ink); letter-spacing: -.01em; font-weight: 700;
+}
+.as-card p {
+  font-size: 14px; line-height: 1.65; color: var(--ink-2);
+  margin: 0 0 16px;
+}
+.as-agents {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding-top: 14px; border-top: 1px solid var(--line);
+}
+.as-agents span {
+  font-size: 11px; padding: 4px 10px;
+  background: var(--bg-2); color: var(--ink-2);
+  border-radius: 6px; font-weight: 500;
+}
+.as-cta-row {
+  margin-top: 32px; display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+}
+.as-cta-row .meta {
+  font-size: 13px; color: var(--ink-3); margin: 0;
+}
+.as-cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 10px;
+  background: var(--ink); color: white;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  border: none; cursor: pointer;
+  transition: background .15s;
+}
+.as-cta-btn:hover { background: var(--sage-deep); }
 </style>
 </head>
 <body>
 
 <div class="promo" style="background:#b45309;">
-  🚧 <b>베타 운영 중</b> — AI 매칭·사업계획서 정식 가동 <b>2026년 7월</b> · 결제 시스템 정식 가동 <b>2026년 8월</b> · 현재는 시연 모드
+  🚧 <b>베타 운영 중</b> — AI 매칭·사업계획서 정식 준비 중 · 토스페이먼츠 결제 연동 적용 중
 </div>
 <div class="promo">
   ✨ <span class="em">Anthropic 최상위 모델</span> — 사업계획서·심사·멘토링 모두 <b>Claude Opus 4.7</b> 사용 · <a href="#pricing">요금 보기 →</a>
@@ -865,6 +957,8 @@ footer.site a:hover { color: var(--ink); }
           <a href="slides.html"><span>발표 슬라이드<span class="new" style="margin-left:6px;">NEW</span></span><span class="meta token">30토큰</span></a>
           <div class="divider"></div>
           <a href="mentor.html"><span>1:1 AI 멘토링</span><span class="meta token">50토큰</span></a>
+          <div class="divider"></div>
+          <a href="#greatstream-agent"><span>AI 팀 빌더 <span class="new" style="margin-left:6px;">곧</span></span><span class="meta">GreatStream Agent</span></a>
         </div>
       </div>
 
@@ -895,6 +989,20 @@ footer.site a:hover { color: var(--ink); }
   font-style: italic; font-size: 14px;
   color: var(--sage-deep);
 }
+.auth-area .logout-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 7px 10px; border-radius: 999px;
+  background: var(--card); color: var(--ink-3);
+  border: 1px solid var(--line-2);
+  font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  transition: all .15s;
+}
+.auth-area .logout-chip:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+  background: var(--bg-2);
+}
 .auth-area .user-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 12px; border-radius: 999px;
@@ -912,6 +1020,7 @@ footer.site a:hover { color: var(--ink); }
 @media (max-width: 760px) {
   .auth-area .token-chip { padding: 6px 10px; font-size: 11px; }
   .auth-area .user-chip { padding: 6px 10px; font-size: 12px; }
+  .auth-area .logout-chip { padding: 6px 9px; font-size: 11px; }
 }
 </style>
 
@@ -1206,6 +1315,68 @@ footer.site a:hover { color: var(--ink); }
     </div>
   </section>
 
+  <!-- GreatStream Agent 소개 (곧 출시) -->
+  <section class="section" id="greatstream-agent">
+    <div class="container">
+      <div class="section-head">
+        <span class="as-soon-chip">곧 출시 · 새싹매치 확장 모듈</span>
+        <h2>AI 한 명이 아닌, <span style="color:var(--sage-deep);">AI 팀</span>과 함께 키우세요.</h2>
+        <p>새싹매치는 매칭·사업계획서 초안까지 도와드립니다. <b>GreatStream Agent</b>는 그 위에 — 본인 사업용 AI 팀을 직접 만들고, 한 줄 요청으로 5~8명의 전문 에이전트가 협업해 결과물을 정리해주는 확장 모듈입니다.</p>
+      </div>
+
+      <div class="as-cards">
+        <div class="as-card">
+          <div class="as-card-dot" aria-hidden="true"></div>
+          <div class="as-card-eyebrow">청년창업 도우미 스튜디오</div>
+          <h3>지원사업 탐색 → 초안 작성 → 일정 관리, 한 팀이 처리</h3>
+          <p>Director가 한 줄 요청을 받아 4명의 전문 에이전트에게 분담합니다. 매칭 결과, 사업계획서 초안, 자격 점검, 마감 일정까지 한 번에 정리됩니다.</p>
+          <div class="as-agents">
+            <span>Director</span><span>Grant Scout</span><span>Plan Writer</span><span>Eligibility</span><span>Deadline</span>
+          </div>
+        </div>
+
+        <div class="as-card">
+          <div class="as-card-dot" aria-hidden="true"></div>
+          <div class="as-card-eyebrow">Studio Creator</div>
+          <h3>본인 사업용 AI 팀을 직접 빌드</h3>
+          <p>도메인·역할·결과물 형식을 입력하면 새 스튜디오가 만들어집니다. 청년창업 트랙 외 본인 업종(약국·콘텐츠·교육·로컬 등)에도 적용 가능합니다.</p>
+          <div class="as-agents">
+            <span>+ 새 스튜디오</span><span>+ 에이전트 정의</span><span>+ 결과물 양식</span>
+          </div>
+        </div>
+
+        <div class="as-card">
+          <div class="as-card-dot" aria-hidden="true"></div>
+          <div class="as-card-eyebrow">새싹매치 회원 전용 접근</div>
+          <h3>추가 가입·결제 없이 청년창업 스튜디오만 접근</h3>
+          <p>새싹매치 회원은 GreatStream Agent의 <b>청년창업 도우미 스튜디오</b>에 자동 입장합니다. 토큰·결제는 모두 새싹매치에서 통합 관리 — 별도 결제 화면 없음. 다른 산업 스튜디오와 Studio Creator는 본체 가입자 전용 (출시 예정).</p>
+          <div class="as-agents">
+            <span>회원 전용 접근</span><span>결제 통합</span><span>토큰 공용</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin:28px 0 0;font-size:13px;color:var(--ink-3);line-height:1.7;">
+        <b style="color:var(--ink-2);">새싹매치 회원</b> → 청년창업 도우미 스튜디오 자동 접근 (토큰·결제 통합) <span style="color:var(--line-2);">·</span> <b style="color:var(--ink-2);">GreatStream Agent 본체 가입자</b> → 모든 스튜디오 + Studio Creator 사용
+      </div>
+
+      <div style="background:var(--sage-soft);border:1px solid var(--sage);border-radius:14px;padding:18px 22px;margin:24px 0 0;display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:22px;flex-shrink:0;">🌱</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--ink-2);">
+          <b style="color:var(--sage-deep);font-size:14px;">GreatStream Agent는 작성·정리 보조 도구입니다.</b><br />
+          에이전트 팀이 생성하는 산출물은 일반론과 표준 표현으로 구성되며, <b>본인의 실제 데이터·차별점·검수가 반드시 추가</b>되어야 합니다. 합격·성과를 보장하지 않으며, 최종 의사결정과 외부 발송물은 본인이 검토·승인합니다. 출시 일정은 사전 안내 없이 변경될 수 있습니다.
+        </div>
+      </div>
+
+      <div class="as-cta-row">
+        <p class="meta">새싹매치와 GreatStream Agent 모두 <b style="color:var(--ink-2);">태계(太溪)</b>가 운영합니다 · 현재 내부 프로토타입 단계 · 새싹매치 회원에게 출시 시 자동 안내됩니다.</p>
+        <button type="button" class="as-cta-btn" id="greatstream-agent-cta">
+          준비 알림 받기 →
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- 트래커 -->
   <section class="section" id="tracker">
     <div class="container">
@@ -1339,12 +1510,12 @@ footer.site a:hover { color: var(--ink); }
     margin-bottom: 14px;
   }
   .pcard .price-big .won {
-    font-family: "Cormorant Garamond", serif;
-    font-size: 26px; color: var(--ink); font-weight: 400;
+    font-family: "Pretendard Variable", "Pretendard", sans-serif;
+    font-size: 24px; color: var(--ink); font-weight: 700;
   }
   .pcard .price-big .amount {
-    font-family: "Cormorant Garamond", serif;
-    font-size: 46px; color: var(--ink); font-weight: 500;
+    font-family: "Pretendard Variable", "Pretendard", sans-serif;
+    font-size: 44px; color: var(--ink); font-weight: 800;
     letter-spacing: -.01em; line-height: 1;
   }
   .pcard .price-big .per {
@@ -1538,7 +1709,7 @@ footer.site a:hover { color: var(--ink); }
       </div>
 
       <div style="max-width:680px;margin:24px auto 0;padding:16px 20px;background:var(--sage-soft);border:1px solid var(--sage);border-radius:12px;text-align:center;font-size:13px;line-height:1.6;color:var(--ink-2);">
-        💡 <b>베타 안내</b> — 사업자 등록 및 토스페이먼츠 PG 연동 전입니다. 표시된 가격은 정식 출시 후 적용되며, <b>지금은 모든 토큰을 무료로 즉시 지급</b>합니다. 정식 결제 오픈 시 별도 안내 드립니다.
+        💡 <b>결제 안내</b> — 토스페이먼츠 결제창으로 안전하게 결제합니다. 결제 완료 후 토큰은 즉시 적립되며, 결제 승인 실패 시 적립되지 않습니다.
       </div>
 
       <!-- B2B 지자체 -->
@@ -2292,7 +2463,7 @@ function openModal(kind){
       <div class="price-sub">언제든 취소 가능 · 첫 7일 무료</div>
       <div class="btn-row">
         <button class="btn secondary" onclick="closeModal()">취소</button>
-        <button class="btn premium" onclick="alert('베타 기간입니다 — 사업자 등록 및 PG 연동 전이라 실제 결제는 받지 않아요. 관심 등록은 rbshbomber@gmail.com 으로 직접 연락주세요.');closeModal();">관심 등록</button>
+        <button class="btn premium" onclick="alert('프리미엄 플랜은 토큰 결제 안정화 후 순차 오픈합니다. 관심 등록은 rbshbomber@gmail.com 으로 직접 연락주세요.');closeModal();">관심 등록</button>
       </div>`;
   } else if(kind === "enterprise"){
     html = `
@@ -2311,7 +2482,7 @@ function openModal(kind){
       <div class="price-sub">베타 출시 기념 50% 할인 (정가 10,000원)</div>
       <div class="btn-row">
         <button class="btn secondary" onclick="closeModal()">취소</button>
-        <button class="btn premium" onclick="alert('베타 기간 — 사업자 등록 및 PG 연동 전입니다. 정식 출시 후 활성화됩니다.');closeModal();">베타 안내 확인</button>
+        <button class="btn premium" onclick="alert('워드 파일 다운로드 결제는 토큰 결제 안정화 후 순차 오픈합니다.');closeModal();">안내 확인</button>
       </div>`;
   }
   m.innerHTML = html;
@@ -2337,24 +2508,26 @@ function openTokenPurchase(plan, tokens, price){
     <h3 style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.01em;">토큰 충전</h3>
     <p>${HAN_LABEL[plan] || plan} 패키지 — 1회 결제 후 즉시 잔액에 반영됩니다.</p>
     <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--ink);font-weight:500;">
+      <div style="font-family:'Pretendard Variable','Pretendard',sans-serif;font-size:36px;color:var(--ink);font-weight:800;">
         ₩${price.toLocaleString()}
       </div>
       <div style="color:var(--sage-deep);font-size:15px;font-weight:700;margin-top:6px;">+${tokens.toLocaleString()} 토큰</div>
       <div style="color:var(--ink-3);font-size:12px;margin-top:4px;">현재 잔액 ${(u.tokens||0).toLocaleString()} → 충전 후 ${((u.tokens||0)+tokens).toLocaleString()}</div>
     </div>
-    <p style="font-size:12px;color:var(--ink-3);background:var(--sage-soft);padding:10px 12px;border-radius:8px;line-height:1.55;">💡 <b>베타 기간 안내</b> — 사업자 등록 및 토스페이먼츠 PG 연동 전입니다. 현재는 모든 토큰을 <b>무료로 즉시 지급</b>하며, 실제 결제 청구는 발생하지 않습니다. 정식 출시 시 안내 드립니다.</p>
+    <p style="font-size:12px;color:var(--ink-3);background:var(--sage-soft);padding:10px 12px;border-radius:8px;line-height:1.55;">토스페이먼츠 결제창에서 결제 인증을 마치면 서버에서 승인 후 토큰이 적립됩니다. 결제 중 창을 닫으면 적립되지 않습니다.</p>
     <div class="btn-row">
       <button class="btn secondary" onclick="closeModal()">취소</button>
-      <button class="btn primary" id="confirm-charge">베타 무료 토큰 받기</button>
+      <button class="btn primary" id="confirm-charge">토스페이먼츠로 결제</button>
     </div>`;
   document.getElementById("modal-overlay").classList.add("open");
-  document.getElementById("confirm-charge").addEventListener("click", () => {
-    addTokens(tokens, `${HAN_LABEL[plan]} 충전 (₩${price.toLocaleString()})`, "purchase");
-    closeModal();
-    setTimeout(() => {
-      alert(`✓ ${tokens.toLocaleString()} 토큰이 적립되었습니다. 헤더 잔액 확인.`);
-    }, 200);
+  document.getElementById("confirm-charge").addEventListener("click", async () => {
+    await window.saessak?.payments?.startCheckout({
+      type: "charge",
+      plan,
+      tokens,
+      price,
+      user: u
+    });
   });
 }
 
@@ -2371,35 +2544,26 @@ function openTokenSubscribe(plan, monthlyTokens, price){
     <h3 style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.01em;">월 구독 시작</h3>
     <p>${HAN_LABEL[plan] || plan} 구독 — 매월 자동 결제 + 매달 토큰 자동 지급</p>
     <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--ink);font-weight:500;">
+      <div style="font-family:'Pretendard Variable','Pretendard',sans-serif;font-size:36px;color:var(--ink);font-weight:800;">
         ₩${price.toLocaleString()}<span style="font-size:14px;color:var(--ink-3);letter-spacing:.12em;margin-left:8px;">PER MONTH</span>
       </div>
       <div style="color:var(--sage-deep);font-size:15px;font-weight:700;margin-top:6px;">매달 ${monthlyTokens.toLocaleString()} 토큰 자동 지급</div>
       <div style="color:var(--ink-3);font-size:12px;margin-top:4px;">언제든 취소 가능 · 첫 회 결제 즉시 토큰 적립</div>
     </div>
-    <p style="font-size:12px;color:var(--ink-3);background:var(--sage-soft);padding:10px 12px;border-radius:8px;line-height:1.55;">💡 <b>베타 기간 안내</b> — 사업자 등록 및 토스페이먼츠 PG 연동 전입니다. 현재는 모든 구독을 <b>무료로 활성화</b>하며 첫 회분 토큰을 즉시 지급합니다. 실제 청구는 정식 출시 후 별도 안내 드립니다.</p>
+    <p style="font-size:12px;color:var(--ink-3);background:var(--sage-soft);padding:10px 12px;border-radius:8px;line-height:1.55;">현재 구독은 첫 회 결제 후 월 구독 상태와 첫 회분 토큰을 반영합니다. 자동결제 빌링키 관리는 토스페이먼츠 콘솔 설정 후 확장 가능합니다.</p>
     <div class="btn-row">
       <button class="btn secondary" onclick="closeModal()">취소</button>
-      <button class="btn primary" id="confirm-sub">베타 무료 구독 시작 →</button>
+      <button class="btn primary" id="confirm-sub">토스페이먼츠로 결제</button>
     </div>`;
   document.getElementById("modal-overlay").classList.add("open");
-  document.getElementById("confirm-sub").addEventListener("click", () => {
-    updateUser(user => {
-      user.subscription = {
-        plan: plan,
-        startedAt: new Date().toISOString(),
-        renewsAt: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-        monthlyTokens: monthlyTokens,
-        priceWon: price
-      };
-      user.plan = "premium";
-      return user;
+  document.getElementById("confirm-sub").addEventListener("click", async () => {
+    await window.saessak?.payments?.startCheckout({
+      type: "subscribe",
+      plan,
+      tokens: monthlyTokens,
+      price,
+      user: u
     });
-    addTokens(monthlyTokens, `${HAN_LABEL[plan]} 구독 첫 회 (₩${price.toLocaleString()}/월)`, "subscribe");
-    closeModal();
-    setTimeout(() => {
-      alert(`✓ ${HAN_LABEL[plan]} 구독이 시작되었습니다. 매달 ${monthlyTokens.toLocaleString()} 토큰이 자동 지급됩니다.`);
-    }, 200);
   });
 }
 
@@ -2429,7 +2593,20 @@ function updateAuthUI(){
     area.innerHTML = `
       <a class="token-chip" href="#pricing"><span>토큰 ${tokenDisplay}</span></a>
       <a class="user-chip" href="mypage.html">👤 ${u.name}님 ${planTag}</a>
+      <button class="logout-chip" type="button" id="header-logout">로그아웃</button>
     `;
+    document.getElementById("header-logout")?.addEventListener("click", async () => {
+      if(!confirm("로그아웃하시겠어요?")) return;
+      if(window.saessak?.signOut){
+        await window.saessak.signOut();
+      } else {
+        localStorage.removeItem("saessak_current_user");
+      }
+      updateAuthUI();
+      location.href = "index.html";
+    });
+  } else {
+    area.innerHTML = `<a class="nav-cta" href="auth.html" id="auth-cta">로그인</a>`;
   }
 }
 function getCurrentUserFull(){
@@ -2550,6 +2727,18 @@ async function tryLoadListingsJson(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ===== GreatStream Agent 준비 알림 버튼 =====
+  const asCta = document.getElementById("greatstream-agent-cta");
+  if (asCta) {
+    asCta.addEventListener("click", () => {
+      alert(
+        "GreatStream Agent 출시 시 자동 안내드립니다.\n\n" +
+        "새싹매치 회원이시면 별도 신청 없이 가입 이메일로 안내가 발송됩니다.\n" +
+        "아직 가입 전이시면 새싹매치에 먼저 가입해주세요."
+      );
+    });
+  }
+
   // ===== 모바일 햄버거 메뉴 =====
   const mobileBtn = document.getElementById("mobile-menu-btn");
   const navLinks = document.getElementById("nav-links");
