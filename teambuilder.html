@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>새싹매치 · AI 팀 스튜디오</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+    <link rel="stylesheet" href="teambuilder.css">
+    <script src="supabase-config.js" defer></script>
+    <script src="admin-config.js" defer></script>
+    <script src="ai-client.js" defer></script>
+  </head>
+  <body>
+    <section class="lobby" id="lobby" aria-label="Studio lobby">
+      <video class="lobby-bg-video" id="lobby-bg-video" autoplay muted loop playsinline preload="metadata" poster="">
+        <source src="videos/lobby-bg.mp4" type="video/mp4">
+      </video>
+      <div class="lobby-bg-overlay"></div>
+      <div class="lobby-inner">
+        <div class="lobby-header">
+          <p class="eyebrow">Agent Studio Lobby</p>
+          <h1>작업에 맞는 스튜디오를 선택하세요</h1>
+          <div class="account-card" id="lobby-account-card">
+            <div>
+              <span class="account-label">Prototype Account</span>
+              <strong id="account-name">Demo Founder</strong>
+            </div>
+            <div class="credit-pill">
+              <span>Credits</span>
+              <strong id="account-credits">—</strong>
+            </div>
+            <a href="index.html" class="overview-link">← 새싹매치</a>
+            <button id="dev-topup-button" type="button" style="display:none">개발용 충전</button>
+          </div>
+          <section class="council-panel" id="council-panel">
+            <div class="council-head">
+              <div>
+                <p class="eyebrow">Codex x Claude</p>
+                <h2>Codex랑 Claude 대화창</h2>
+              </div>
+              <span id="council-mode">상태 확인 중</span>
+            </div>
+            <div class="council-quick" aria-label="빠른 회의 주제">
+              <button type="button" data-council-question="내일 내가 가장 먼저 처리해야 할 사업/개발 작업 5개를 우선순위로 정해줘." data-council-context="새싹매치는 라이브 운영 중, 약사이는 메인 사업 후보, Agent Studio는 Mini Mac에서 테스트 중. 나는 혼자 개발하고 있고, 외부 발송이나 결제는 승인 전 하지 않는다.">내일 뭐하지?</button>
+              <button type="button" data-council-question="내일 새싹매치에서 가장 먼저 고치거나 보강해야 할 작업 순서를 정해줘." data-council-context="새싹매치는 청년창업 지원사업 매칭 SaaS다. 가짜 데이터 금지, AI는 보조 도구로 표현, 법적 위험 표현은 피한다.">새싹매치</button>
+              <button type="button" data-council-question="약사이 사업을 내일 어디까지 밀어야 할지 Claude와 Codex 관점으로 나눠서 검토해줘." data-council-context="약사이는 약국관리앱 메인 사업 후보이며, 의료/약사법 리스크 표현을 조심해야 한다. 확정 판단 대신 보조 도구와 검토 필요로 표현한다.">약사이</button>
+              <button type="button" data-council-question="오늘 한 일과 막힌 일을 정리하고, 내일 아침 바로 시작할 순서로 바꿔줘." data-council-context="작업 기록, 산출물, 개발 환경, 배포 상태를 기준으로 실행 가능한 순서만 정리한다.">오늘 정리</button>
+            </div>
+            <div class="council-grid">
+              <label>
+                물어볼 것
+                <textarea id="council-question" rows="3" placeholder="예) 내일 가장 먼저 할 일 5개만 정해줘."></textarea>
+              </label>
+              <label>
+                지금 상황
+                <textarea id="council-context" rows="3" placeholder="예) 새싹매치는 운영 중, 약사이는 기획 중, 오늘은 Mini Mac에서 작업 중."></textarea>
+              </label>
+            </div>
+            <div class="council-actions">
+              <button id="council-run" type="button">둘이 얘기시키기</button>
+              <span id="council-status"></span>
+            </div>
+            <div class="council-results" id="council-results" aria-live="polite">
+              <article class="council-message council-system">
+                <strong>대화창</strong>
+                <p>위 버튼을 누르면 Codex와 Claude 의견이 말풍선으로 나타납니다.</p>
+              </article>
+            </div>
+          </section>
+          <section class="studio-builder" id="studio-builder">
+            <div class="builder-head">
+              <div>
+                <p class="eyebrow">Studio Creator</p>
+                <h2>새 스튜디오와 에이전트 팀 만들기</h2>
+              </div>
+              <button id="toggle-builder-button" type="button">열기</button>
+            </div>
+            <form class="builder-form is-collapsed" id="studio-builder-form">
+              <div class="builder-grid">
+                <label>
+                  스튜디오 이름
+                  <input id="studio-title-input" type="text" placeholder="예) 청년창업사업 도우미">
+                </label>
+                <label>
+                  한 줄 설명
+                  <input id="studio-subtitle-input" type="text" placeholder="예) 지원사업 탐색부터 사업계획서까지">
+                </label>
+              </div>
+              <label>
+                요약
+                <textarea id="studio-summary-input" rows="2" placeholder="이 스튜디오가 해결할 문제와 고객을 적어주세요."></textarea>
+              </label>
+              <label>
+                에이전트 팀 구성
+                <textarea id="studio-agents-input" rows="6">Director|작업 총괄|사용자 요청을 에이전트별 작업으로 나누고 최종 산출물을 정리
+Research|지원사업 리서치|K-Startup·중기부·지자체 공고를 조사
+Plan Writer|사업계획서|문제정의·시장성·실행계획·예산안을 작성
+Reviewer|검수|자격요건·누락서류·위험 표현을 점검</textarea>
+              </label>
+              <div class="future-slots" aria-label="Later features">
+                <span>추가 예정</span>
+                <em>영상/이미지 업로드</em>
+                <em>초대형 팀 계정</em>
+                <em>결제 상품화</em>
+                <em>모델 라우팅</em>
+                <em>마켓플레이스</em>
+              </div>
+              <div class="builder-actions">
+                <button id="create-studio-button" type="submit">스튜디오 생성</button>
+                <span id="builder-status"></span>
+              </div>
+            </form>
+          </section>
+          <section class="pricing-panel" id="pricing-panel">
+            <div class="pricing-head">
+              <div>
+                <p class="eyebrow">Billing System</p>
+                <h2>국내/해외 유료화 크레딧 경제</h2>
+              </div>
+              <div class="pricing-currency" role="tablist" aria-label="currency">
+                <button class="selected" id="pricing-krw-button" type="button">KRW</button>
+                <button id="pricing-usd-button" type="button">USD</button>
+              </div>
+            </div>
+            <div class="plan-grid" id="plan-grid"></div>
+            <div class="operation-table" id="operation-table"></div>
+          </section>
+        </div>
+        <div class="studio-cards" id="studio-cards"></div>
+      </div>
+    </section>
+
+    <main class="shell is-hidden" id="studio-shell">
+      <section class="stage-panel" aria-label="Agent production studio">
+        <div class="topbar">
+          <div class="topbar-left">
+            <button id="back-button" class="home-button" type="button" title="모든 프로젝트 로비로">← 로비</button>
+            <div class="topbar-title">
+              <p class="eyebrow" id="studio-eyebrow">Shorts & Longform Studio</p>
+              <h1 id="studio-title">Agent Studio</h1>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <button id="toolpack-toggle-button" class="team-edit-button" type="button">도구팩</button>
+            <button id="team-edit-button" class="team-edit-button" type="button">팀 편집</button>
+            <div class="credit-pill topbar-credit">
+              <span>Credits</span>
+              <strong id="topbar-credits">—</strong>
+            </div>
+            <div class="status-pill" id="last-updated">Syncing</div>
+          </div>
+        </div>
+
+        <div class="studio" id="office" aria-live="polite">
+          <video class="studio-video" id="studio-video" autoplay muted loop playsinline preload="metadata"></video>
+          <video class="studio-video studio-video-fade" id="studio-video-fade" muted playsinline preload="none"></video>
+          <div class="video-shade"></div>
+          <div class="hotspot-layer" id="hotspot-layer" aria-label="Video character hotspots"></div>
+          <div class="video-bottom-bar" id="video-bottom-bar">
+            <div class="video-selected" id="video-selected"></div>
+            <div class="video-mini-pipeline" id="video-mini-pipeline"></div>
+          </div>
+          <div class="studio-grid"></div>
+          <div class="scene-banner" id="scene-banner">
+            <div class="scene-kicker">Now Rolling</div>
+            <div class="scene-title" id="scene-title">Studio warm-up</div>
+          </div>
+          <div class="pipeline-strip" id="pipeline-strip" aria-label="Studio pipeline"></div>
+          <div class="zone zone-research">
+            <div class="zone-label" data-zone-label="research">Research Bay</div>
+            <div class="pinboard">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="bookshelf"></div>
+          </div>
+          <div class="zone zone-shoot">
+            <div class="zone-label" data-zone-label="shoot">Shorts Set</div>
+            <div class="camera">
+              <div class="camera-body"></div>
+              <div class="camera-lens"></div>
+              <div class="camera-legs"></div>
+            </div>
+            <div class="softbox softbox-left"></div>
+            <div class="softbox softbox-right"></div>
+            <div class="stage-mark"></div>
+          </div>
+          <div class="zone zone-edit">
+            <div class="zone-label" data-zone-label="edit">Edit Suite</div>
+            <div class="monitor">
+              <div class="playhead"></div>
+            </div>
+            <div class="timeline">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="console"></div>
+          </div>
+          <div class="zone zone-review">
+            <div class="zone-label" data-zone-label="review">Review Room</div>
+            <div class="screening">
+              <div></div>
+            </div>
+            <div class="approval-board">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="walkway"></div>
+          <div class="character-dock" id="character-dock" aria-label="Character selector"></div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="panel profile-panel">
+          <div class="panel-title">
+            <h2 id="selected-heading">Selected</h2>
+          </div>
+          <div class="selected-profile" id="selected-profile"></div>
+        </section>
+
+        <details class="panel pipeline-panel">
+          <summary class="panel-title">
+            <h2 id="pipeline-heading">최근 산출물</h2>
+            <span class="panel-hint">눌러서 펼치기</span>
+          </summary>
+          <div class="pipeline-list" id="pipeline-list"></div>
+        </details>
+
+        <details class="panel toolpack-panel" open>
+          <summary class="panel-title">
+            <h2>도구팩 주입</h2>
+            <span class="panel-hint">Connect AI 방식</span>
+          </summary>
+          <div class="toolpack-list" id="toolpack-list"></div>
+        </details>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2 id="crew-heading">Crew</h2>
+            <button id="reset-button" type="button">Reset</button>
+          </div>
+          <div class="agent-list" id="agent-list"></div>
+        </section>
+
+        <details class="panel log-panel" id="log-panel-details">
+          <summary class="panel-title">
+            <h2 id="log-heading">이벤트 로그</h2>
+            <span class="panel-hint">눌러서 펼치기</span>
+          </summary>
+          <div class="event-log" id="event-log"></div>
+        </details>
+      </aside>
+    </main>
+
+    <aside class="brief-drawer is-hidden" id="brief-drawer" aria-label="Agent brief">
+      <header class="brief-head">
+        <div class="brief-id">
+          <p class="brief-eyebrow" id="brief-eyebrow">Agent</p>
+          <strong id="brief-name">—</strong>
+          <small id="brief-specialty"></small>
+        </div>
+        <button id="brief-close" type="button" aria-label="close">×</button>
+      </header>
+      <label class="brief-label" for="brief-input">이 에이전트에게 시킬 작업</label>
+      <textarea id="brief-input" placeholder="예) 30대 1인 창업자 타깃 쇼츠 후킹 3개 뽑아줘. 톤은 진솔하지만 자극적이지 않게."></textarea>
+      <div class="billing-preview" id="billing-preview">
+        <span>예상 비용</span>
+        <strong id="estimated-credits">— credits</strong>
+        <em id="balance-after">잔액 확인 중</em>
+      </div>
+      <div class="brief-actions">
+        <button id="brief-submit" type="button">에이전트에게 보내기</button>
+        <span id="brief-status" class="brief-status"></span>
+      </div>
+      <div class="brief-feed" id="brief-feed" aria-label="Recent dispatches"></div>
+    </aside>
+
+    <aside class="toolpack-drawer is-hidden" id="toolpack-drawer" aria-label="Toolpack drawer">
+      <header class="team-editor-head">
+        <div>
+          <p class="brief-eyebrow">Connect AI Import</p>
+          <strong>도구팩 주입</strong>
+          <small>필요한 팩을 현재 스튜디오에 붙이면 이벤트 로그와 산출물 가이드로 남습니다.</small>
+        </div>
+        <button id="toolpack-drawer-close" type="button" aria-label="close">×</button>
+      </header>
+      <div class="toolpack-list toolpack-list-drawer" id="toolpack-drawer-list"></div>
+    </aside>
+
+    <aside class="team-editor is-hidden" id="team-editor" aria-label="Team editor">
+      <header class="team-editor-head">
+        <div>
+          <p class="brief-eyebrow">Team Builder</p>
+          <strong id="team-editor-title">팀 구성 편집</strong>
+          <small>위치 지정할 팀원을 고른 뒤 화면의 원하는 위치를 클릭하세요.</small>
+        </div>
+        <button id="team-editor-close" type="button" aria-label="close">×</button>
+      </header>
+      <div class="team-editor-list" id="team-editor-list"></div>
+      <div class="team-editor-actions">
+        <button id="add-agent-button" type="button">팀원 추가</button>
+        <button id="save-team-button" type="button">저장</button>
+        <span id="team-editor-status"></span>
+      </div>
+    </aside>
+
+    <script src="teambuilder-shim.js"></script>
+    <script src="teambuilder.js"></script>
+  </body>
+</html>
