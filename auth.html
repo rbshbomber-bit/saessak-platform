@@ -495,6 +495,11 @@ const SOCIAL_LABEL = { google: "구글", kakao: "카카오톡", naver: "네이�
 document.querySelectorAll("[data-provider]").forEach(btn => {
   btn.addEventListener("click", async () => {
     const provider = btn.dataset.provider;
+    if(provider === "kakao"){
+      showMsg("카카오톡 로그인 페이지로 이동 중...", "success");
+      location.href = `/api/kakao-start?redirect=${encodeURIComponent(location.origin + "/")}`;
+      return;
+    }
     if(provider === "naver"){
       showMsg("네이버 로그인 페이지로 이동 중...", "success");
       location.href = `/api/naver-start?redirect=${encodeURIComponent(location.origin + "/")}`;
