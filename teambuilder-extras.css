@@ -1,0 +1,377 @@
+/*
+ * teambuilder-extras.css — Agent Studio 룩에 새싹매치 sage 톤 오버레이
+ *   - 본인 데이터 모달, 전체 실행 모달, 응답 모달
+ *   - 상단 바 새 버튼 (전체 실행 / 본인 데이터 / 영상 교체)
+ *   - 모바일 미디어쿼리 (770px 이하)
+ */
+
+:root {
+  --saessak-sage: #5b8a72;
+  --saessak-sage-deep: #2f5e4d;
+  --saessak-sage-soft: #e8f1ec;
+  --saessak-ink: #0f172a;
+  --saessak-ink-2: #475569;
+  --saessak-ink-3: #94a3b8;
+  --saessak-line: #e2e8f0;
+  --saessak-bad: #ef4444;
+  --saessak-warn: #f59e0b;
+  --saessak-ok: #16a34a;
+  --saessak-card: #fbfaf6;
+}
+
+/* ─── 상단 바 주입 영역 ─── */
+.saessak-topbar-injected {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+.saessak-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: transform .08s, background .15s, box-shadow .15s;
+  white-space: nowrap;
+}
+
+.saessak-btn {
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--saessak-line);
+  background: white;
+  color: var(--saessak-ink);
+  transition: all .12s;
+}
+.saessak-btn:hover { background: var(--saessak-sage-soft); border-color: var(--saessak-sage); }
+.saessak-btn.primary { background: var(--saessak-sage-deep); color: white; border-color: var(--saessak-sage-deep); }
+.saessak-btn.primary:hover { background: var(--saessak-sage); }
+.saessak-btn.ghost { background: transparent; border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
+.saessak-btn.ghost:hover { background: rgba(255,255,255,0.06); color: white; }
+.saessak-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#saessak-runall-btn {
+  background: linear-gradient(135deg, #2f5e4d, #5b8a72);
+  color: white;
+  border: 1px solid #5b8a72;
+  box-shadow: 0 4px 14px rgba(47, 94, 77, 0.35);
+}
+#saessak-runall-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(47, 94, 77, 0.5); }
+.saessak-pill-cost {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  color: white;
+  font-weight: 700;
+}
+
+#saessak-userdata-btn {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+#saessak-userdata-btn:hover { background: rgba(255,255,255,0.14); color: white; }
+
+.saessak-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  color: white;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+}
+.saessak-badge.complete {
+  background: var(--saessak-ok);
+}
+.saessak-badge.empty {
+  background: rgba(239, 68, 68, 0.85);
+}
+
+.saessak-video-picker {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+}
+.saessak-video-picker:hover { background: rgba(255,255,255,0.14); }
+.saessak-video-picker option { background: #1a1f2e; color: white; }
+
+/* ─── 공용 모달 ─── */
+.saessak-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+.saessak-modal.is-hidden { display: none; }
+.saessak-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
+}
+.saessak-modal-card {
+  position: relative;
+  background: var(--saessak-card);
+  color: var(--saessak-ink);
+  border-radius: 18px;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+  max-width: 560px;
+  width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 24px 28px;
+}
+.saessak-modal-card.saessak-modal-wide { max-width: 760px; }
+.saessak-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.saessak-modal-head strong { font-size: 18px; display: block; margin: 4px 0 2px; }
+.saessak-modal-head small { color: var(--saessak-ink-2); line-height: 1.5; display: block; font-size: 12.5px; }
+.saessak-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--saessak-sage-deep);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+}
+.saessak-close-btn {
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--saessak-ink-3);
+  padding: 4px 8px;
+}
+.saessak-close-btn:hover { color: var(--saessak-ink); }
+.saessak-modal-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.saessak-modal-note {
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  color: var(--saessak-ink-3);
+  line-height: 1.6;
+}
+
+/* ─── 본인 데이터 폼 ─── */
+.saessak-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+}
+.saessak-field { display: block; }
+.saessak-field span {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--saessak-ink-2);
+  margin-bottom: 4px;
+}
+.saessak-field input,
+.saessak-field textarea {
+  font-family: inherit;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--saessak-line);
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  color: var(--saessak-ink);
+  box-sizing: border-box;
+}
+.saessak-field input:focus,
+.saessak-field textarea:focus {
+  outline: none;
+  border-color: var(--saessak-sage);
+  box-shadow: 0 0 0 3px rgba(91,138,114,0.15);
+}
+.saessak-field-full { grid-column: 1 / -1; }
+
+/* ─── 전체 실행 파이프라인 ─── */
+.saessak-runall-body { display: flex; flex-direction: column; gap: 14px; }
+.saessak-runall-checks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.saessak-link {
+  background: transparent;
+  border: 0;
+  color: var(--saessak-sage-deep);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.saessak-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.saessak-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid var(--saessak-line);
+  border-radius: 10px;
+  font-size: 13.5px;
+}
+.saessak-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--saessak-sage-soft);
+  color: var(--saessak-sage-deep);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.saessak-step-body { flex: 1; min-width: 0; }
+.saessak-step-body strong { display: block; font-size: 13px; }
+.saessak-step-body small { color: var(--saessak-ink-3); font-size: 11.5px; }
+.saessak-step-view {
+  background: var(--saessak-sage-soft);
+  color: var(--saessak-sage-deep);
+  border: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.saessak-step-pending .saessak-step-num { background: #f1f5f9; color: var(--saessak-ink-3); }
+.saessak-step-running .saessak-step-num {
+  background: var(--saessak-sage);
+  color: white;
+  animation: saessak-pulse 1.2s infinite;
+}
+.saessak-step-done .saessak-step-num { background: var(--saessak-ok); color: white; }
+.saessak-step-error .saessak-step-num { background: var(--saessak-bad); color: white; }
+.saessak-step-error { border-color: var(--saessak-bad); background: #fef2f2; }
+@keyframes saessak-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ─── 응답 모달 ─── */
+.saessak-response-body {
+  background: white;
+  border: 1px solid var(--saessak-line);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  max-height: 60vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ─── 파일 첨부 ─── */
+.saessak-attach-row {
+  margin: 8px 0 4px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.saessak-attach-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(91,138,114,0.12);
+  color: var(--saessak-sage-deep);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(91,138,114,0.25);
+}
+.saessak-attach-label:hover { background: rgba(91,138,114,0.2); }
+.saessak-attach-status { font-size: 12px; color: var(--saessak-ink-3); }
+.saessak-attach-status.saessak-ok { color: var(--saessak-ok); }
+.saessak-attach-status.saessak-err { color: var(--saessak-bad); }
+
+/* ─── 상태 텍스트 ─── */
+.saessak-ok { color: var(--saessak-ok); font-weight: 600; }
+.saessak-err { color: var(--saessak-bad); font-weight: 600; }
+.saessak-warn { color: var(--saessak-warn); font-weight: 600; }
+
+/* ─── 모바일 미디어쿼리 (770px 이하) ─── */
+@media (max-width: 770px) {
+  .saessak-form-grid { grid-template-columns: 1fr; }
+  .saessak-modal-card { padding: 18px 16px; width: 96vw; }
+  .saessak-pill { font-size: 12px; padding: 5px 10px; }
+  .saessak-pill-cost { padding: 1px 6px; font-size: 10px; }
+  .saessak-topbar-injected { gap: 4px; }
+  .saessak-video-picker { font-size: 11px; padding: 4px 8px; max-width: 130px; }
+  .saessak-modal-foot { flex-direction: column; align-items: stretch; }
+  .saessak-modal-foot .saessak-btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .saessak-topbar-injected {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    margin-right: 0;
+  }
+  /* 영상 picker 모바일에서는 숨김 (메뉴 안으로 옮기는 게 v0.2 작업) */
+  .saessak-video-picker { display: none; }
+}
+
+/* ─── 핫스팟 dot 모바일에서 더 크게 (44x44 터치 타겟) ─── */
+@media (max-width: 770px) {
+  .video-hotspot {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+  }
+}
