@@ -114,6 +114,8 @@ function extractAmount(summary, suptBizClsfc) {
   if (m3) return `${m3[1]}천만원`;
   const m4 = text.match(/(\d+(?:,\d{3})*)\s*만\s*원/);
   if (m4) return `${m4[1]}만원`;
+  const m5 = text.match(/(\d+)\s*백만\s*원/);
+  if (m5) return `${m5[1]}백만원`;
   return '문의';
 }
 
@@ -123,6 +125,7 @@ function decodeEntities(s) {
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&#39;/g, "'")
@@ -296,10 +299,15 @@ function transformBizinfoItem(item, idx) {
 }
 
 function classifyBizinfoRegion(hashTags, agency, title) {
-  const text = `${hashTags || ''},${agency || ''},${title || ''}`;
+  const primaryText = `${title || ''},${agency || ''}`;
   const regions = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
-  const found = regions.find(r => text.includes(r));
-  return found || '전국';
+  const primaryFound = regions.find(r => primaryText.includes(r));
+  if (primaryFound) return primaryFound;
+
+  const tagText = `${hashTags || ''}`;
+  const tagMatches = regions.filter(r => tagText.includes(r));
+  if (tagMatches.length >= 10) return '전국';
+  return tagMatches[0] || '전국';
 }
 
 // ===== K-Startup 1건 → 우리 LISTINGS 1건 (사이트 카드 호환 구조) =====
