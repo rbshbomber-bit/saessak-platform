@@ -79,6 +79,23 @@ function normalizeDate(d) {
   return d;
 }
 
+function stripHTML(s) {
+  return decodeEntities(String(s || '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim());
+}
+
+function parseBizinfoPeriod(period) {
+  const raw = String(period || '');
+  const dates = raw.match(/\d{8}/g) || [];
+  return {
+    start: normalizeDate(dates[0] || ''),
+    end: normalizeDate(dates[1] || dates[0] || ''),
+  };
+}
+
 function extractAmount(summary, suptBizClsfc) {
   const text = (summary || '') + ' ' + (suptBizClsfc || '');
   if (!text) return '문의';
@@ -184,6 +201,88 @@ function moneyToNumber(s, summary) {
   return 0;
 }
 
+function isFundingRelevant(title, summary, category, hashTags) {
+  const text = `${title} ${summary} ${category} ${hashTags}`.toLowerCase();
+  const hasFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|시제품|제품화|상용화|r&d|기술개발|마케팅|판로|수출/.test(text);
+  const hasEducationOnlySignal = /교육|아카데미|강의|특강|세미나|설명회|포럼|컨퍼런스|워크숍|워크샵|캠프|상담회|행사|박람회|페어|멘토링/.test(text);
+  const hasHardFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|r&d|기술개발/.test(text);
+
+  if (hasFundingSignal) return true;
+  if (hasEducationOnlySignal && !hasHardFundingSignal) return false;
+  return /금융|창업/.test(category || hashTags || '');
+}
+
+function bizinfoTypes(title, summary, category) {
+  const text = `${title} ${summary} ${category}`;
+  const types = [];
+  if (/융자|대출|보증|정책자금|운전자금|시설자금/.test(text)) types.push('융자');
+  if (/자금|사업화|지원금|보조금|사업비|바우처|시제품|제품화|상용화|기술개발|r&d/i.test(text)) types.push('자금');
+  if (/멘토링|컨설팅/.test(text)) types.push('멘토링');
+  if (/판로|수출|마케팅|홍보/.test(text)) types.push('판로');
+  if (/공간|입주|보육/.test(text)) types.push('공간');
+  return types.length ? [...new Set(types)] : (/금융/.test(category) ? ['융자'] : ['자금']);
+}
+
+function bizinfoMoney(title, summary, category) {
+  const text = `${title} ${summary}`;
+  const amount = extractAmount(text, category);
+  if (amount !== '문의') return amount;
+  if (/융자|대출|보증|정책자금/.test(text + category)) return '융자·보증';
+  if (/바우처/.test(text)) return '바우처';
+  return '지원금 문의';
+}
+
+function transformBizinfoItem(item, idx) {
+  const title = stripHTML(item.pblancNm || item.title || '');
+  const summary = stripHTML(item.bsnsSumryCn || item.description || '');
+  const category = stripHTML(item.pldirSportRealmLclasCodeNm || item.lcategory || '');
+  const hashTags = stripHTML(item.hashTags || '');
+  const agency = stripHTML(item.jrsdInsttNm || item.author || '');
+  const execAgency = stripHTML(item.excInsttNm || '');
+  const period = parseBizinfoPeriod(item.reqstBeginEndDe || item.reqstDt || '');
+  const id = item.pblancId || item.seq || `bizinfo-${idx}`;
+  const url = item.pblancUrl || item.link || 'https://www.bizinfo.go.kr';
+  const regionLabel = classifyBizinfoRegion(hashTags, agency, title);
+  const region = classifyRegion(regionLabel, agency, title);
+  const types = bizinfoTypes(title, summary, category);
+  const money = bizinfoMoney(title, summary, category);
+  const fieldKey = classifyField(title, summary, category);
+
+  return {
+    id: `bi-${id}`,
+    region,
+    regionLabel,
+    title: title.replace(/\s+/g, ' '),
+    org: execAgency ? `${agency || '기업마당'} / ${execAgency}` : (agency || '기업마당'),
+    field: FIELD_KO[fieldKey] || category || '일반',
+    age: /청년|39세|만\s*39/.test(`${title} ${summary}`) ? '만 39세 이하' : '제한 없음',
+    money,
+    types,
+    moneyMax: moneyToNumber(money, summary),
+    deadline: period.end,
+    summary: summary.slice(0, 250),
+    url,
+    fieldKey,
+    bizClsfc: category,
+    sprvInst: agency,
+    period: period.start || period.end ? `${period.start || '상시'} ~ ${period.end || '상시'}` : '상시/공고문 확인',
+    target: stripHTML(item.trgetNm || ''),
+    applyUrl: item.rceptEngnHmpgUrl || url,
+    contact: stripHTML(item.refrncNm || ''),
+    hashTags,
+    rcrtOngoing: true,
+    isExplicitlyNonYouth: false,
+    source: 'bizinfo',
+  };
+}
+
+function classifyBizinfoRegion(hashTags, agency, title) {
+  const text = `${hashTags || ''},${agency || ''},${title || ''}`;
+  const regions = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주'];
+  const found = regions.find(r => text.includes(r));
+  return found || '전국';
+}
+
 // ===== K-Startup 1건 → 우리 LISTINGS 1건 (사이트 카드 호환 구조) =====
 function transformItem(item, idx) {
   const title = item.biz_pbanc_nm || item.intg_pbanc_biz_nm || '';
@@ -274,16 +373,85 @@ async function fetchPage(apiKey, page, perPage) {
   }
 }
 
+async function fetchBizinfoPage(apiKey, categoryId, page, perPage) {
+  if (!apiKey) return { items: [], totalCount: 0, skipped: true };
+
+  const url = new URL('https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do');
+  url.searchParams.set('crtfcKey', apiKey);
+  url.searchParams.set('dataType', 'json');
+  url.searchParams.set('searchLclasId', categoryId);
+  url.searchParams.set('pageUnit', String(perPage));
+  url.searchParams.set('pageIndex', String(page));
+
+  try {
+    const apiRes = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/json,*/*',
+        'User-Agent': 'saessak-platform/1.0',
+      }
+    });
+    const text = await apiRes.text();
+    if (!apiRes.ok) {
+      console.error(`Bizinfo category ${categoryId} page ${page} HTTP ${apiRes.status}`);
+      return { items: [], totalCount: 0 };
+    }
+    const data = JSON.parse(text);
+    if (data.reqErr) {
+      console.error(`Bizinfo category ${categoryId} page ${page} error: ${data.reqErr}`);
+      return { items: [], totalCount: 0 };
+    }
+    const channel = data.jsonArray || data.channel || data;
+    const rawItems = channel.item || [];
+    const items = Array.isArray(rawItems) ? rawItems : [rawItems].filter(Boolean);
+    const totalCount = parseInt(items[0]?.totCnt || channel.totCnt || '0', 10) || 0;
+    return { items, totalCount };
+  } catch (err) {
+    console.error(`Bizinfo category ${categoryId} page ${page} fetch error`, err.message);
+    return { items: [], totalCount: 0 };
+  }
+}
+
+async function fetchBizinfoListings(apiKey, pages, perPage) {
+  if (!apiKey) {
+    return { listings: [], rawItemsParsed: 0, totalAvailable: 0, skipped: true };
+  }
+
+  // 01 금융, 06 창업. 교육/행사성은 transform 전 필터에서 제외한다.
+  const categories = ['01', '06'];
+  const requests = [];
+  categories.forEach(categoryId => {
+    for (let page = 1; page <= pages; page += 1) {
+      requests.push(fetchBizinfoPage(apiKey, categoryId, page, perPage));
+    }
+  });
+  const results = await Promise.all(requests);
+  const rawItems = results.flatMap(r => r.items);
+  const totalAvailable = results.reduce((sum, r) => sum + (r.totalCount || 0), 0);
+
+  const listings = rawItems
+    .map((item, idx) => transformBizinfoItem(item, idx))
+    .filter(x => x.title)
+    .filter(x => isFundingRelevant(x.title, x.summary, x.bizClsfc, x.hashTags || ''));
+
+  return {
+    listings,
+    rawItemsParsed: rawItems.length,
+    totalAvailable,
+    skipped: false,
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   // 캐시 10분 (1시간 → 10분 단축, 최신성 ↑)
   res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=300');
 
   const apiKey = process.env.KSTARTUP_API_KEY;
-  if (!apiKey) {
+  const bizinfoApiKey = process.env.BIZINFO_API_KEY;
+  if (!apiKey && !bizinfoApiKey) {
     return res.status(200).json({
       ok: false,
-      error: 'KSTARTUP_API_KEY 환경 변수 미설정',
+      error: 'KSTARTUP_API_KEY 또는 BIZINFO_API_KEY 환경 변수 미설정',
       fallback: true,
       listings: STATIC_FALLBACK,
     });
@@ -295,33 +463,47 @@ export default async function handler(req, res) {
   const perPage = Math.min(parseInt(req.query?.perPage || '500', 10), 500);
   // ?pages 파라미터: 가져올 페이지 수 (기본 5 = 최대 2,500건, 최대 10 = 5,000건)
   const maxPages = Math.min(parseInt(req.query?.pages || '5', 10), 10);
+  const includeBizinfo = req.query?.bizinfo !== '0';
+  const bizinfoPages = Math.min(parseInt(req.query?.bizinfoPages || '2', 10), 5);
+  const bizinfoPerPage = Math.min(parseInt(req.query?.bizinfoPerPage || '100', 10), 300);
 
   try {
     // 페이지 1~N 병렬 호출
     const pageNumbers = Array.from({ length: maxPages }, (_, i) => i + 1);
-    const results = await Promise.all(
-      pageNumbers.map(p => fetchPage(apiKey, p, perPage))
-    );
+    const results = apiKey
+      ? await Promise.all(pageNumbers.map(p => fetchPage(apiKey, p, perPage)))
+      : [];
 
     // 모든 페이지 합치기
     const allItems = results.flatMap(r => r.items);
     const totalAvailable = results[0]?.totalCount || 0;
+    const bizinfoResult = includeBizinfo
+      ? await fetchBizinfoListings(bizinfoApiKey, bizinfoPages, bizinfoPerPage)
+      : { listings: [], rawItemsParsed: 0, totalAvailable: 0, skipped: true };
 
     const today = new Date().toISOString().slice(0, 10);
 
     // 변환 + 필터 + 중복 제거 + 정렬
-    let transformed = allItems
+    const kstartupListings = allItems
       .map((item, idx) => transformItem(item, idx))
       .filter(x => x.title)
       .filter(x => !x.deadline || x.deadline >= today)
       .filter(x => x.rcrtOngoing !== false)
       .filter(x => !x.isExplicitlyNonYouth);
 
-    // 중복 제거 (id 기준 — 같은 공고가 여러 페이지에 나오는 경우 대비)
-    const seen = new Set();
+    const bizinfoListings = bizinfoResult.listings
+      .filter(x => !x.deadline || x.deadline >= today);
+
+    let transformed = [...kstartupListings, ...bizinfoListings];
+
+    // 중복 제거 (원천 ID 우선, 같은 제목+기관 보조)
+    const seenIds = new Set();
+    const seenTitles = new Set();
     transformed = transformed.filter(x => {
-      if (seen.has(x.id)) return false;
-      seen.add(x.id);
+      const titleKey = `${x.title}|${x.org}`.replace(/\s+/g, ' ').toLowerCase();
+      if (seenIds.has(x.id) || seenTitles.has(titleKey)) return false;
+      seenIds.add(x.id);
+      seenTitles.add(titleKey);
       return true;
     });
 
@@ -336,11 +518,26 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       count: transformed.length,
-      totalAvailable,
-      rawItemsParsed: allItems.length,
+      totalAvailable: totalAvailable + (bizinfoResult.totalAvailable || 0),
+      rawItemsParsed: allItems.length + (bizinfoResult.rawItemsParsed || 0),
       pagesFetched: maxPages,
       updatedAt: new Date().toISOString(),
-      source: 'kstartup-live',
+      source: includeBizinfo ? 'kstartup-bizinfo-live' : 'kstartup-live',
+      sources: {
+        kstartup: {
+          enabled: Boolean(apiKey),
+          count: kstartupListings.length,
+          rawItemsParsed: allItems.length,
+          totalAvailable,
+        },
+        bizinfo: {
+          enabled: Boolean(bizinfoApiKey) && includeBizinfo,
+          skipped: bizinfoResult.skipped,
+          count: bizinfoListings.length,
+          rawItemsParsed: bizinfoResult.rawItemsParsed || 0,
+          totalAvailable: bizinfoResult.totalAvailable || 0,
+        },
+      },
       listings: transformed,
     });
   } catch (err) {
