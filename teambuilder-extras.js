@@ -375,6 +375,9 @@
         🚀 전체 실행
         <span class="saessak-pill-cost">60</span>
       </button>
+      <button id="saessak-menu-toggle" class="saessak-btn ghost saessak-pill" type="button" aria-expanded="false" title="도구팩과 에이전트 메뉴 열기">
+        메뉴
+      </button>
       <button id="saessak-userdata-btn" class="saessak-btn ghost saessak-pill" type="button" title="본인 데이터 — 모든 에이전트가 인용">
         본인 데이터
         <span id="saessak-userdata-badge" class="saessak-badge empty">0/8</span>
@@ -389,6 +392,11 @@
     else topbarActions.appendChild(wrap);
 
     document.getElementById("saessak-runall-btn").addEventListener("click", openRunAllModal);
+    document.getElementById("saessak-menu-toggle").addEventListener("click", (e) => {
+      const open = document.body.classList.toggle("studio-menu-open");
+      e.currentTarget.setAttribute("aria-expanded", String(open));
+      e.currentTarget.textContent = open ? "메뉴 닫기" : "메뉴";
+    });
     document.getElementById("saessak-userdata-btn").addEventListener("click", openUserDataModal);
 
     const picker = document.getElementById("saessak-video-picker");

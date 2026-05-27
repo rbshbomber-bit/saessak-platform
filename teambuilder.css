@@ -2661,6 +2661,14 @@ body.video-studio .selected-profile {
   z-index: 30;
   pointer-events: none;
 }
+
+body.video-studio:not(.studio-menu-open) .side-panel {
+  display: none !important;
+}
+
+body.video-studio.studio-menu-open .side-panel {
+  display: flex !important;
+}
 body.video-studio .selected-profile > div { padding: 0 !important; }
 body.video-studio .selected-profile::before { display: none !important; }
 body.video-studio .selected-profile .profile-character,
@@ -3976,6 +3984,19 @@ body.video-studio #saessak-topbar-injected {
   margin-right: 0 !important;
 }
 
+body.video-studio #saessak-menu-toggle {
+  display: inline-flex !important;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #eef6ff;
+}
+
+body.video-studio.studio-menu-open #saessak-menu-toggle {
+  background: rgba(110, 231, 255, 0.18);
+  border-color: rgba(110, 231, 255, 0.45);
+  color: #ffffff;
+}
+
 body.video-studio #saessak-userdata-btn,
 body.video-studio .saessak-video-picker,
 body.video-studio #toolpack-toggle-button,
@@ -3988,7 +4009,7 @@ body.video-studio .side-panel {
   position: fixed !important;
   top: 100px !important;
   right: 16px !important;
-  bottom: 16px !important;
+  bottom: 96px !important;
   left: auto !important;
   width: min(320px, calc(100vw - 32px)) !important;
   max-width: 320px !important;
@@ -4007,7 +4028,7 @@ body.video-studio .side-panel > .panel:not(.profile-panel) {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: min(460px, calc(100vh - 130px)) !important;
+  max-height: min(420px, calc(100vh - 220px)) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -4055,6 +4076,12 @@ body.video-studio .side-panel .agent-card.selected .agent-task {
 
 body.video-studio .hotspot-layer {
   padding-top: 108px !important;
+}
+
+body.video-studio .event-log,
+body.video-studio .log-dock,
+body.video-studio #event-log {
+  z-index: 65 !important;
 }
 
 @media (max-width: 900px) {
