@@ -285,10 +285,24 @@
     if (path === "/api/toolpacks") {
       return jsonResponse({
         packs: [
-          { id: "kstartup",  name: "K-Startup 공고",  desc: "Grant Scout가 자동으로 매칭", state: "active" },
-          { id: "claude",    name: "Claude 4.6",      desc: "에이전트 추론 엔진",        state: "active" },
-          { id: "supabase",  name: "Supabase",        desc: "결과물 영속 저장",          state: "active" },
-          { id: "docx",      name: "DOCX/PDF 내보내기", desc: "사업계획서 다운로드",      state: "active" }
+          {
+            id: "funding-listings",
+            category: "공고 데이터",
+            name: "자금지원 공고",
+            summary: "K-Startup과 기업마당 자금지원형 공고를 Grant Scout가 우선 참고합니다.",
+            agents: ["Grant Scout", "Eligibility", "Deadline"],
+            accent: "#6ee7ff",
+            state: "active"
+          },
+          {
+            id: "plan-export",
+            category: "산출물",
+            name: "사업계획서 내보내기",
+            summary: "Plan Writer 결과를 제출 전 검토용 문서 초안으로 정리합니다.",
+            agents: ["Plan Writer", "Critic"],
+            accent: "#7ee787",
+            state: "active"
+          }
         ]
       });
     }
