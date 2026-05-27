@@ -206,7 +206,10 @@ function isFundingRelevant(title, summary, category, hashTags) {
   const hasFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|시제품|제품화|상용화|r&d|기술개발|마케팅|판로|수출|해외시장/.test(text);
   const hasEducationOnlySignal = /교육|아카데미|강의|특강|세미나|설명회|포럼|컨퍼런스|워크숍|워크샵|캠프|상담회|행사|박람회|페어|멘토링/.test(text);
   const hasHardFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|r&d|기술개발/.test(text);
+  const hasEventOnlySignal = /참관객|참가자|청중|행사|네트워크|정기\s*ir|설명회|세미나|포럼|컨퍼런스/.test(text);
+  const hasDirectMoneySignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자유치|투자금|바우처|r&d|기술개발/.test(text);
 
+  if (hasEventOnlySignal && !hasDirectMoneySignal) return false;
   if (hasFundingSignal) return true;
   if (hasEducationOnlySignal && !hasHardFundingSignal) return false;
   return /금융|창업/.test(category || hashTags || '');
