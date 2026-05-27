@@ -203,13 +203,22 @@ function moneyToNumber(s, summary) {
 
 function isFundingRelevant(title, summary, category, hashTags) {
   const text = `${title} ${summary} ${category} ${hashTags}`.toLowerCase();
-  const hasFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|시제품|제품화|상용화|r&d|기술개발|마케팅|판로|수출/.test(text);
+  const hasFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|시제품|제품화|상용화|r&d|기술개발|마케팅|판로|수출|해외시장/.test(text);
   const hasEducationOnlySignal = /교육|아카데미|강의|특강|세미나|설명회|포럼|컨퍼런스|워크숍|워크샵|캠프|상담회|행사|박람회|페어|멘토링/.test(text);
   const hasHardFundingSignal = /자금|사업화|지원금|보조금|사업비|융자|대출|보증|투자|바우처|r&d|기술개발/.test(text);
 
   if (hasFundingSignal) return true;
   if (hasEducationOnlySignal && !hasHardFundingSignal) return false;
   return /금융|창업/.test(category || hashTags || '');
+}
+
+function isListingFundingRelevant(x) {
+  return isFundingRelevant(
+    x.title,
+    x.summary,
+    `${x.bizClsfc || ''} ${(x.types || []).join(' ')}`,
+    `${x.field || ''} ${x.hashTags || ''}`
+  );
 }
 
 function bizinfoTypes(title, summary, category) {
@@ -464,6 +473,7 @@ export default async function handler(req, res) {
   // ?pages 파라미터: 가져올 페이지 수 (기본 5 = 최대 2,500건, 최대 10 = 5,000건)
   const maxPages = Math.min(parseInt(req.query?.pages || '5', 10), 10);
   const includeBizinfo = req.query?.bizinfo !== '0';
+  const fundingOnly = req.query?.funding !== '0';
   const bizinfoPages = Math.min(parseInt(req.query?.bizinfoPages || '2', 10), 5);
   const bizinfoPerPage = Math.min(parseInt(req.query?.bizinfoPerPage || '100', 10), 300);
 
@@ -495,6 +505,9 @@ export default async function handler(req, res) {
       .filter(x => !x.deadline || x.deadline >= today);
 
     let transformed = [...kstartupListings, ...bizinfoListings];
+    if (fundingOnly) {
+      transformed = transformed.filter(isListingFundingRelevant);
+    }
 
     // 중복 제거 (원천 ID 우선, 같은 제목+기관 보조)
     const seenIds = new Set();
@@ -523,6 +536,7 @@ export default async function handler(req, res) {
       pagesFetched: maxPages,
       updatedAt: new Date().toISOString(),
       source: includeBizinfo ? 'kstartup-bizinfo-live' : 'kstartup-live',
+      fundingOnly,
       sources: {
         kstartup: {
           enabled: Boolean(apiKey),
