@@ -12,6 +12,27 @@
 (() => {
   "use strict";
 
+  const SAESSAK_TOOLPACKS = [
+    {
+      id: "funding-listings",
+      category: "공고 데이터",
+      name: "자금지원 공고",
+      summary: "K-Startup과 기업마당 자금지원형 공고를 Grant Scout가 우선 참고합니다.",
+      agents: ["Grant Scout", "Eligibility", "Deadline"],
+      accent: "#6ee7ff",
+      state: "active"
+    },
+    {
+      id: "plan-export",
+      category: "산출물",
+      name: "사업계획서 내보내기",
+      summary: "Plan Writer 결과를 제출 전 검토용 문서 초안으로 정리합니다.",
+      agents: ["Plan Writer", "Critic"],
+      accent: "#7ee787",
+      state: "active"
+    }
+  ];
+
   // ── 새싹매치 청년창업 도우미 6 에이전트 ──
   const SAESSAK_PROJECT = {
     id: "saessak-match",
@@ -22,6 +43,7 @@
     background: { type: "video", src: "videos/saessak-platform.mp4" },
     meta: { status: "BETA · 라이브" },
     fullRunCost: 60,
+    toolpacks: SAESSAK_TOOLPACKS.map(pack => ({ id: pack.id, name: pack.name })),
     agents: [
       { id: "director",    name: "Director",     title: "작업 총괄",
         specialty: "한 줄 요청 → 5 에이전트에게 작업 분담 + 최종 통합",
@@ -284,26 +306,7 @@
     // ── 도구팩 (실제 사용 도구) ──
     if (path === "/api/toolpacks") {
       return jsonResponse({
-        packs: [
-          {
-            id: "funding-listings",
-            category: "공고 데이터",
-            name: "자금지원 공고",
-            summary: "K-Startup과 기업마당 자금지원형 공고를 Grant Scout가 우선 참고합니다.",
-            agents: ["Grant Scout", "Eligibility", "Deadline"],
-            accent: "#6ee7ff",
-            state: "active"
-          },
-          {
-            id: "plan-export",
-            category: "산출물",
-            name: "사업계획서 내보내기",
-            summary: "Plan Writer 결과를 제출 전 검토용 문서 초안으로 정리합니다.",
-            agents: ["Plan Writer", "Critic"],
-            accent: "#7ee787",
-            state: "active"
-          }
-        ]
+        packs: SAESSAK_TOOLPACKS
       });
     }
 
@@ -386,7 +389,10 @@
 
     // ── 프로젝트 도구팩 ──
     if (path.match(/^\/api\/projects\/[^/]+\/toolpacks/)) {
-      return jsonResponse({ ok: true });
+      let body = {};
+      try { body = init && init.body ? JSON.parse(init.body) : {}; } catch (e) {}
+      const pack = SAESSAK_TOOLPACKS.find(item => item.id === body.packId) || SAESSAK_TOOLPACKS[0];
+      return jsonResponse({ ok: true, project: SAESSAK_PROJECT, pack });
     }
 
     // ── 프로젝트 이벤트 ──

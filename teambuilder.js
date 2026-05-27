@@ -381,7 +381,7 @@ function renderToolpacksInto(container) {
   }
   const injected = new Set((activeProject?.toolpacks || []).map((item) => item.id));
   container.innerHTML = packs.map((pack) => {
-    const installed = injected.has(pack.id);
+    const installed = pack.state === "active" || injected.has(pack.id);
     return `
       <article class="toolpack-card" style="--pack-color:${escapeHtml(pack.accent || "#6ee7ff")}">
         <div>
@@ -391,7 +391,7 @@ function renderToolpacksInto(container) {
           <small>${(pack.agents || []).map(escapeHtml).join(" · ")}</small>
         </div>
         <button type="button" data-pack-id="${escapeHtml(pack.id)}" ${!activeProject || installed ? "disabled" : ""}>
-          ${installed ? "주입됨" : "주입"}
+          ${installed ? "기본 적용" : "주입"}
         </button>
       </article>
     `;
@@ -426,7 +426,7 @@ async function injectToolpack(packId) {
     await loadOutputs();
     showToast(`${data.pack.name} 주입 완료`, "success");
   } catch (err) {
-    showToast(`도구팩 주입 실패: ${err.message}`, "error");
+    showToast(`기능 적용 확인 실패: ${err.message}`, "error");
     renderToolpacks();
   }
 }
