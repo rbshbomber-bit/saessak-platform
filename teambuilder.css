@@ -3807,3 +3807,114 @@ body.is-editing-team .hotspot-layer {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ============================================================
+ * v8 PATCH (2026-05-27) — topbar 겹침/잘림 수정
+ * 이전: max-width:240px 강제로 topbar 안 버튼들이 잘리고
+ *       Director 같은 stage 캐릭터와 시각적으로 겹침.
+ * 수정: max-width 해제 + 버튼별 보호 + 좁은 화면 부가버튼 숨김
+ * ============================================================ */
+
+/* 1) video-studio 모드의 topbar 강제 폭 제한 해제 */
+body.video-studio .topbar {
+  max-width: none !important;
+  width: auto !important;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+/* 2) studio-title 줄임표 폭도 합리적으로 */
+body.video-studio .topbar-title h1,
+body.video-studio .topbar-title .eyebrow {
+  max-width: min(280px, 40vw);
+}
+
+/* 3) topbar 안 모든 버튼/액션은 잘리거나 줄바꿈 안 되게 */
+body.video-studio .topbar-actions,
+body.video-studio .topbar-actions > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+body.video-studio .topbar-actions {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  column-gap: 6px;
+  justify-content: flex-end;
+}
+
+/* 4) saessak-runall-btn 등 추가 주입 버튼 보호 */
+body.video-studio #saessak-topbar-injected,
+body.video-studio #saessak-topbar-injected > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+body.video-studio #saessak-topbar-injected {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+body.video-studio .saessak-pill {
+  white-space: nowrap;
+  min-width: 0;
+}
+body.video-studio .saessak-pill-cost {
+  flex-shrink: 0;
+}
+
+/* 5) 좁은 화면(<= 1100px): 부가 버튼 숨겨서 핵심만 표시 */
+@media (max-width: 1100px) {
+  body.video-studio #saessak-userdata-btn,
+  body.video-studio .saessak-video-picker,
+  body.video-studio #toolpack-toggle-button {
+    display: none !important;
+  }
+  body.video-studio .topbar-title h1 { font-size: 0.85rem; }
+  body.video-studio .topbar-title .eyebrow { font-size: 0.55rem; }
+}
+
+/* 6) 더 좁은 화면(<= 720px): "전체 실행" 라벨도 더 축약 */
+@media (max-width: 720px) {
+  body.video-studio #saessak-runall-btn {
+    font-size: 0; /* 텍스트 숨김 */
+    padding: 8px 12px;
+  }
+  body.video-studio #saessak-runall-btn::before {
+    content: "🚀";
+    font-size: 14px;
+  }
+  body.video-studio #saessak-runall-btn .saessak-pill-cost {
+    font-size: 11px;
+    margin-left: 4px;
+  }
+  body.video-studio #team-edit-button,
+  body.video-studio #reset-button { display: none !important; }
+}
+
+/* 7) topbar의 시각적 가림막 보강 — character가 뒤에 가도 topbar가 위로 */
+body.video-studio .topbar {
+  position: relative;
+  z-index: 60 !important;
+  backdrop-filter: blur(8px);
+}
+
+/* 8) character dock/hotspot은 topbar보다 아래 z-index */
+body.video-studio .character-dock,
+body.video-studio .hotspot-layer,
+body.video-studio .video-hotspot {
+  z-index: 5 !important;
+}
+body.video-studio .video-hotspot.selected,
+body.video-studio .video-hotspot:hover {
+  z-index: 6 !important; /* 호버/선택 시에도 topbar(60) 아래 */
+}
+
+/* 9) Director 같은 핫스팟 라벨(span)이 topbar 영역(상단 70px) 위로 침범 못 하게 */
+body.video-studio .hotspot-layer { padding-top: 72px; }
+
+/* 10) credit pill은 항상 보이게 (잔액은 핵심 정보) */
+body.video-studio .topbar-credit {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
