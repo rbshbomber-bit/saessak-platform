@@ -50,14 +50,19 @@ module.exports = async function handler(req, res) {
   const kakaoAccount = profileData.kakao_account || {};
   const profile = kakaoAccount.profile || profileData.properties || {};
   const id = String(profileData.id || Date.now());
-  const email = (kakaoAccount.email || `${id}@kakao.local`).toLowerCase();
+  const adminKakaoEmailById = { "4912921188": "rbshbomber@gmail.com" };
+  const adminKakaoNameById = { "4912921188": "byeun seung" };
+  const email = (kakaoAccount.email || adminKakaoEmailById[id] || `${id}@kakao.local`).toLowerCase();
+  const isKnownAdmin = adminKakaoEmailById[id] && email === adminKakaoEmailById[id];
   const payload = {
     id: `u_kakao_${id}`,
     kakaoId: id,
-    name: profile.nickname || email.split("@")[0],
+    name: adminKakaoNameById[id] || profile.nickname || email.split("@")[0],
     email,
     avatar: profile.profile_image_url || profile.thumbnail_image_url || null,
-    provider: "kakao"
+    provider: "kakao",
+    role: isKnownAdmin ? "admin" : null,
+    tokens: isKnownAdmin ? 999999 : null
   };
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -86,13 +91,14 @@ module.exports = async function handler(req, res) {
       plan: "free",
       joinedAt: new Date().toISOString(),
       usage: { matches: 0, plans: 0 },
-      tokens: 50,
+      role: profile.role || null,
+      tokens: profile.tokens || 50,
       subscription: null,
       tokenLog: [{
         ts: new Date().toISOString(),
         kind: "signup-bonus",
-        amount: 50,
-        balance: 50,
+        amount: profile.tokens || 50,
+        balance: profile.tokens || 50,
         memo: "카카오 회원가입 보너스 — 50 토큰"
       }]
     };
@@ -101,6 +107,10 @@ module.exports = async function handler(req, res) {
     user.kakaoId = profile.kakaoId || user.kakaoId;
     user.provider = user.provider || "kakao";
     if(profile.avatar) user.avatar = profile.avatar;
+    if(profile.email && (!user.email || /@(kakao|naver)\.local$/.test(user.email))) user.email = profile.email;
+    if(profile.name && (!user.name || /^\\d+$/.test(String(user.name)))) user.name = profile.name;
+    if(profile.role) user.role = profile.role;
+    if(profile.tokens && (!user.tokens || user.tokens < profile.tokens)) user.tokens = profile.tokens;
   }
   localStorage.setItem(USER_KEY, JSON.stringify(users));
   localStorage.setItem(CURRENT_KEY, user.id);

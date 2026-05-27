@@ -3918,3 +3918,173 @@ body.video-studio .topbar-credit {
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+/* ============================================================
+ * v9 PATCH (2026-05-27) — 상단 메뉴 겹침 최종 정리
+ * 상단은 헤더 1줄만 유지하고, 에이전트 메뉴는 아래 우측 패널로 내린다.
+ * ============================================================ */
+body.video-studio .topbar {
+  position: fixed !important;
+  top: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  bottom: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  min-height: 68px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  padding: 10px 14px !important;
+  border-radius: 18px !important;
+  z-index: 90 !important;
+  background: rgba(13, 17, 25, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.36) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+}
+
+body.video-studio .topbar-left {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+body.video-studio .topbar-title h1,
+body.video-studio .topbar-title .eyebrow {
+  max-width: min(520px, 48vw) !important;
+}
+
+body.video-studio .topbar-actions {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  max-width: 48vw !important;
+  overflow: hidden !important;
+}
+
+body.video-studio #saessak-topbar-injected {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  margin-right: 0 !important;
+}
+
+body.video-studio #saessak-userdata-btn,
+body.video-studio .saessak-video-picker,
+body.video-studio #toolpack-toggle-button,
+body.video-studio #team-edit-button,
+body.video-studio #last-updated {
+  display: none !important;
+}
+
+body.video-studio .side-panel {
+  position: fixed !important;
+  top: 100px !important;
+  right: 16px !important;
+  bottom: 16px !important;
+  left: auto !important;
+  width: min(320px, calc(100vw - 32px)) !important;
+  max-width: 320px !important;
+  height: auto !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  overflow: visible !important;
+  z-index: 70 !important;
+  pointer-events: none;
+}
+
+body.video-studio .side-panel > .panel:not(.profile-panel) {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: min(460px, calc(100vh - 130px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  pointer-events: auto;
+}
+
+body.video-studio .side-panel > .panel:not(.profile-panel)::after {
+  display: none !important;
+}
+
+body.video-studio .side-panel .panel-title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+body.video-studio .side-panel .agent-list {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  width: 100% !important;
+  padding: 10px !important;
+  overflow: auto !important;
+}
+
+body.video-studio .side-panel .agent-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+  padding: 10px 12px 10px 14px !important;
+  border-radius: 10px !important;
+}
+
+body.video-studio .side-panel .agent-card .agent-task,
+body.video-studio .side-panel .agent-card:hover .agent-task,
+body.video-studio .side-panel .agent-card.selected .agent-task {
+  display: block !important;
+  max-width: 100% !important;
+}
+
+body.video-studio .hotspot-layer {
+  padding-top: 108px !important;
+}
+
+@media (max-width: 900px) {
+  body.video-studio .topbar {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    min-height: 96px !important;
+  }
+
+  body.video-studio .topbar-actions {
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  body.video-studio .side-panel {
+    top: 124px !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: 44vh !important;
+  }
+
+  body.video-studio .side-panel > .panel:not(.profile-panel) {
+    max-height: 44vh !important;
+  }
+
+  body.video-studio .hotspot-layer {
+    padding-top: 150px !important;
+  }
+}

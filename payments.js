@@ -114,8 +114,12 @@
     const pendingRaw = sessionStorage.getItem(PENDING_KEY);
     const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
     const product = payment.product;
-    const userId = pending && pending.orderId === payment.orderId ? pending.userId : localStorage.getItem("saessak_current_user");
-    if(!userId || !product) return { ok: false, reason: "user_not_found" };
+    if(!pending || pending.orderId !== payment.orderId) return { ok: false, reason: "pending_order_mismatch" };
+    if(!product || pending.plan !== payment.productId || pending.price !== product.price || pending.tokens !== product.tokens) {
+      return { ok: false, reason: "product_mismatch" };
+    }
+    const userId = pending.userId;
+    if(!userId) return { ok: false, reason: "user_not_found" };
 
     const creditKey = CREDIT_PREFIX + payment.orderId;
     if(localStorage.getItem(creditKey)) return { ok: true, duplicate: true };

@@ -172,11 +172,15 @@
     const session = sessionData && sessionData.session;
     if(session){
       syncSupabaseToLocal(session);
+      if(typeof window.saessak.ensureAdminPrivileges === 'function') window.saessak.ensureAdminPrivileges();
+      if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
+      if(typeof window.refreshTokenDisplay === 'function') window.refreshTokenDisplay();
     }
 
     client.auth.onAuthStateChange((event, sess) => {
       if(event === 'SIGNED_IN' && sess){
         syncSupabaseToLocal(sess);
+        if(typeof window.saessak.ensureAdminPrivileges === 'function') window.saessak.ensureAdminPrivileges();
         if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
         if(typeof window.refreshTokenDisplay === 'function') window.refreshTokenDisplay();
       } else if(event === 'SIGNED_OUT'){
