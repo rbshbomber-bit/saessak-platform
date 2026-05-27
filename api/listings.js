@@ -89,10 +89,17 @@ function stripHTML(s) {
 
 function parseBizinfoPeriod(period) {
   const raw = String(period || '');
-  const dates = raw.match(/\d{8}/g) || [];
+  const dashedDates = raw.match(/\d{4}-\d{2}-\d{2}/g) || [];
+  if (dashedDates.length) {
+    return {
+      start: dashedDates[0] || '',
+      end: dashedDates[1] || dashedDates[0] || '',
+    };
+  }
+  const compactDates = raw.match(/\d{8}/g) || [];
   return {
-    start: normalizeDate(dates[0] || ''),
-    end: normalizeDate(dates[1] || dates[0] || ''),
+    start: normalizeDate(compactDates[0] || ''),
+    end: normalizeDate(compactDates[1] || compactDates[0] || ''),
   };
 }
 
@@ -247,8 +254,8 @@ function bizinfoMoney(title, summary, category) {
 function transformBizinfoItem(item, idx) {
   const title = stripHTML(item.pblancNm || item.title || '');
   const summary = stripHTML(item.bsnsSumryCn || item.description || '');
-  const category = stripHTML(item.pldirSportRealmLclasCodeNm || item.lcategory || '');
-  const hashTags = stripHTML(item.hashTags || '');
+  const category = stripHTML(`${item.pldirSportRealmLclasCodeNm || item.lcategory || ''} ${item.pldirSportRealmMlsfcCodeNm || ''}`);
+  const hashTags = stripHTML(item.hashTags || item.hashtags || '');
   const agency = stripHTML(item.jrsdInsttNm || item.author || '');
   const execAgency = stripHTML(item.excInsttNm || '');
   const period = parseBizinfoPeriod(item.reqstBeginEndDe || item.reqstDt || '');
@@ -413,7 +420,7 @@ async function fetchBizinfoPage(apiKey, categoryId, page, perPage) {
       return { items: [], totalCount: 0 };
     }
     const channel = data.jsonArray || data.channel || data;
-    const rawItems = channel.item || [];
+    const rawItems = Array.isArray(channel) ? channel : (channel.item || []);
     const items = Array.isArray(rawItems) ? rawItems : [rawItems].filter(Boolean);
     const totalCount = parseInt(items[0]?.totCnt || channel.totCnt || '0', 10) || 0;
     return { items, totalCount };
