@@ -4009,17 +4009,19 @@ body.video-studio .side-panel {
   position: fixed !important;
   top: 100px !important;
   right: 16px !important;
-  bottom: 96px !important;
+  bottom: auto !important;
   left: auto !important;
   width: min(320px, calc(100vw - 32px)) !important;
   max-width: 320px !important;
   height: auto !important;
-  max-height: none !important;
+  max-height: calc(100dvh - 120px) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   gap: 10px !important;
-  overflow: visible !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 10px !important;
   z-index: 70 !important;
   pointer-events: none;
 }
@@ -4028,11 +4030,11 @@ body.video-studio .side-panel > .panel:not(.profile-panel) {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: min(420px, calc(100vh - 220px)) !important;
+  max-height: none !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   padding: 0 !important;
   pointer-events: auto;
 }
@@ -4056,6 +4058,7 @@ body.video-studio .side-panel .agent-list {
   gap: 6px !important;
   width: 100% !important;
   padding: 10px !important;
+  max-height: 300px !important;
   overflow: auto !important;
 }
 
@@ -4084,6 +4087,15 @@ body.video-studio #event-log {
   z-index: 65 !important;
 }
 
+body.video-studio.studio-menu-open .event-log,
+body.video-studio.studio-menu-open .log-dock,
+body.video-studio.studio-menu-open #event-log,
+body.video-studio.studio-menu-open .log-panel,
+body.video-studio.studio-menu-open #log-panel-details,
+body.video-studio.studio-menu-open .video-bottom-bar {
+  display: none !important;
+}
+
 @media (max-width: 900px) {
   body.video-studio .topbar {
     align-items: flex-start !important;
@@ -4104,11 +4116,15 @@ body.video-studio #event-log {
     bottom: auto !important;
     width: auto !important;
     max-width: none !important;
-    max-height: 44vh !important;
+    max-height: calc(100dvh - 144px) !important;
   }
 
   body.video-studio .side-panel > .panel:not(.profile-panel) {
-    max-height: 44vh !important;
+    max-height: none !important;
+  }
+
+  body.video-studio .side-panel .agent-list {
+    max-height: 260px !important;
   }
 
   body.video-studio .hotspot-layer {
