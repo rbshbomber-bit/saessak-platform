@@ -288,6 +288,35 @@ function fallbackResultFromText(agentId, rawText) {
   return null;
 }
 
+function scrubUnverifiedNumbers(text) {
+  if (typeof text !== 'string') return text;
+  return text
+    .replace(/\d+\s*[~∼-]\s*\d+\s*(?:명|건|곳|개|%|원|만원|억원|인|개월)/g, '확인 필요')
+    .replace(/\d[\d,]*\s*(?:명|건|곳|개|%|원|만원|억원|인)\s*이상/g, '확인 필요')
+    .replace(/월\s*확인 필요\s*수준/g, '확인 필요 수준');
+}
+
+function sanitizeResult(agentId, result) {
+  if (!result || typeof result !== 'object') return result;
+  if (agentId !== 'plan-writer') return result;
+
+  return {
+    ...result,
+    chapters: Array.isArray(result.chapters)
+      ? result.chapters.map(chapter => ({
+        ...chapter,
+        body: scrubUnverifiedNumbers(chapter.body)
+      }))
+      : [],
+    assumptions: Array.isArray(result.assumptions)
+      ? result.assumptions.map(scrubUnverifiedNumbers)
+      : [],
+    missingInputs: Array.isArray(result.missingInputs)
+      ? result.missingInputs.map(scrubUnverifiedNumbers)
+      : []
+  };
+}
+
 // ─────────────────────────────────────────────────────────
 // 핸들러
 // ─────────────────────────────────────────────────────────
@@ -410,6 +439,8 @@ export default async function handler(req, res) {
         attempts
       });
     }
+
+    parsedResult = sanitizeResult(agentId, parsedResult);
 
     return res.status(200).json({
       ok: true,
