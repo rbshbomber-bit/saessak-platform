@@ -144,15 +144,21 @@ function extractJson(text) {
   if (!text || typeof text !== 'string') return null;
   // 코드블록 제거
   let cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*$/gm, '').trim();
-  // 가장 바깥 { } 추출
-  const match = cleaned.match(/\{[\s\S]*\}/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]);
-  } catch (e) {
-    console.warn('[teambuilder] JSON parse fail', e.message, 'text:', cleaned.slice(0, 200));
-    return null;
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if (first === -1 || last === -1 || last <= first) return null;
+
+  // 가장 넓은 JSON 후보부터 줄여가며 파싱한다. 긴 초안에 여분 텍스트가 붙어도 살리기 위함.
+  for (let end = last; end > first; end = cleaned.lastIndexOf('}', end - 1)) {
+    if (end === -1) break;
+    const candidate = cleaned.slice(first, end + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch (e) {
+      if (end === first) console.warn('[teambuilder] JSON parse fail', e.message, 'text:', cleaned.slice(0, 200));
+    }
   }
+  return null;
 }
 
 function validateAgainstSchema(result, schema) {
@@ -197,6 +203,89 @@ async function callClaude({ apiKey, systemPrompt, userPrompt, maxTokens, model }
     text = data.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
   }
   return { text, usage: data.usage || null };
+}
+
+async function repairJsonWithClaude({ apiKey, rawText, schema, agentId }) {
+  if (!rawText || rawText.length < 20) return null;
+  const systemPrompt = `당신은 깨진 AI 응답을 유효한 JSON으로 복구하는 변환기입니다.
+추가 설명 없이 JSON 객체만 반환하세요.
+원문에 없는 사실을 새로 만들지 말고, 누락된 배열은 []로, 누락된 문자열은 "확인 필요"로 채우세요.`;
+  const userPrompt = `[에이전트]
+${agentId}
+
+[필수 JSON 스키마]
+${JSON.stringify(schema, null, 2)}
+
+[원문 응답]
+${rawText.slice(0, 12000)}
+
+위 원문을 스키마에 맞는 유효한 JSON 객체 하나로만 변환하세요.`;
+  try {
+    const { text } = await callClaude({ apiKey, systemPrompt, userPrompt, maxTokens: 2200 });
+    return extractJson(text);
+  } catch (e) {
+    console.warn('[teambuilder] JSON repair failed:', e.message);
+    return null;
+  }
+}
+
+function fallbackResultFromText(agentId, rawText) {
+  const text = String(rawText || '').trim();
+  if (!text) return null;
+  const body = text.slice(0, 6000);
+
+  if (agentId === 'plan-writer') {
+    return {
+      title: '사업계획서 초안',
+      chapters: [{ h: '초안 본문', body }],
+      assumptions: ['AI 응답이 JSON 형식으로 구조화되지 않아 원문 초안을 보존했습니다. 제출 전 본인 검토가 필요합니다.'],
+      missingInputs: ['정량 수치, 실제 고객/사용자 데이터, 정확한 신청 공고명, 지원금 규모']
+    };
+  }
+  if (agentId === 'director') {
+    return {
+      summary: body.slice(0, 1200),
+      plans: {
+        grantScout: '지원사업 후보와 자금지원형 여부를 재확인합니다.',
+        planWriter: '원문 내용을 사업계획서 초안으로 재구성합니다.',
+        eligibility: '자격요건과 제출서류를 확인합니다.',
+        deadline: '마감일 기준 실행 일정을 역산합니다.',
+        critic: '근거 부족과 과장 표현을 점검합니다.'
+      },
+      priority: ['공고와 자격요건 확인', '사업계획서 초안 작성', '근거 부족 항목 보완'],
+      missingData: ['AI 응답 구조화 실패로 세부 누락 정보 재확인 필요']
+    };
+  }
+  if (agentId === 'grant-scout') {
+    return {
+      topRecommendation: body.slice(0, 1200),
+      candidates: [],
+      searchGaps: ['AI 응답이 구조화되지 않아 추천 공고 목록을 확정하지 못했습니다. 원문 요약을 확인하고 공고 링크를 재검증하세요.']
+    };
+  }
+  if (agentId === 'eligibility') {
+    return {
+      eligibilityChecks: [{ targetGrant: '확인 필요', status: '불명확', reasons: [body.slice(0, 1200)], missingData: ['공고 원문', '사업자 등록 상태', '연령/지역 요건'] }],
+      documentChecklist: [],
+      questionsForUser: ['현재 사업자 등록 상태는 무엇인가요?', '지원하려는 정확한 공고명은 무엇인가요?']
+    };
+  }
+  if (agentId === 'deadline') {
+    return {
+      timeline: [{ stage: '일정 확인', startDate: '확인 필요', endDate: '확인 필요', daysNeeded: 0, userActions: [body.slice(0, 1200)] }],
+      criticalDates: [],
+      todayActions: ['지원 공고의 정확한 마감일을 확인하세요.']
+    };
+  }
+  if (agentId === 'critic') {
+    return {
+      overallVerdict: body.slice(0, 1200),
+      weaknesses: [],
+      missingUserData: [],
+      legalRiskFlags: []
+    };
+  }
+  return null;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -258,18 +347,22 @@ export default async function handler(req, res) {
     let lastError = null;
     let parsedResult = null;
     let totalUsage = null;
+    let lastRawText = '';
     const maxAttempts = 2;
 
     while (attempts < maxAttempts) {
       attempts++;
       try {
-        const { text, usage } = await callClaude({ apiKey, systemPrompt, userPrompt, maxTokens });
+        const retryHint = attempts > 1
+          ? '\n\n[재시도 지시]\n직전 응답은 JSON 파싱 또는 스키마 검증에 실패했습니다. 이번 응답은 반드시 { 로 시작해서 } 로 끝나는 유효한 JSON 객체 하나만 반환하세요. 줄바꿈이 들어간 본문은 JSON 문자열 안에 \\n으로 이스케이프하세요.'
+          : '';
+        const { text, usage } = await callClaude({ apiKey, systemPrompt, userPrompt: userPrompt + retryHint, maxTokens });
         totalUsage = usage;
+        lastRawText = text;
 
         const json = extractJson(text);
         if (!json) {
           lastError = { code: 'parse_failed', detail: 'JSON 추출 실패. raw text 길이: ' + text.length };
-          // 재시도 시 시스템 프롬프트에 더 강한 지시 추가
           continue;
         }
 
@@ -288,11 +381,32 @@ export default async function handler(req, res) {
     }
 
     if (!parsedResult) {
+      const repaired = await repairJsonWithClaude({
+        apiKey,
+        rawText: lastRawText,
+        schema: agentDef.outputSchema,
+        agentId
+      });
+      if (repaired) {
+        const validation = validateAgainstSchema(repaired, agentDef.outputSchema);
+        if (validation.ok) {
+          parsedResult = repaired;
+        }
+      }
+    }
+
+    let degraded = false;
+    if (!parsedResult && lastRawText && ['parse_failed', 'validation_failed'].includes(lastError?.code)) {
+      parsedResult = fallbackResultFromText(agentId, lastRawText);
+      degraded = Boolean(parsedResult);
+    }
+
+    if (!parsedResult) {
       return res.status(502).json({
         ok: false,
         agent: agentId,
-        error: lastError.code,
-        detail: lastError.detail,
+        error: lastError?.code || 'unknown_error',
+        detail: lastError?.detail || '에이전트 결과 생성 실패',
         attempts
       });
     }
@@ -306,6 +420,7 @@ export default async function handler(req, res) {
       stageLabel: agentDef.stageLabel,
       result: parsedResult,
       attempts,
+      degraded,
       usage: totalUsage
     });
   } catch (err) {
