@@ -291,8 +291,10 @@ function fallbackResultFromText(agentId, rawText) {
 function scrubUnverifiedNumbers(text) {
   if (typeof text !== 'string') return text;
   return text
-    .replace(/\d+\s*[~∼-]\s*\d+\s*(?:명|건|곳|개|%|원|만원|억원|인|개월)/g, '확인 필요')
-    .replace(/\d[\d,]*\s*(?:명|건|곳|개|%|원|만원|억원|인)\s*이상/g, '확인 필요')
+    .replace(/\d+\s*[~∼-]\s*\d+\s*(?:개월|만원|억원|명|건|곳|개|%|원|인)/g, '확인 필요')
+    .replace(/\d[\d,]*\s*(?:개월|만원|억원|명|건|곳|개|%|원|인)\s*이상/g, '확인 필요')
+    .replace(/\d[\d,]*\s*(?:개월|만원|억원|명|건|곳|개|%|원|인)/g, '확인 필요')
+    .replace(/확인 필요\s*월/g, '확인 필요')
     .replace(/월\s*확인 필요\s*수준/g, '확인 필요 수준');
 }
 
