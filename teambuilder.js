@@ -391,7 +391,7 @@ function renderToolpacksInto(container) {
           <small>${(pack.agents || []).map(escapeHtml).join(" · ")}</small>
         </div>
         <button type="button" data-pack-id="${escapeHtml(pack.id)}" ${!activeProject || installed ? "disabled" : ""}>
-          ${installed ? "기본 적용" : "주입"}
+          ${installed ? "연결됨" : "적용"}
         </button>
       </article>
     `;
@@ -408,7 +408,7 @@ async function injectToolpack(packId) {
   const button = toolpackList?.querySelector(`[data-pack-id="${CSS.escape(packId)}"]`);
   if (button) {
     button.disabled = true;
-    button.textContent = "주입 중";
+    button.textContent = "적용 중";
   }
   try {
     const resp = await fetch(`/api/projects/${encodeURIComponent(activeProject.id)}/toolpacks`, {
@@ -424,7 +424,7 @@ async function injectToolpack(packId) {
     renderLobby();
     await pollEvents();
     await loadOutputs();
-    showToast(`${data.pack.name} 주입 완료`, "success");
+    showToast(`${data.pack.name} 연결 확인 완료`, "success");
   } catch (err) {
     showToast(`기능 적용 확인 실패: ${err.message}`, "error");
     renderToolpacks();

@@ -16,6 +16,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { buildReadinessPrompt, evaluateReadiness } from './grant-readiness-core.js';
 
 const STUDIOS_PATH = path.join(process.cwd(), 'data', 'agent-studios.json');
 
@@ -31,6 +32,21 @@ function loadStudios() {
     console.error('[teambuilder] agent-studios.json 로드 실패', e);
     throw new Error('agent-studios.json 로드 실패: ' + e.message);
   }
+}
+
+function limitText(value, max = 12000) {
+  if (value == null) return '';
+  return String(value).slice(0, max);
+}
+
+function limitUserData(userData) {
+  if (!userData || typeof userData !== 'object' || Array.isArray(userData)) return {};
+  return Object.fromEntries(
+    Object.entries(userData).map(([key, value]) => [
+      key,
+      typeof value === 'string' ? limitText(value, 1200) : value
+    ])
+  );
 }
 
 // ─────────────────────────────────────────────────────────
@@ -89,7 +105,27 @@ async function fetchKstartupContext(userData, req) {
   }
 }
 
-function buildUserPrompt(userData, request, previousResults, agentId, kstartupContext) {
+function formatAdditionalUserData(userData) {
+  const labels = {
+    businessStatus: '사업자 상태',
+    customers: '핵심 고객',
+    evidence: '검증 근거',
+    features: '구현 기능',
+    market: '시장/타깃',
+    competitors: '경쟁/대안',
+    revenue: '매출/유료화 근거',
+    pricing: '수익모델',
+    budget: '예산 계획',
+    impact: '성과 지표',
+    documents: '보유 서류',
+    risk: '리스크 관리'
+  };
+  return Object.entries(labels)
+    .map(([key, label]) => `- ${label}: ${userData[key] || '(미입력)'}`)
+    .join('\n');
+}
+
+function buildUserPrompt(userData, request, previousResults, agentId, kstartupContext, readiness) {
   const dataSection = `[사용자 본인 데이터]
 - 사업 아이템: ${userData.item || '(미입력)'}
 - 운영자 강점: ${userData.strength || '(미입력)'}
@@ -98,7 +134,8 @@ function buildUserPrompt(userData, request, previousResults, agentId, kstartupCo
 - 신청 희망 사업: ${userData.targetGrant || '(미정)'}
 - 분야: ${userData.field || '(미입력)'}
 - 지역: ${userData.region || '(미입력)'}
-- 연령: ${userData.age || '(미입력)'}`;
+- 연령: ${userData.age || '(미입력)'}
+${formatAdditionalUserData(userData)}`;
 
   const requestSection = `[사용자 한 줄 요청]
 ${request || '(요청 없음 — 본인 데이터 기반 종합 컨설팅)'}`;
@@ -134,7 +171,32 @@ ${request || '(요청 없음 — 본인 데이터 기반 종합 컨설팅)'}`;
     kstartupSection = `\n\n[K-Startup 실시간 공고 — 사용자 분야·지역과 매칭된 ${lines.length}건]\n${lines.join('\n\n')}\n\n위 목록을 우선 검토하고, 사용자 본인 데이터와 매칭 이유를 명시하여 candidates 배열에 인용하세요. 목록에 없는 사업도 추천 가능하지만, 이 목록의 사업을 더 신뢰하세요.`;
   }
 
-  return `${dataSection}\n\n${requestSection}${contextSection}${kstartupSection}`;
+  const readinessSection = readiness ? `\n\n${buildReadinessPrompt(readiness)}` : '';
+
+  return `${dataSection}\n\n${requestSection}${contextSection}${readinessSection}${kstartupSection}`;
+}
+
+function extractPlanText(request, previousResults) {
+  const parts = [request || ''];
+  if (previousResults && typeof previousResults === 'object') {
+    for (const key of ['director', 'grantScout', 'planWriter', 'eligibility', 'deadline', 'critic']) {
+      if (previousResults[key]) parts.push(JSON.stringify(previousResults[key]));
+    }
+  }
+  return parts.join('\n\n');
+}
+
+function extractReadinessListing(previousResults) {
+  const firstCandidate = previousResults?.grantScout?.candidates?.[0];
+  if (!firstCandidate) return {};
+  return {
+    title: firstCandidate.name,
+    org: firstCandidate.organization,
+    money: firstCandidate.fundingRange,
+    deadline: firstCandidate.deadlineNote,
+    target: firstCandidate.eligibilityKey,
+    summary: firstCandidate.fitReason
+  };
 }
 
 // ─────────────────────────────────────────────────────────
@@ -339,7 +401,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { studio: studioId, agent: agentId, userData, request, previousResults } = req.body || {};
+    const { studio: studioId, agent: agentId, request, previousResults } = req.body || {};
+    const userData = limitUserData(req.body?.userData);
+    const safeRequest = limitText(request, 8000);
 
     if (!studioId || !agentId) {
       return res.status(400).json({ ok: false, error: 'missing_params', detail: 'studio와 agent 필수' });
@@ -370,7 +434,12 @@ export default async function handler(req, res) {
 
     // 시스템 프롬프트 + 사용자 프롬프트 빌드
     const systemPrompt = buildSystemPrompt(studios.globalRules, agentDef);
-    const userPrompt = buildUserPrompt(userData, request, previousResults, agentId, kstartupContext);
+    const readiness = evaluateReadiness({
+      userData,
+      planText: extractPlanText(safeRequest, previousResults),
+      listing: extractReadinessListing(previousResults)
+    });
+    const userPrompt = buildUserPrompt(userData, safeRequest, previousResults, agentId, kstartupContext, readiness);
     const maxTokens = (agentDef.estimatedTokens || 1500) + 500; // 여유분
 
     // 호출 + 재시도
@@ -451,6 +520,7 @@ export default async function handler(req, res) {
       agentTitle: agentDef.title,
       stage: agentDef.stage,
       stageLabel: agentDef.stageLabel,
+      readiness,
       result: parsedResult,
       attempts,
       degraded,

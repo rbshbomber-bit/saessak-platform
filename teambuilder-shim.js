@@ -17,7 +17,7 @@
       id: "funding-listings",
       category: "공고 데이터",
       name: "자금지원 공고",
-      summary: "K-Startup과 기업마당 자금지원형 공고를 Grant Scout가 우선 참고합니다.",
+      summary: "K-Startup 자금지원형 공고와 준비도 엔진을 Grant Scout가 우선 참고합니다.",
       agents: ["Grant Scout", "Eligibility", "Deadline"],
       accent: "#6ee7ff",
       state: "active"
@@ -29,6 +29,15 @@
       summary: "Plan Writer 결과를 제출 전 검토용 문서 초안으로 정리합니다.",
       agents: ["Plan Writer", "Critic"],
       accent: "#7ee787",
+      state: "active"
+    },
+    {
+      id: "grant-readiness",
+      category: "심사 보강",
+      name: "100점 로드맵",
+      summary: "10대 심사축 기준으로 부족한 증거, 서류, 리스크를 먼저 찾아 에이전트 프롬프트에 반영합니다.",
+      agents: ["Director", "Plan Writer", "Critic"],
+      accent: "#f2c66d",
       state: "active"
     }
   ];
@@ -52,7 +61,7 @@
         specialty: "K-Startup · 중기부 · 지자체 공고 매칭 + 적합도 평가",
         color: "#ff8ab3", hotspot: { x: 20, y: 48 }, cost: 10, stage: 2 },
       { id: "plan-writer", name: "Plan Writer",  title: "사업계획서 초안",
-        specialty: "문제정의 · 시장성 · 실행계획 · 예산안 6 챕터 작성",
+        specialty: "문제정의 · 시장성 · 실행계획 · 예산안 5 챕터 초안",
         color: "#7ee787", hotspot: { x: 70, y: 44 }, cost: 20, stage: 3 },
       { id: "eligibility", name: "Eligibility",  title: "자격 검수",
         specialty: "사용자 조건 적합성 + 필요 서류 체크리스트",
@@ -259,6 +268,7 @@
     // /api/claude, /api/listings 등 다른 실 endpoint도 통과
     if (path === "/api/claude") return originalFetch(url, init);
     if (path === "/api/listings") return originalFetch(url, init);
+    if (path === "/api/grant-readiness") return originalFetch(url, init);
     if (path === "/api/kstartup-debug") return originalFetch(url, init);
 
     // ── 계정 정보 ──
@@ -495,7 +505,10 @@
         const requestId = "req-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
         // 응답 텍스트화
-        const text = formatAgentResult(body.agent, data.result);
+        const readinessText = data.readiness
+          ? `**준비도 진단**\n${data.readiness.score}/100 · ${data.readiness.grade}\n${data.readiness.priorityActions?.slice(0, 3).map((a, i) => `${i + 1}. ${a.area}: ${a.action}`).join("\n") || ""}\n\n`
+          : "";
+        const text = readinessText + formatAgentResult(body.agent, data.result);
 
         // 메모리에 추가 (단독 호출만)
         if (isStandalone) appendThread(body.agent, body.brief, text);
@@ -509,6 +522,7 @@
             {
               metadata: {
                 agent: body.agent, brief: body.brief, raw: data.result,
+                readiness: data.readiness,
                 requestId, attempts: data.attempts, usage: data.usage
               }
             }
@@ -573,7 +587,10 @@
           // previousResults 키는 camelCase로 변환 (api/teambuilder.js와 일치)
           const camelKey = agentId.replace(/-(\w)/g, (_, c) => c.toUpperCase());
           previousResults[camelKey] = data.result;
-          const text = formatAgentResult(agentId, data.result);
+          const readinessText = data.readiness
+            ? `**준비도 진단**\n${data.readiness.score}/100 · ${data.readiness.grade}\n${data.readiness.priorityActions?.slice(0, 3).map((a, i) => `${i + 1}. ${a.area}: ${a.action}`).join("\n") || ""}\n\n`
+            : "";
+          const text = readinessText + formatAgentResult(agentId, data.result);
           pushEvent({
             time: new Date().toISOString(),
             type: "run-step-done", runId, agent: agentId, agentName: agent.name,
@@ -586,7 +603,7 @@
               "teambuilder",
               `${agent.name} (전체 실행) — ${request.slice(0, 40)}`,
               text,
-              { metadata: { agent: agentId, runId, brief: request, raw: data.result } }
+              { metadata: { agent: agentId, runId, brief: request, raw: data.result, readiness: data.readiness } }
             );
           }
         } catch (e) {

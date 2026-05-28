@@ -31,12 +31,24 @@
   const USER_DATA_FIELDS = [
     { key: "item",        label: "사업 아이템",      placeholder: "예) 약국용 복약지도 자동화 SaaS",       type: "text"     },
     { key: "strength",    label: "운영자 강점",      placeholder: "예) 어머니 약사 40년 + 현장 1년",       type: "text"     },
-    { key: "funding",     label: "자금 상황",        placeholder: "예) 자기자본 3천 + 정부지원 희망 1억",   type: "text"     },
+    { key: "funding",     label: "자금 상황",        placeholder: "예) 자기자본 보유 + 정부지원 희망",      type: "text"     },
     { key: "prototype",   label: "시제품 유무",      placeholder: "예) MVP 베타 운영 중 / 기획 단계",      type: "text"     },
     { key: "targetGrant", label: "신청 희망 사업",   placeholder: "예) 예비창업패키지, 청년창업사관학교",   type: "text"     },
     { key: "field",       label: "분야",             placeholder: "예) 의료 SaaS / 핀테크 / 콘텐츠",       type: "text"     },
     { key: "region",      label: "지역",             placeholder: "예) 인천 강화군 / 서울 강남구",         type: "text"     },
-    { key: "age",         label: "연령",             placeholder: "예) 만 39세 (1987생)",                  type: "text"     }
+    { key: "age",         label: "연령",             placeholder: "예) 만 39세 (1987생)",                  type: "text"     },
+    { key: "businessStatus", label: "사업자 상태",    placeholder: "예) 개인사업자 등록 완료 / 예비창업",   type: "text"     },
+    { key: "customers",   label: "핵심 고객",        placeholder: "예) 정부지원사업을 처음 신청하는 1인 창업자", type: "text" },
+    { key: "evidence",    label: "검증 근거",        placeholder: "예) 인터뷰/설문/MVP 피드백/출처 있는 통계", type: "text" },
+    { key: "features",    label: "구현 기능",        placeholder: "예) 공고 수집, AI 매칭, 신청 트래커",     type: "text"     },
+    { key: "market",      label: "시장/타깃",        placeholder: "예) 청년창업 지원사업 신청자",            type: "text"     },
+    { key: "competitors", label: "경쟁/대안",        placeholder: "예) K-Startup 직접 검색, 컨설팅 업체",   type: "text"     },
+    { key: "revenue",     label: "매출/유료화 근거", placeholder: "예) 아직 없음 / 첫 결제 확인 필요 / 유료화 테스트 계획", type: "text" },
+    { key: "pricing",     label: "수익모델",         placeholder: "예) 토큰 충전, 구독, B2B 라이선스",      type: "text"     },
+    { key: "budget",      label: "예산 계획",        placeholder: "예) 개발비, 운영비, 검증비, 마케팅비",   type: "text"     },
+    { key: "impact",      label: "성과 지표",        placeholder: "예) 신청 완료 건수, 상담 연결 수, 재방문율", type: "text" },
+    { key: "documents",   label: "보유 서류",        placeholder: "예) 사업자등록증, 통신판매업, 통장",      type: "text"     },
+    { key: "risk",        label: "리스크 관리",      placeholder: "예) 개인정보, AI 면책, 환불/결제, 허위 수치 차단", type: "text" }
   ];
 
   // ── 헬퍼 ──
@@ -61,6 +73,33 @@
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function gradeClass(grade) {
+    if (grade === "매우 강함") return "great";
+    if (grade === "강함") return "good";
+    if (grade === "보통") return "normal";
+    return "weak";
+  }
+
+  function statusClass(status) {
+    if (status === "강함") return "good";
+    if (status === "보완 필요") return "normal";
+    return "weak";
+  }
+
+  async function fetchReadiness(planText) {
+    const resp = await fetch("/api/grant-readiness", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userData: getUserData(), planText: planText || "" })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || data.detail || resp.status);
+    if (!Number.isFinite(data.score) || !Array.isArray(data.dimensions)) {
+      throw new Error("준비도 응답 형식이 올바르지 않습니다");
+    }
+    return data;
   }
 
   // ── 1) 본인 데이터 패널 (모달 형식) ──
@@ -94,7 +133,7 @@
           <small id="saessak-userdata-status"></small>
         </footer>
         <p class="saessak-modal-note">
-          저장은 본 기기 localStorage에만 — 서버로 가지 않아요. 새로고침해도 유지됩니다.
+          저장값은 본 기기 localStorage에 보관됩니다. 에이전트 실행 시에는 사용자가 요청한 분석을 위해 API로 전달됩니다.
           AI 보조 도구일뿐, 본인 판단·검토 필수 · 합격 보장 없음.
         </p>
       </div>
@@ -129,6 +168,104 @@
   function openUserDataModal() {
     buildUserDataPanel();
     document.getElementById("saessak-user-data-modal").classList.remove("is-hidden");
+  }
+
+  // ── 준비도 / 100점 로드맵 ──
+  function buildReadinessModal() {
+    if (document.getElementById("saessak-readiness-modal")) return;
+    const modal = document.createElement("div");
+    modal.id = "saessak-readiness-modal";
+    modal.className = "saessak-modal is-hidden";
+    modal.innerHTML = `
+      <div class="saessak-modal-backdrop" data-close></div>
+      <div class="saessak-modal-card saessak-modal-wide">
+        <header class="saessak-modal-head">
+          <div>
+            <p class="saessak-eyebrow">Grant Readiness</p>
+            <strong>100점 로드맵</strong>
+            <small>합격률이 아니라 공통 심사 요구사항 충족도입니다. 부족한 증거와 서류를 먼저 잡아줍니다.</small>
+          </div>
+          <button class="saessak-close-btn" data-close aria-label="close">×</button>
+        </header>
+        <label class="saessak-field saessak-field-full">
+          <span>추가 메모 또는 사업계획서 초안</span>
+          <textarea id="saessak-readiness-plan" rows="4" placeholder="현재 사업계획서 초안, 심사위원에게 강조하고 싶은 내용, 공고문 핵심 조건을 붙여넣으세요."></textarea>
+        </label>
+        <div class="saessak-readiness-result" id="saessak-readiness-result"></div>
+        <footer class="saessak-modal-foot">
+          <button class="saessak-btn ghost" data-close>닫기</button>
+          <button class="saessak-btn" id="saessak-readiness-edit">본인 데이터 보강</button>
+          <button class="saessak-btn primary" id="saessak-readiness-run">준비도 진단</button>
+          <span id="saessak-readiness-status"></span>
+        </footer>
+        <p class="saessak-modal-note">AI 작성 보조용 진단입니다. 실제 공고 원문과 기관 안내를 기준으로 최종 확인해야 합니다.</p>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelectorAll("[data-close]").forEach(el =>
+      el.addEventListener("click", () => modal.classList.add("is-hidden")));
+    modal.querySelector("#saessak-readiness-edit").addEventListener("click", openUserDataModal);
+    modal.querySelector("#saessak-readiness-run").addEventListener("click", runReadinessCheck);
+  }
+
+  function renderReadiness(data) {
+    const el = document.getElementById("saessak-readiness-result");
+    if (!el) return;
+    const actions = (data.priorityActions || []).map((item, i) => `
+      <li><strong>${i + 1}. ${escapeHtml(item.area)}</strong><span>${escapeHtml(item.action)}</span></li>
+    `).join("");
+    const dimensions = (data.dimensions || []).map(d => `
+      <article class="saessak-readiness-dim ${statusClass(d.status)}">
+        <div>
+          <strong>${escapeHtml(d.label)}</strong>
+          <small>${escapeHtml(d.status)} · 누락 ${d.missingInputs?.length || 0}</small>
+        </div>
+        <span>${d.score}/${d.max}</span>
+      </article>
+    `).join("");
+
+    el.innerHTML = `
+      <section class="saessak-readiness-score ${gradeClass(data.grade)}">
+        <div>
+          <small>현재 준비도</small>
+          <strong>${data.score}/100</strong>
+        </div>
+        <span>${escapeHtml(data.grade)}</span>
+      </section>
+      <p class="saessak-readiness-summary">${escapeHtml(data.summary)}</p>
+      <div class="saessak-readiness-grid">${dimensions}</div>
+      <section class="saessak-readiness-actions">
+        <strong>우선 보강 액션</strong>
+        <ol>${actions || "<li><span>큰 취약 항목은 없습니다. 공고 원문 기준으로 마지막 검토를 진행하세요.</span></li>"}</ol>
+      </section>
+    `;
+  }
+
+  async function runReadinessCheck() {
+    const status = document.getElementById("saessak-readiness-status");
+    const button = document.getElementById("saessak-readiness-run");
+    const planText = document.getElementById("saessak-readiness-plan")?.value || "";
+    if (status) { status.textContent = "진단 중..."; status.className = ""; }
+    if (button) button.disabled = true;
+    try {
+      const data = await fetchReadiness(planText);
+      renderReadiness(data);
+      if (status) { status.textContent = "진단 완료"; status.className = "saessak-ok"; }
+    } catch (e) {
+      if (status) { status.textContent = "진단 실패: " + e.message; status.className = "saessak-err"; }
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  async function openReadinessModal() {
+    buildReadinessModal();
+    const modal = document.getElementById("saessak-readiness-modal");
+    modal.classList.remove("is-hidden");
+    document.getElementById("saessak-readiness-status").textContent = "";
+    if (!document.getElementById("saessak-readiness-result").innerHTML.trim()) {
+      await runReadinessCheck();
+    }
   }
 
   // 본인 데이터 진행률 뱃지
@@ -169,7 +306,7 @@
           </label>
           <div class="saessak-runall-checks">
             <button class="saessak-link" id="saessak-runall-edit-userdata">본인 데이터 편집 →</button>
-            <span class="saessak-badge" id="saessak-runall-userdata-badge">0/8</span>
+            <span class="saessak-badge" id="saessak-runall-userdata-badge">0/${USER_DATA_FIELDS.length}</span>
           </div>
           <div class="saessak-pipeline" id="saessak-runall-pipeline"></div>
         </div>
@@ -380,7 +517,10 @@
       </button>
       <button id="saessak-userdata-btn" class="saessak-btn ghost saessak-pill" type="button" title="본인 데이터 — 모든 에이전트가 인용">
         본인 데이터
-        <span id="saessak-userdata-badge" class="saessak-badge empty">0/8</span>
+        <span id="saessak-userdata-badge" class="saessak-badge empty">0/${USER_DATA_FIELDS.length}</span>
+      </button>
+      <button id="saessak-readiness-btn" class="saessak-btn ghost saessak-pill" type="button" title="지원사업 준비도와 100점 로드맵">
+        100점 로드맵
       </button>
       <select id="saessak-video-picker" class="saessak-video-picker" title="배경 영상 교체">
         ${VIDEO_POOL.map(v => `<option value="${v.id}">${v.label}</option>`).join("")}
@@ -398,6 +538,7 @@
       e.currentTarget.textContent = open ? "메뉴 닫기" : "메뉴";
     });
     document.getElementById("saessak-userdata-btn").addEventListener("click", openUserDataModal);
+    document.getElementById("saessak-readiness-btn").addEventListener("click", openReadinessModal);
 
     const picker = document.getElementById("saessak-video-picker");
     const saved = localStorage.getItem("teambuilder.activeVideo") || "saessak-platform";
@@ -495,7 +636,7 @@
 
   // 외부에서 호출 가능하게
   window.saessakExtras = {
-    openUserDataModal, openRunAllModal, showResponseModal,
+    openUserDataModal, openRunAllModal, openReadinessModal, showResponseModal,
     applyVideoBackground, getUserData, setUserData,
     USER_DATA_FIELDS, VIDEO_POOL
   };
