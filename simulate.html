@@ -112,12 +112,31 @@ header.site {
   box-shadow: 0 24px 80px rgba(20,24,31,.24);
   color: white;
 }
+.interview-stage.has-video {
+  min-height: auto;
+  aspect-ratio: 16 / 9;
+}
+.stage-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(.92) contrast(1.04) brightness(.72);
+  transform: scale(1.035) translateZ(0);
+}
 .stage-room {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(180deg, rgba(255,255,255,.06), transparent 42%),
     repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 84px);
+}
+.interview-stage.has-video .stage-room {
+  background:
+    linear-gradient(180deg, rgba(12,16,22,.36), rgba(12,16,22,.18) 36%, rgba(12,16,22,.54)),
+    radial-gradient(circle at 50% 14%, rgba(110,231,255,.14), transparent 34%);
 }
 .stage-desk {
   position: absolute;
@@ -264,6 +283,27 @@ header.site {
   font-size: 12px;
 }
 .question-rail b { color: white; }
+.interview-stage.has-video .stage-desk,
+.interview-stage.has-video .panel-row,
+.interview-stage.has-video .applicant-seat {
+  display: none;
+}
+.interview-stage.has-video .question-rail {
+  left: 24px;
+  right: 24px;
+  bottom: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.interview-stage.has-video .question-rail div {
+  display: block;
+  min-height: 58px;
+  background: rgba(10,14,20,.56);
+  backdrop-filter: blur(10px);
+}
+.interview-stage.has-video .question-rail span {
+  display: block;
+  margin-top: 4px;
+}
 
 .disclaimer-box {
   background: var(--sage-soft); border: 1px solid var(--sage);
@@ -432,6 +472,7 @@ footer.site {
 @media (max-width: 980px) {
   .interview-shell { grid-template-columns: 1fr; }
   .interview-stage { position: relative; top: auto; min-height: 610px; }
+  .interview-stage.has-video { min-height: auto; }
 }
 @media (max-width: 720px) {
   .container { padding: 0 16px; }
@@ -442,6 +483,7 @@ footer.site {
   .applicant-seat { top: 418px; width: calc(100% - 34px); }
   .question-rail { display: none; }
   .interview-stage { min-height: 590px; }
+  .interview-stage.has-video { min-height: auto; }
 }
 </style>
 </head>
@@ -472,7 +514,10 @@ footer.site {
 
 <div class="container">
   <div class="interview-shell">
-    <section class="interview-stage" aria-label="가상 심사 면접장">
+    <section class="interview-stage has-video" aria-label="가상 심사 면접장">
+      <video class="stage-video" autoplay muted loop playsinline preload="metadata" poster="images/hero.png">
+        <source src="videos/simulate-interview-panel.mp4" type="video/mp4">
+      </video>
       <div class="stage-room"></div>
       <div class="stage-title">
         <div>
