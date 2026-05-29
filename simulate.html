@@ -674,10 +674,315 @@ footer.site {
 .foot-row .legal { margin-bottom: 8px; }
 .foot-row a { color: var(--ink-2); margin: 0 8px; }
 
+body.sim-immersive {
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #0f141a;
+  color: white;
+}
+.sim-immersive header.site {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 90;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  background: rgba(16,18,24,.86);
+  box-shadow: 0 18px 48px rgba(0,0,0,.26);
+  backdrop-filter: blur(18px);
+}
+.sim-immersive .nav {
+  max-width: none;
+  height: 74px;
+  padding: 0 18px;
+}
+.sim-immersive .brand,
+.sim-immersive .back {
+  color: rgba(255,255,255,.92);
+}
+.sim-immersive .brand .name .accent {
+  color: #b8d3b4;
+}
+.sim-immersive .token-chip {
+  background: rgba(91,122,90,.28);
+  border-color: rgba(216,227,212,.36);
+  color: #e6f3e2;
+}
+.sim-immersive .hero-bar,
+.sim-immersive footer.site {
+  display: none;
+}
+.sim-immersive > .container {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.sim-immersive .interview-shell {
+  margin: 0;
+  min-height: 100dvh;
+  display: block;
+}
+.sim-immersive .interview-stage.has-video {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: #090d12;
+}
+.sim-immersive .stage-video {
+  object-fit: cover;
+  object-position: 44% center;
+  filter: saturate(.9) contrast(1.04) brightness(.58);
+}
+.sim-immersive .interview-stage.has-video .stage-room {
+  background:
+    linear-gradient(90deg, rgba(8,12,18,.70), rgba(8,12,18,.20) 26%, rgba(8,12,18,.16) 64%, rgba(8,12,18,.78)),
+    linear-gradient(180deg, rgba(8,12,18,.54), rgba(8,12,18,.08) 34%, rgba(8,12,18,.72)),
+    radial-gradient(circle at 22% 72%, rgba(110,231,255,.12), transparent 28%),
+    radial-gradient(circle at 78% 28%, rgba(141,168,136,.16), transparent 30%);
+}
+.sim-immersive .stage-title {
+  top: 112px;
+  left: 34px;
+  right: auto;
+  width: min(680px, calc(100vw - 68px));
+  display: block;
+  z-index: 3;
+}
+.sim-immersive .stage-title small {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.sim-immersive .stage-title strong {
+  margin-top: 2px;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.04;
+  letter-spacing: 0;
+  text-shadow: 0 10px 34px rgba(0,0,0,.38);
+}
+.sim-immersive .stage-status {
+  display: none;
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: rgba(45,71,61,.58);
+}
+.sim-immersive .panel-labels {
+  z-index: 4;
+}
+.sim-immersive .panel-label {
+  padding: 7px 9px;
+  max-width: 150px;
+  background: rgba(10,14,20,.78);
+  border-color: rgba(216,227,212,.26);
+}
+.sim-immersive .panel-label:nth-child(1) { left: 12%; top: 36%; }
+.sim-immersive .panel-label:nth-child(2) { left: 30%; top: 34%; }
+.sim-immersive .panel-label:nth-child(3) { left: 48%; top: 34%; }
+.sim-immersive .panel-label:nth-child(4) { left: 66%; top: 34%; }
+.sim-immersive .panel-label:nth-child(5) { left: 84%; top: 34%; }
+.sim-immersive .panel-label span {
+  font-size: 12px;
+}
+.sim-immersive .interview-stage.has-video .question-rail {
+  left: 34px;
+  right: auto;
+  bottom: 294px;
+  width: min(760px, calc(100vw - 68px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  z-index: 4;
+}
+.sim-immersive .interview-stage.has-video .question-rail div {
+  min-height: 68px;
+  border-radius: 16px;
+  background: rgba(14,18,25,.70);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: 0 18px 42px rgba(0,0,0,.26);
+}
+.sim-immersive .simulation-content {
+  position: fixed;
+  left: 28px;
+  right: 28px;
+  bottom: 22px;
+  z-index: 60;
+  width: auto;
+  display: grid;
+  grid-template-columns: minmax(280px, .62fr) minmax(560px, 1.38fr);
+  gap: 12px;
+  align-items: stretch;
+  overflow: visible;
+  padding: 0;
+}
+.sim-immersive .disclaimer-box {
+  margin: 0;
+  padding: 13px 15px;
+  border-radius: 16px;
+  background: rgba(216,227,212,.90);
+  box-shadow: 0 14px 42px rgba(0,0,0,.18);
+  backdrop-filter: blur(16px);
+}
+.sim-immersive .disclaimer-box .ico {
+  font-size: 16px;
+}
+.sim-immersive .card,
+.sim-immersive .persona-card,
+.sim-immersive .summary-card {
+  background: rgba(255,255,255,.88);
+  border-color: rgba(255,255,255,.62);
+  box-shadow: 0 18px 54px rgba(0,0,0,.20);
+  backdrop-filter: blur(18px);
+}
+.sim-immersive .card {
+  padding: 20px;
+  border-radius: 18px;
+  color: var(--ink);
+  display: grid;
+  grid-template-columns: minmax(170px, .8fr) minmax(170px, .8fr) minmax(280px, 1.4fr);
+  gap: 12px;
+  align-items: end;
+}
+.sim-immersive .card h3 {
+  grid-column: 1 / -1;
+  font-size: 18px;
+  margin-bottom: 0;
+}
+.sim-immersive .field {
+  margin-bottom: 0;
+}
+.sim-immersive .field textarea {
+  min-height: 86px;
+  max-height: 120px;
+}
+.sim-immersive .btn-run {
+  grid-column: 1 / -1;
+  padding: 12px 18px;
+}
+.sim-immersive .result-area {
+  position: fixed;
+  left: 28px;
+  bottom: 296px;
+  z-index: 70;
+  width: min(900px, calc(100vw - 56px));
+  max-height: min(52dvh, 520px);
+  margin: 0;
+  overflow: auto;
+  padding: 0 6px 4px 0;
+  scrollbar-color: rgba(216,227,212,.44) rgba(255,255,255,.08);
+}
+.sim-immersive .result-area:empty {
+  display: none;
+}
+.sim-immersive .summary-card {
+  color: var(--ink);
+  margin: 0 0 12px;
+  border-radius: 18px;
+  padding: 18px;
+}
+.sim-immersive .interview-panel {
+  margin-top: 0;
+  gap: 12px;
+}
+.sim-immersive .bubble-row {
+  grid-template-columns: 156px minmax(0, 1fr);
+  gap: 12px;
+}
+.sim-immersive .bubble-persona,
+.sim-immersive .speech-card {
+  background: rgba(255,255,255,.94);
+  border-color: rgba(255,255,255,.68);
+  box-shadow: 0 14px 38px rgba(0,0,0,.18);
+}
+.sim-immersive .bubble-persona {
+  min-height: 72px;
+}
+.sim-immersive .speech-card {
+  border-radius: 18px;
+}
+.sim-immersive .speech-card::before {
+  background: rgba(255,255,255,.94);
+  border-color: rgba(255,255,255,.68);
+}
+.sim-immersive .speech-card textarea {
+  min-height: 74px;
+  background: rgba(251,250,246,.92);
+}
+.sim-immersive .persona-card {
+  color: var(--ink);
+  margin: 12px 0;
+  border-radius: 18px;
+}
+.sim-immersive .footer-note {
+  background: rgba(255,255,255,.88);
+  border-color: rgba(255,255,255,.62);
+  color: var(--ink-3);
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+}
+.sim-immersive .loading {
+  min-height: 190px;
+  border-radius: 18px;
+  box-shadow: 0 18px 54px rgba(0,0,0,.20);
+}
+
 @media (max-width: 980px) {
   .simulation-content { grid-template-columns: 1fr; }
   .interview-stage { position: relative; top: auto; min-height: 610px; }
   .interview-stage.has-video { min-height: auto; }
+  body.sim-immersive {
+    overflow: auto;
+  }
+  .sim-immersive header.site {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+  }
+  .sim-immersive .nav {
+    height: 64px;
+  }
+  .sim-immersive .interview-stage.has-video {
+    position: relative;
+    height: 58dvh;
+    min-height: 420px;
+  }
+  .sim-immersive .stage-video {
+    object-fit: cover;
+  }
+  .sim-immersive .stage-title {
+    top: 96px;
+    left: 18px;
+    width: calc(100vw - 36px);
+  }
+  .sim-immersive .stage-title strong {
+    font-size: clamp(30px, 8vw, 46px);
+  }
+  .sim-immersive .interview-stage.has-video .question-rail {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    width: auto;
+  }
+  .sim-immersive .simulation-content,
+  .sim-immersive .result-area {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    margin: 16px;
+    z-index: 10;
+  }
+  .sim-immersive .card {
+    grid-template-columns: 1fr;
+  }
 }
 @media (max-width: 720px) {
   .container { padding: 0 16px; }
@@ -706,7 +1011,7 @@ footer.site {
 }
 </style>
 </head>
-<body>
+<body class="sim-immersive">
 
 <header class="site">
   <div class="container nav">
@@ -890,7 +1195,9 @@ setTimeout(() => {
         if(opt) sel.value = handoff.target;
       }
       syncStageMeta();
-      ta.scrollIntoView({behavior:'smooth', block:'center'});
+      if (!document.body.classList.contains("sim-immersive")) {
+        ta.scrollIntoView({behavior:'smooth', block:'center'});
+      }
     }
   }
 }, 300);
@@ -979,7 +1286,9 @@ function renderInterviewSession({ target, field, text }) {
     </div>
     <div class="footer-note">AI는 작성 보조 도구입니다. 이 평가는 실제 합격 여부를 보장하지 않고, 제출 전 보완 우선순위를 잡기 위한 시뮬레이션입니다.</div>
   `;
-  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!document.body.classList.contains("sim-immersive")) {
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   document.getElementById("s-reset-interview")?.addEventListener("click", () => renderInterviewSession({ target, field, text }));
   document.getElementById("s-evaluate")?.addEventListener("click", () => runFinalEvaluation({ target, field, text, questions }));
 }
