@@ -64,7 +64,7 @@ header.site {
     linear-gradient(180deg, rgba(20,24,31,.76), rgba(20,24,31,.92)),
     url("images/hero.png") center / cover;
   color: white;
-  padding: 48px 0 32px;
+  padding: 34px 0 26px;
 }
 .hero-bar::after {
   content: "";
@@ -75,19 +75,19 @@ header.site {
 }
 .hero-bar .container { position: relative; z-index: 1; }
 .hero-bar h1 {
-  font-size: clamp(34px, 5vw, 64px);
-  line-height: 1.02;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1.06;
   font-weight: 850;
   letter-spacing: 0;
   margin: 0 0 12px;
 }
-.hero-bar p { color: rgba(255,255,255,.74); margin: 0; font-size: 16px; max-width: 760px; }
+.hero-bar p { color: rgba(255,255,255,.74); margin: 0; font-size: 14px; max-width: 720px; }
 .hero-bar .badge {
   display: inline-flex; align-items: center; gap: 8px;
   background: rgba(255,255,255,.10); color: white;
   border: 1px solid rgba(255,255,255,.18);
-  padding: 6px 11px; border-radius: 999px;
-  font-size: 12px; font-weight: 700;
+  padding: 5px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
   margin-bottom: 12px;
 }
 
@@ -404,6 +404,19 @@ header.site {
 }
 .btn-run:hover { opacity: .85; }
 .btn-run:disabled { background: var(--ink-3); cursor: not-allowed; }
+.btn-secondary {
+  display: inline-block;
+  padding: 12px 16px;
+  background: var(--card);
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-secondary:hover { background: var(--bg-2); color: var(--ink); }
 
 .result-area { margin-top: 28px; }
 
@@ -466,6 +479,159 @@ header.site {
   margin: 0 0 12px; font-size: 16px; color: var(--sage-deep);
 }
 .summary-card p { margin: 0 0 8px; font-size: 14px; line-height: 1.7; }
+
+.interview-brief {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+}
+.brief-stat {
+  background: rgba(255,255,255,.78);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.brief-stat small {
+  display: block;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.brief-stat strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.interview-panel {
+  margin-top: 24px;
+  display: grid;
+  gap: 14px;
+}
+.bubble-row {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.bubble-persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-s);
+}
+.bubble-persona b {
+  width: 34px;
+  height: 34px;
+  border-radius: 99px;
+  display: grid;
+  place-items: center;
+  background: var(--sage-soft);
+  color: var(--sage-deep);
+  font-weight: 900;
+}
+.bubble-persona span {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-2);
+  line-height: 1.3;
+}
+.speech-card {
+  position: relative;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow-s);
+}
+.speech-card::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 22px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+.speech-card p {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-weight: 750;
+  line-height: 1.55;
+}
+.speech-card textarea {
+  width: 100%;
+  min-height: 86px;
+  resize: vertical;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  background: var(--bg);
+}
+.interview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.score-hero {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+.score-badge {
+  min-height: 140px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: white;
+}
+.score-badge strong {
+  display: block;
+  font-size: 38px;
+  line-height: 1;
+}
+.score-badge span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255,255,255,.64);
+  font-size: 12px;
+  font-weight: 700;
+}
+.verdict-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: white;
+  border: 1px solid var(--sage);
+  color: var(--sage-deep);
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.verdict-pill.grade-strong,
+.verdict-pill.grade-good,
+.verdict-pill.grade-medium,
+.verdict-pill.grade-weak {
+  color: white;
+  border-color: transparent;
+}
 
 .footer-note {
   background: var(--bg-2); border: 1px solid var(--line);
@@ -533,6 +699,10 @@ footer.site {
     font-size: 10px;
   }
   .panel-label span { font-size: 10px; }
+  .interview-brief { grid-template-columns: 1fr; }
+  .bubble-row { grid-template-columns: 1fr; }
+  .speech-card::before { display: none; }
+  .score-hero { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -751,7 +921,70 @@ document.getElementById("s-target")?.addEventListener("change", syncStageMeta);
 document.getElementById("s-field")?.addEventListener("change", syncStageMeta);
 syncStageMeta();
 
-document.getElementById("s-run").addEventListener("click", async () => {
+function buildInterviewQuestions(target, field, text) {
+  return [
+    {
+      key: "gov",
+      question: `${target} 기준으로, 현재 사업계획서에서 지원금이 꼭 필요한 이유와 제출 후 바로 실행할 수 있는 근거는 무엇인가요?`
+    },
+    {
+      key: "vc",
+      question: `${field} 시장에서 고객이 실제로 돈을 내거나 반복 사용할 이유를 한 문장으로 설명하면 무엇인가요?`
+    },
+    {
+      key: "tech",
+      question: `지금 구현된 기능과 앞으로 만들 기능을 구분한다면, 심사위원에게 즉시 보여줄 수 있는 검증물은 무엇인가요?`
+    },
+    {
+      key: "legal",
+      question: `개인정보, 결제, AI 결과물 고지, 환불 같은 운영 리스크를 어떻게 관리하고 있나요?`
+    },
+    {
+      key: "youth",
+      question: `이 사업이 청년 창업자나 지역 창업 생태계에 주는 효과를 측정 가능한 지표로 말하면 무엇인가요?`
+    }
+  ];
+}
+
+function renderInterviewSession({ target, field, text }) {
+  const questions = buildInterviewQuestions(target, field, text);
+  const panel = document.getElementById("result-area");
+  panel.innerHTML = `
+    <div class="summary-card">
+      <h3>가상 면접 질문</h3>
+      <p>아래 질문에 답하면 AI가 사업계획서와 답변을 함께 보고 제출 준비도와 적합 위험을 평가합니다.</p>
+      <div class="interview-brief">
+        <div class="brief-stat"><small>신청 사업</small><strong>${escapeHtml(target)}</strong></div>
+        <div class="brief-stat"><small>분야</small><strong>${escapeHtml(field)}</strong></div>
+        <div class="brief-stat"><small>평가 기준</small><strong>적합도 · 준비도 · 보완 리스크</strong></div>
+      </div>
+    </div>
+    <div class="interview-panel">
+      ${questions.map((item, i) => {
+        const meta = PERSONA_META[item.key];
+        return `
+          <div class="bubble-row">
+            <div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.name)}</span></div>
+            <div class="speech-card">
+              <p>${escapeHtml(item.question)}</p>
+              <textarea data-answer-index="${i}" placeholder="답변을 입력하세요. 모르면 '확인 필요'라고 적어도 됩니다."></textarea>
+            </div>
+          </div>
+        `;
+      }).join("")}
+      <div class="interview-actions">
+        <button class="btn-secondary" type="button" id="s-reset-interview">질문 다시 보기</button>
+        <button class="btn-run" type="button" id="s-evaluate" style="width:auto;min-width:220px;">답변 제출 및 평가 (80 토큰)</button>
+      </div>
+    </div>
+    <div class="footer-note">AI는 작성 보조 도구입니다. 이 평가는 실제 합격 여부를 보장하지 않고, 제출 전 보완 우선순위를 잡기 위한 시뮬레이션입니다.</div>
+  `;
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("s-reset-interview")?.addEventListener("click", () => renderInterviewSession({ target, field, text }));
+  document.getElementById("s-evaluate")?.addEventListener("click", () => runFinalEvaluation({ target, field, text, questions }));
+}
+
+document.getElementById("s-run").addEventListener("click", () => {
   const u = getCurrentUser();
   if(!u){
     if(confirm("심사위원 시뮬레이션은 회원가입/로그인이 필요합니다. 로그인 페이지로 이동할까요?")){
@@ -766,8 +999,22 @@ document.getElementById("s-run").addEventListener("click", async () => {
   }
   const target = document.getElementById("s-target").value;
   const field = document.getElementById("s-field").value;
+  renderInterviewSession({ target, field, text });
+});
 
+async function runFinalEvaluation({ target, field, text, questions }) {
+  const u = getCurrentUser();
   const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
+  let charged = false;
+  const answers = Array.from(document.querySelectorAll("[data-answer-index]")).map((el, i) => ({
+    persona: questions[i]?.key,
+    question: questions[i]?.question,
+    answer: el.value.trim()
+  }));
+  if(answers.some(item => item.answer.length < 8)){
+    alert("각 질문에 최소 한 줄 이상 답변해주세요. 아직 모르는 항목은 '확인 필요'라고 적어도 됩니다.");
+    return;
+  }
 
   // 일일 사용 한도 체크 (어뷰징 방지, 관리자 자동 우회)
   if (window.saessak.checkLimit && !window.saessak.checkLimit('simulate')) {
@@ -791,15 +1038,16 @@ document.getElementById("s-run").addEventListener("click", async () => {
       });
       return user;
     });
+    charged = true;
     refreshTokenDisplay();
   }
 
-  const btn = document.getElementById("s-run");
+  const btn = document.getElementById("s-evaluate");
   btn.disabled = true;
-  btn.textContent = "가상 면접 진행 중...";
+  btn.textContent = "평가 중...";
   document.getElementById("result-area").innerHTML = `
     <div class="loading">
-      <div>5명의 가상 심사위원이 회의 중입니다.<span>사업성, 기술성, 리스크, 정책효과를 나눠 읽는 중...</span></div>
+      <div>가상 심사위원단이 답변을 검토 중입니다.<span>준비도 점수, 적합 위험, 보완 우선순위를 계산하는 중...</span></div>
     </div>`;
 
   const systemPrompt = `당신은 한국 청년창업 정부 지원사업 심사를 다각도로 시뮬레이션하는 AI입니다.
@@ -812,9 +1060,10 @@ document.getElementById("s-run").addEventListener("click", async () => {
 5. youth: 청년정책·지역 효과형 — 청년 효과·지역 균형·정책 부합성
 
 규칙:
-- 등급은 정성 평가만: strong / good / medium / weak (정확한 점수·% 금지)
-- 각 페르소나는 자기 관점에서 강점 2개, 약점 2개, 예상 질문 5개 제시
-- 합격을 보장하지 않음. 시뮬레이션 결과임을 명시
+- 등급은 정성 평가만: strong / good / medium / weak (합격률·선정확률 % 금지)
+- readinessScore는 합격률이 아니라 제출 준비도 점수(0~100)입니다.
+- verdict는 적합 / 보완 후 적합 / 부적합 위험 중 하나만 사용합니다. 합격 확정 표현 금지.
+- 각 페르소나는 자기 관점에서 강점 2개, 약점 2개, 추가 압박 질문 2개 제시
 - JSON만 응답. 마크다운 코드블록 금지.`;
 
   const prompt = `[신청 사업] ${target}
@@ -822,19 +1071,26 @@ document.getElementById("s-run").addEventListener("click", async () => {
 [사업계획서 본문]
 ${text}
 
-[작업] 위 5개 페르소나(gov/vc/tech/legal/youth)가 각자 평가하여 JSON으로 반환.
+[가상 면접 답변]
+${answers.map((item, i) => `${i + 1}. ${PERSONA_META[item.persona]?.name || item.persona}\n질문: ${item.question}\n답변: ${item.answer}`).join("\n\n")}
+
+[작업] 사업계획서와 사용자의 면접 답변을 함께 평가하세요. 합격 여부 확정이 아니라 제출 준비도와 리스크를 진단합니다.
 
 [출력 JSON 형식]
 {
-  "overall": "5명 페르소나 평가 종합 한 문단 (200자 이내)",
+  "readinessScore": 0,
+  "verdict": "적합|보완 후 적합|부적합 위험",
+  "selectionSignal": "매우 강함|강함|보통|약함",
+  "overall": "평가 종합 한 문단 (220자 이내)",
   "personas": {
-    "gov":   {"grade":"strong|good|medium|weak", "strengths":["...","..."], "weaknesses":["...","..."], "questions":["...","...","...","...","..."]},
-    "vc":    {"grade":"...", "strengths":[...], "weaknesses":[...], "questions":[...5개...]},
+    "gov":   {"grade":"strong|good|medium|weak", "strengths":["...","..."], "weaknesses":["...","..."], "questions":["추가 압박 질문 1","추가 압박 질문 2"]},
+    "vc":    {"grade":"...", "strengths":[...], "weaknesses":[...], "questions":[...2개...]},
     "tech":  {...},
     "legal": {...},
     "youth": {...}
   },
-  "topActions": ["가장 시급한 보완 액션 3개", "...", "..."]
+  "topActions": ["가장 시급한 보완 액션 3개", "...", "..."],
+  "missingEvidence": ["제출 전 확인할 증거/서류"]
 }`;
 
   try {
@@ -848,22 +1104,41 @@ ${text}
     const m = responseText.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("응답 형식 오류");
     const data = JSON.parse(m[0]);
-    renderResult(data, target);
+    renderResult(data, target, answers);
     // 성공 후 일일 사용량 기록
     window.saessak.recordUsage && window.saessak.recordUsage('simulate');
   } catch(e){
     console.error(e);
+    if(charged && !isAdmin){
+      updateUser(user => {
+        user.tokens = (user.tokens || 0) + SIMULATE_COST;
+        if(!user.tokenLog) user.tokenLog = [];
+        user.tokenLog.unshift({
+          ts: new Date().toISOString(), kind: "refund",
+          amount: SIMULATE_COST, balance: user.tokens,
+          memo: `심사 시뮬레이션 실패 환불: ${target}`,
+        });
+        return user;
+      });
+      refreshTokenDisplay();
+    }
     document.getElementById("result-area").innerHTML = `
       <div class="persona-card">
         <div class="empty-msg">시뮬레이션 실패. 다시 시도해주세요.<br /><small style="color:var(--bad);">${e.message}</small></div>
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "가상 면접 시작 (80 토큰)";
+    btn.textContent = "답변 제출 및 평가 (80 토큰)";
   }
-});
+}
 
-function renderResult(data, target){
+function verdictClass(verdict) {
+  if (verdict === "적합") return "grade-strong";
+  if (verdict === "보완 후 적합") return "grade-good";
+  return "grade-weak";
+}
+
+function renderResult(data, target, answers){
   // 결과 저장 (히스토리)
   const planText = document.getElementById("s-text").value;
   window.saessak?.saveHistory?.({
@@ -872,13 +1147,16 @@ function renderResult(data, target){
     target,
     input: planText,
     output: data,
-    meta: { field: document.getElementById("s-field").value }
+    meta: { field: document.getElementById("s-field").value, answers }
   });
   window.saessak?.handOff?.({ source: 'simulate', target, planText });
-  window._currentSimulateData = { data, target, planText };
+  window._currentSimulateData = { data, target, planText, answers };
 
   const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
   const gradeClass = { strong:"grade-strong", good:"grade-good", medium:"grade-medium", weak:"grade-weak" };
+  const score = Number.isFinite(Number(data.readinessScore)) ? Math.max(0, Math.min(100, Math.round(Number(data.readinessScore)))) : 0;
+  const verdict = data.verdict || "보완 후 적합";
+  const signal = data.selectionSignal || "보통";
 
   let personaHTML = "";
   ["gov","vc","tech","legal","youth"].forEach(key => {
@@ -903,7 +1181,7 @@ function renderResult(data, target){
         <ul class="weaknesses">
           ${(p.weaknesses||[]).map(s => `<li>${escapeHtml(s)}</li>`).join("")}
         </ul>
-        <h4>예상 질문 5개</h4>
+        <h4>추가 압박 질문</h4>
         <div class="questions">
           <ol>${(p.questions||[]).map(q => `<li>${escapeHtml(q)}</li>`).join("")}</ol>
         </div>
@@ -918,14 +1196,36 @@ function renderResult(data, target){
 
   document.getElementById("result-area").innerHTML = `
     <div class="summary-card">
-      <h3>종합 평가 (신청 사업: ${escapeHtml(target)})</h3>
-      <p>${escapeHtml(data.overall||'')}</p>
+      <div class="score-hero">
+        <div class="score-badge">
+          <div>
+            <strong>${score}</strong>
+            <span>제출 준비도 / 100</span>
+          </div>
+        </div>
+        <div>
+          <span class="verdict-pill ${verdictClass(verdict)}">${escapeHtml(verdict)}</span>
+          <h3>종합 평가 (신청 사업: ${escapeHtml(target)})</h3>
+          <p>${escapeHtml(data.overall||'')}</p>
+          <p><b>심사 대응 신호:</b> ${escapeHtml(signal)}</p>
+        </div>
+      </div>
     </div>
     ${personaHTML}
     <div class="summary-card">
       <h3>가장 시급한 보완 액션 3가지</h3>
       ${actionsHTML}
     </div>
+    ${(data.missingEvidence||[]).length ? `
+      <div class="summary-card">
+        <h3>제출 전 확인할 증거/서류</h3>
+        ${(data.missingEvidence||[]).map((item, i) => `
+          <p style="padding-left:18px;text-indent:-18px;">
+            <b style="color:var(--sage-deep);">${i+1}.</b> ${escapeHtml(item)}
+          </p>
+        `).join("")}
+      </div>
+    ` : ""}
 
     <div style="display:flex;gap:10px;margin:24px 0;flex-wrap:wrap;">
       <button onclick="downloadSimDocx()" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink-2);">워드 다운로드</button>
@@ -943,7 +1243,7 @@ function downloadSimDocx(){
   if(!cur){ alert("저장된 결과가 없습니다."); return; }
   const gradeLabel = { strong:"매우 강함", good:"강함", medium:"보통", weak:"약함" };
   const sections = [
-    { heading: '종합 평가', content: cur.data.overall || '' }
+    { heading: '종합 평가', content: `제출 준비도: ${cur.data.readinessScore || 0}/100\n판정: ${cur.data.verdict || '보완 후 적합'}\n심사 대응 신호: ${cur.data.selectionSignal || '보통'}\n\n${cur.data.overall || ''}` }
   ];
   ["gov","vc","tech","legal","youth"].forEach(key => {
     const p = cur.data.personas?.[key];
@@ -955,9 +1255,12 @@ function downloadSimDocx(){
       items: p.strengths || []
     });
     sections.push({ subheading: '약점', items: p.weaknesses || [] });
-    sections.push({ subheading: '예상 질문 5개', items: p.questions || [] });
+    sections.push({ subheading: '추가 압박 질문', items: p.questions || [] });
   });
   sections.push({ heading: '가장 시급한 보완 액션', bullets: cur.data.topActions || [] });
+  if(cur.data.missingEvidence?.length) {
+    sections.push({ heading: '제출 전 확인할 증거/서류', bullets: cur.data.missingEvidence || [] });
+  }
 
   window.saessak.downloadDocx({
     title: `${cur.target} 심사위원 시뮬레이션`,
