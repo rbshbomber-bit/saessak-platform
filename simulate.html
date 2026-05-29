@@ -290,6 +290,54 @@ header.site {
 .interview-stage.has-video .applicant-seat {
   display: none;
 }
+.panel-labels {
+  display: none;
+}
+.interview-stage.has-video .panel-labels {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  z-index: 2;
+}
+.panel-label {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 132px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(10,14,20,.66);
+  border: 1px solid rgba(255,255,255,.18);
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+  backdrop-filter: blur(8px);
+}
+.panel-label b {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 99px;
+  background: var(--badge);
+  color: #102016;
+  font-size: 11px;
+  font-weight: 900;
+}
+.panel-label span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
 .interview-stage.has-video .question-rail {
   left: 24px;
   right: 24px;
@@ -486,6 +534,16 @@ footer.site {
   .question-rail { display: none; }
   .interview-stage { min-height: 590px; }
   .interview-stage.has-video { min-height: auto; }
+  .panel-label {
+    max-width: 104px;
+    padding: 5px 6px;
+  }
+  .panel-label b {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+  .panel-label span { font-size: 10px; }
 }
 </style>
 </head>
@@ -521,6 +579,13 @@ footer.site {
         <source src="videos/simulate-interview-panel.mp4" type="video/mp4">
       </video>
       <div class="stage-room"></div>
+      <div class="panel-labels" aria-hidden="true">
+        <div class="panel-label" style="--x:14%;--y:33%;--badge:#d8e3d4"><b>G</b><span>정부 운영형</span></div>
+        <div class="panel-label" style="--x:32%;--y:31%;--badge:#d8e3d4"><b>V</b><span>투자 검토형</span></div>
+        <div class="panel-label" style="--x:50%;--y:31%;--badge:#d8e3d4"><b>T</b><span>기술 검토형</span></div>
+        <div class="panel-label" style="--x:67%;--y:31%;--badge:#d8e3d4"><b>R</b><span>리스크 검토형</span></div>
+        <div class="panel-label" style="--x:84%;--y:31%;--badge:#d8e3d4"><b>Y</b><span>정책 효과형</span></div>
+      </div>
       <div class="stage-title">
         <div>
           <small>LIVE INTERVIEW ROOM</small>
