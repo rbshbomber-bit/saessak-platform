@@ -567,6 +567,42 @@ header.site {
   font-weight: 750;
   line-height: 1.55;
 }
+.speech-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+}
+.speech-tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--bg);
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.speech-tools button:hover {
+  background: var(--sage-soft);
+  color: var(--sage-deep);
+  border-color: var(--sage);
+}
+.speech-tools button.is-listening {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+.voice-status {
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 700;
+}
 .speech-card textarea {
   width: 100%;
   min-height: 86px;
@@ -935,6 +971,18 @@ body.sim-immersive {
   min-height: 74px;
   background: rgba(251,250,246,.92);
 }
+.sim-immersive .speech-tools button {
+  background: rgba(255,255,255,.86);
+  border-color: rgba(255,255,255,.36);
+  color: #172033;
+}
+.sim-immersive .speech-tools button:hover {
+  background: rgba(216,227,212,.92);
+  color: #2e5634;
+}
+.sim-immersive .voice-status {
+  color: rgba(255,255,255,.70);
+}
 .sim-immersive .persona-card {
   color: var(--ink);
   margin: 12px 0;
@@ -1276,8 +1324,93 @@ function buildInterviewQuestions(target, field, text) {
   ];
 }
 
+let activeRecognition = null;
+
+function speakInterviewQuestion(index) {
+  const question = window._currentInterviewQuestions?.[index]?.question;
+  if (!question) return;
+  if (!("speechSynthesis" in window)) {
+    alert("이 브라우저는 질문 듣기를 지원하지 않습니다.");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(question);
+  utterance.lang = "ko-KR";
+  utterance.rate = 0.94;
+  utterance.pitch = 1;
+  const voices = window.speechSynthesis.getVoices?.() || [];
+  const koVoice = voices.find(v => v.lang === "ko-KR") || voices.find(v => v.lang?.startsWith("ko"));
+  if (koVoice) utterance.voice = koVoice;
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopVoiceAnswer() {
+  if (activeRecognition) {
+    activeRecognition.stop();
+    activeRecognition = null;
+  }
+  document.querySelectorAll("[data-mic-index]").forEach(btn => {
+    btn.classList.remove("is-listening");
+    btn.textContent = "마이크 답변";
+  });
+}
+
+function startVoiceAnswer(index) {
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const textarea = document.querySelector(`[data-answer-index="${index}"]`);
+  const status = document.querySelector(`[data-voice-status="${index}"]`);
+  const button = document.querySelector(`[data-mic-index="${index}"]`);
+  if (!textarea) return;
+  if (!Recognition) {
+    alert("이 브라우저는 음성 받아쓰기를 지원하지 않습니다. Chrome에서 사용해보세요.");
+    return;
+  }
+  if (activeRecognition && button?.classList.contains("is-listening")) {
+    stopVoiceAnswer();
+    if (status) status.textContent = "음성 입력 중지";
+    return;
+  }
+  stopVoiceAnswer();
+  const recognition = new Recognition();
+  activeRecognition = recognition;
+  recognition.lang = "ko-KR";
+  recognition.interimResults = true;
+  recognition.continuous = false;
+  const previous = textarea.value.trim();
+  if (status) status.textContent = "듣는 중...";
+  if (button) {
+    button.classList.add("is-listening");
+    button.textContent = "듣기 중지";
+  }
+  recognition.onresult = event => {
+    let interim = "";
+    let finalText = "";
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const transcript = event.results[i][0]?.transcript || "";
+      if (event.results[i].isFinal) finalText += transcript;
+      else interim += transcript;
+    }
+    const merged = [previous, finalText || interim].filter(Boolean).join(previous ? "\n" : "");
+    textarea.value = merged;
+    if (status) status.textContent = finalText ? "받아쓰기 완료" : "받아쓰는 중...";
+  };
+  recognition.onerror = event => {
+    if (status) status.textContent = event.error === "not-allowed" ? "마이크 권한이 필요합니다." : "음성 입력 실패";
+  };
+  recognition.onend = () => {
+    if (activeRecognition === recognition) activeRecognition = null;
+    if (button) {
+      button.classList.remove("is-listening");
+      button.textContent = "마이크 답변";
+    }
+    if (status && status.textContent === "듣는 중...") status.textContent = "음성 입력 종료";
+  };
+  recognition.start();
+}
+
 function renderInterviewSession({ target, field, text }) {
   const questions = buildInterviewQuestions(target, field, text);
+  window._currentInterviewQuestions = questions;
   const panel = document.getElementById("result-area");
   panel.innerHTML = `
     <div class="summary-card">
@@ -1297,6 +1430,11 @@ function renderInterviewSession({ target, field, text }) {
             <div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.name)}</span></div>
             <div class="speech-card">
               <p>${escapeHtml(item.question)}</p>
+              <div class="speech-tools">
+                <button type="button" data-speak-index="${i}">질문 듣기</button>
+                <button type="button" data-mic-index="${i}">마이크 답변</button>
+                <span class="voice-status" data-voice-status="${i}">클릭해서 듣거나 말하세요.</span>
+              </div>
               <textarea data-answer-index="${i}" placeholder="답변을 입력하세요. 모르면 '확인 필요'라고 적어도 됩니다."></textarea>
             </div>
           </div>
@@ -1314,6 +1452,12 @@ function renderInterviewSession({ target, field, text }) {
   }
   document.getElementById("s-reset-interview")?.addEventListener("click", () => renderInterviewSession({ target, field, text }));
   document.getElementById("s-evaluate")?.addEventListener("click", () => runFinalEvaluation({ target, field, text, questions }));
+  panel.querySelectorAll("[data-speak-index]").forEach(btn => {
+    btn.addEventListener("click", () => speakInterviewQuestion(Number(btn.dataset.speakIndex)));
+  });
+  panel.querySelectorAll("[data-mic-index]").forEach(btn => {
+    btn.addEventListener("click", () => startVoiceAnswer(Number(btn.dataset.micIndex)));
+  });
 }
 
 document.getElementById("s-run").addEventListener("click", () => {
