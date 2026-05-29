@@ -394,6 +394,31 @@ header.site {
   outline: none; border-color: var(--sage-deep);
   background: var(--card);
 }
+.file-drop {
+  border: 1px dashed var(--line-2);
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 12px;
+}
+.file-drop input[type="file"] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.file-hint {
+  margin-top: 6px;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.file-status {
+  margin-top: 8px;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 800;
+}
+.file-status.is-ready { color: var(--good); }
+.file-status.is-error { color: var(--bad); }
 
 .btn-run {
   display: inline-block; width: 100%; padding: 14px 24px;
@@ -918,6 +943,16 @@ body.sim-immersive {
   min-height: 86px;
   max-height: 120px;
 }
+.sim-immersive .file-drop {
+  background: rgba(255,255,255,.84);
+  border-color: rgba(255,255,255,.36);
+}
+.sim-immersive .file-hint,
+.sim-immersive .file-status {
+  color: #374151;
+}
+.sim-immersive .file-status.is-ready { color: #166534; }
+.sim-immersive .file-status.is-error { color: #991b1b; }
 .sim-immersive .btn-run {
   grid-column: 1 / -1;
   padding: 12px 18px;
@@ -1167,14 +1202,12 @@ body.sim-immersive {
       <div class="disclaimer-box">
         <div class="ico">!</div>
         <div>
-          <b>가상 시뮬레이션이며 실제 심사와 무관합니다.</b><br />
-          등장하는 5개 페르소나는 정부 사업 심사 일반 패턴을 학습한 AI의 가상 캐릭터이며, 특정 기관·인물을 지칭하지 않습니다.
-          평가 결과는 정성 평가(매우 강함/강함/보통/약함)로 제공되며, 실제 합격률을 예측하지 않습니다.
+          <b>AI 보조 가상 심사입니다.</b> 실제 심사·합격 여부와 무관하며, 제출 전 보완점을 찾기 위한 참고용입니다.
         </div>
       </div>
 
       <div class="card">
-        <h3>시뮬레이션할 사업계획서 입력</h3>
+        <h3>사업계획서 첨부</h3>
         <div class="field">
           <label>신청 사업</label>
           <select id="s-target">
@@ -1194,8 +1227,13 @@ body.sim-immersive {
           </select>
         </div>
         <div class="field">
-          <label>사업계획서 본문 (필수)</label>
-          <textarea id="s-text" placeholder="문제정의, 솔루션, 시장분석, 수익모델, 추진일정, 자금운용 또는 핵심 내용을 입력하세요. 100자 이상."></textarea>
+          <label>사업계획서 파일 (필수)</label>
+          <div class="file-drop">
+            <input type="file" id="s-file" accept=".pdf,.docx,.txt,.md" />
+            <div class="file-hint">PDF, DOCX, TXT, MD 파일을 첨부하면 AI가 문서 내용을 읽고 가상 면접 질문을 구성합니다.</div>
+            <div class="file-status" id="s-file-status">아직 첨부된 사업계획서가 없습니다.</div>
+          </div>
+          <textarea id="s-text" hidden></textarea>
         </div>
 
         <button class="btn-run" id="s-run">가상 면접 시작 (80 토큰)</button>
@@ -1260,6 +1298,13 @@ setTimeout(() => {
     const ta = document.getElementById("s-text");
     if(ta){
       ta.value = handoff.planText;
+      parsedPlanFile = {
+        name: "이전 단계에서 전달된 사업계획서",
+        type: "TEXT",
+        text: handoff.planText,
+        meta: `${countWords(handoff.planText).toLocaleString()} 단어`
+      };
+      setPlanFileStatus(`${parsedPlanFile.name} 첨부 완료 · ${parsedPlanFile.meta}`, "ready");
       if(handoff.target){
         const sel = document.getElementById("s-target");
         const opt = sel && Array.from(sel.options).find(o => o.value === handoff.target);
@@ -1280,11 +1325,105 @@ const PERSONA_META = {
   legal: { initial: "R", name: "법무·리스크 검토형",  role: "리스크·규제 준수·운영 안정성 중심 평가 페르소나" },
   youth: { initial: "Y", name: "청년정책·지역 효과형", role: "청년·지역 효과·정책 부합성 중심 평가 페르소나" },
 };
+const PDFJS_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const MAMMOTH_SRC = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js";
+let parsedPlanFile = null;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[ch]));
+}
+
+function countWords(text) {
+  const cleaned = String(text || "").replace(/\s+/g, " ").trim();
+  if (!cleaned) return 0;
+  const enWords = (cleaned.match(/[A-Za-z]+(?:['-]?[A-Za-z]+)*/g) || []).length;
+  const koWords = (cleaned.match(/[가-힯]+/g) || []).length;
+  const numWords = (cleaned.match(/\d+/g) || []).length;
+  return enWords + koWords + numWords;
+}
+
+function loadExternalScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("문서 분석 라이브러리를 불러오지 못했습니다."));
+    document.head.appendChild(script);
+  });
+}
+
+async function ensurePdfJs() {
+  if (!window.pdfjsLib) await loadExternalScript(PDFJS_SRC);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+  return window.pdfjsLib;
+}
+
+async function ensureMammoth() {
+  if (!window.mammoth) await loadExternalScript(MAMMOTH_SRC);
+  return window.mammoth;
+}
+
+async function parsePlanFile(file) {
+  const name = file.name || "사업계획서";
+  const lc = name.toLowerCase();
+  if (lc.endsWith(".pdf")) {
+    const pdfjs = await ensurePdfJs();
+    const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+    let text = "";
+    for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
+      const page = await pdf.getPage(pageNo);
+      const content = await page.getTextContent();
+      text += content.items.map(item => item.str).join(" ") + "\n";
+    }
+    return { name, type: "PDF", text, meta: `${pdf.numPages}p · ${countWords(text).toLocaleString()} 단어` };
+  }
+  if (lc.endsWith(".docx")) {
+    const mammoth = await ensureMammoth();
+    const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+    const text = result.value || "";
+    return { name, type: "DOCX", text, meta: `${countWords(text).toLocaleString()} 단어` };
+  }
+  if (lc.endsWith(".txt") || lc.endsWith(".md")) {
+    const text = await file.text();
+    return { name, type: lc.endsWith(".md") ? "MD" : "TXT", text, meta: `${countWords(text).toLocaleString()} 단어` };
+  }
+  throw new Error("지원 형식은 PDF, DOCX, TXT, MD입니다.");
+}
+
+function setPlanFileStatus(message, state = "") {
+  const el = document.getElementById("s-file-status");
+  if (!el) return;
+  el.textContent = message;
+  el.className = `file-status${state ? ` is-${state}` : ""}`;
+}
+
+async function handlePlanFileChange(event) {
+  const file = event.target.files?.[0];
+  const textArea = document.getElementById("s-text");
+  parsedPlanFile = null;
+  if (textArea) textArea.value = "";
+  if (!file) {
+    setPlanFileStatus("아직 첨부된 사업계획서가 없습니다.");
+    return;
+  }
+  setPlanFileStatus(`${file.name} 분석 중...`);
+  try {
+    const parsed = await parsePlanFile(file);
+    const text = parsed.text.trim();
+    if (text.length < 100) throw new Error("문서에서 읽은 텍스트가 너무 짧습니다. 다른 파일을 첨부해주세요.");
+    parsedPlanFile = parsed;
+    if (textArea) textArea.value = text;
+    setPlanFileStatus(`${parsed.name} 첨부 완료 · ${parsed.type} · ${parsed.meta}`, "ready");
+  } catch (error) {
+    parsedPlanFile = null;
+    if (textArea) textArea.value = "";
+    setPlanFileStatus(error.message || "문서 분석 실패", "error");
+  }
 }
 
 function syncStageMeta() {
@@ -1297,6 +1436,7 @@ function syncStageMeta() {
 }
 document.getElementById("s-target")?.addEventListener("change", syncStageMeta);
 document.getElementById("s-field")?.addEventListener("change", syncStageMeta);
+document.getElementById("s-file")?.addEventListener("change", handlePlanFileChange);
 syncStageMeta();
 
 function buildInterviewQuestions(target, field, text) {
@@ -1469,8 +1609,8 @@ document.getElementById("s-run").addEventListener("click", () => {
     return;
   }
   const text = document.getElementById("s-text").value.trim();
-  if(text.length < 100){
-    alert("사업계획서 본문을 100자 이상 입력해주세요.");
+  if(!parsedPlanFile || text.length < 100){
+    alert("사업계획서 문서 파일을 먼저 첨부해주세요. PDF, DOCX, TXT, MD 형식을 지원합니다.");
     return;
   }
   const target = document.getElementById("s-target").value;
