@@ -791,12 +791,7 @@ body.sim-immersive {
   font-size: 12px;
 }
 .sim-immersive .interview-stage.has-video .question-rail {
-  left: 34px;
-  right: auto;
-  bottom: 294px;
-  width: min(760px, calc(100vw - 68px));
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  z-index: 4;
+  display: none;
 }
 .sim-immersive .interview-stage.has-video .question-rail div {
   min-height: 68px;
@@ -815,7 +810,7 @@ body.sim-immersive {
   display: grid;
   grid-template-columns: minmax(280px, .62fr) minmax(560px, 1.38fr);
   gap: 12px;
-  align-items: stretch;
+  align-items: end;
   overflow: visible;
   padding: 0;
 }
@@ -826,6 +821,8 @@ body.sim-immersive {
   background: rgba(216,227,212,.90);
   box-shadow: 0 14px 42px rgba(0,0,0,.18);
   backdrop-filter: blur(16px);
+  max-height: 148px;
+  overflow: auto;
 }
 .sim-immersive .disclaimer-box .ico {
   font-size: 16px;
