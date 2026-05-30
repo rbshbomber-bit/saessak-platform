@@ -158,7 +158,7 @@ header.site {
   background: var(--bg-2); color: var(--sage-deep);
 }
 .nav-links .dropdown-menu a .ico-han {
-  font-family: "Cormorant Garamond", serif; font-style: italic;
+  font-family: inherit; font-style: normal;
   color: var(--sage-deep); font-weight: 500;
   margin-right: 4px;
 }
@@ -930,7 +930,7 @@ footer.site a:hover { color: var(--ink); }
   🚧 <b>베타 운영 중</b> — AI 매칭·사업계획서 정식 가동 <b>2026년 7월</b> · 결제 시스템 정식 가동 <b>2026년 8월</b> · 현재는 시연 모드
 </div>
 <div class="promo">
-  ✨ <span class="em">Anthropic 최상위 모델</span> — 사업계획서·심사·멘토링 모두 <b>Claude Opus 4.7</b> 사용 · <a href="#pricing">요금 보기 →</a>
+  ✨ <span class="em">Claude Opus 계열</span> — 현재 Opus 4.7 기반 · <b>Opus 4.8 적용 예정</b> · <a href="#pricing">요금 보기 →</a>
 </div>
 <div id="deadline-banner" class="promo" style="background:#b91c1c;display:none;">
   ⏰ <b>마감 임박</b> — <span id="deadline-count">0</span>건의 공고가 D-3 이내로 마감됩니다 · <a href="#listings" onclick="filterDeadlineSoon(event)">바로가기 →</a>
@@ -986,8 +986,8 @@ footer.site a:hover { color: var(--ink); }
 }
 .auth-area .token-chip:hover { background: var(--sage-soft); }
 .auth-area .token-chip .ico {
-  font-family: "Cormorant Garamond", serif;
-  font-style: italic; font-size: 14px;
+  font-family: inherit;
+  font-style: normal; font-size: 14px;
   color: var(--sage-deep);
 }
 .auth-area .user-chip {
@@ -1043,7 +1043,7 @@ footer.site a:hover { color: var(--ink); }
     <div class="container">
       <div class="hero-stats">
         <div class="stat"><div class="num">17</div><div class="lbl">시도 전국 커버</div></div>
-        <div class="stat"><div class="num">13+</div><div class="lbl">큐레이션 공고</div></div>
+        <div class="stat"><div class="num">13</div><div class="lbl">큐레이션 공고</div></div>
         <div class="stat"><div class="num">5분</div><div class="lbl">AI 매칭 소요</div></div>
         <div class="stat"><div class="num">베타</div><div class="lbl">현재 운영 단계</div></div>
       </div>
@@ -1268,7 +1268,7 @@ footer.site a:hover { color: var(--ink); }
       <div class="demo-card">
         <div class="head-row">
           <h3>사업계획서 AI 체험</h3>
-          <span class="premium-badge">⭐ Opus 4.7 · 20토큰</span>
+          <span class="premium-badge">Claude Opus 계열 · 20토큰</span>
         </div>
         <div class="match-form" id="plan-form">
           <div class="field full">
@@ -1339,9 +1339,9 @@ footer.site a:hover { color: var(--ink); }
 
         <div class="as-card">
           <div class="as-card-dot" aria-hidden="true"></div>
-          <div class="as-card-eyebrow">Studio Creator</div>
-          <h3>본인 사업용 AI 팀을 직접 빌드</h3>
-          <p>도메인·역할·결과물 형식을 입력하면 새 스튜디오가 만들어집니다. 청년창업 트랙 외 본인 업종(약국·콘텐츠·교육·로컬 등)에도 적용 가능합니다.</p>
+          <div class="as-card-eyebrow">준비 중</div>
+          <h3>본인 사업용 AI 팀 빌더</h3>
+          <p>도메인·역할·결과물 형식을 입력해 업종별 AI 팀을 구성하는 기능입니다. 현재는 청년창업 도우미 스튜디오를 우선 운영하며, 확장 기능은 정식 출시 전까지 제한적으로 공개됩니다.</p>
           <div class="as-agents">
             <span>+ 새 스튜디오</span><span>+ 에이전트 정의</span><span>+ 결과물 양식</span>
           </div>
@@ -1351,7 +1351,7 @@ footer.site a:hover { color: var(--ink); }
           <div class="as-card-dot" aria-hidden="true"></div>
           <div class="as-card-eyebrow">새싹매치 회원 전용 접근</div>
           <h3>추가 가입·결제 없이 청년창업 스튜디오만 접근</h3>
-          <p>새싹매치 회원은 GreatStream Agent의 <b>청년창업 도우미 스튜디오</b>에 자동 입장합니다. 토큰·결제는 모두 새싹매치에서 통합 관리 — 별도 결제 화면 없음. 다른 산업 스튜디오와 Studio Creator는 본체 가입자 전용 (출시 예정).</p>
+          <p>새싹매치 회원은 GreatStream Agent의 <b>청년창업 도우미 스튜디오</b>에 자동 입장합니다. 토큰·결제는 모두 새싹매치에서 통합 관리 — 별도 결제 화면 없음. 다른 산업 스튜디오와 팀 빌더 기능은 본체 가입자 전용으로 준비 중입니다.</p>
           <div class="as-agents">
             <span>회원 전용 접근</span><span>결제 통합</span><span>토큰 공용</span>
           </div>
@@ -1359,7 +1359,7 @@ footer.site a:hover { color: var(--ink); }
       </div>
 
       <div style="text-align:center;margin:28px 0 0;font-size:13px;color:var(--ink-3);line-height:1.7;">
-        <b style="color:var(--ink-2);">새싹매치 회원</b> → 청년창업 도우미 스튜디오 자동 접근 (토큰·결제 통합) <span style="color:var(--line-2);">·</span> <b style="color:var(--ink-2);">GreatStream Agent 본체 가입자</b> → 모든 스튜디오 + Studio Creator 사용
+        <b style="color:var(--ink-2);">새싹매치 회원</b> → 청년창업 도우미 스튜디오 자동 접근 (토큰·결제 통합) <span style="color:var(--line-2);">·</span> <b style="color:var(--ink-2);">GreatStream Agent 본체 가입자</b> → 전체 스튜디오와 업종별 팀 빌더 사용
       </div>
 
       <div style="background:var(--sage-soft);border:1px solid var(--sage);border-radius:14px;padding:18px 22px;margin:24px 0 0;display:flex;gap:14px;align-items:flex-start;">
@@ -1405,7 +1405,6 @@ footer.site a:hover { color: var(--ink); }
   </section>
 
   <!-- 요금제 — 라이트 톤 (기존 사이트와 일관) + 토큰/구독 듀얼 컨셉 -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
   <style>
   .pricing-dark {
     background: var(--bg-2);
@@ -1434,8 +1433,8 @@ footer.site a:hover { color: var(--ink); }
     display: inline-flex; align-items: center; gap: 6px;
   }
   .pricing-toggle button .han {
-    font-family: "Cormorant Garamond", serif;
-    font-style: italic; font-size: 17px; color: var(--sage-deep);
+    font-family: inherit;
+    font-style: normal; font-size: 15px; color: var(--sage-deep);
   }
   .pricing-toggle button.active {
     background: var(--ink);
@@ -1488,9 +1487,9 @@ footer.site a:hover { color: var(--ink); }
     letter-spacing: .12em;
   }
   .pcard .plan-han {
-    font-family: "Cormorant Garamond", serif;
-    font-style: italic;
-    font-size: 22px; font-weight: 500;
+    font-family: inherit;
+    font-style: normal;
+    font-size: 15px; font-weight: 800;
     color: var(--sage-deep);
     margin-bottom: 28px;
     letter-spacing: .01em;
@@ -1514,11 +1513,11 @@ footer.site a:hover { color: var(--ink); }
     margin-bottom: 14px;
   }
   .pcard .price-big .won {
-    font-family: "Cormorant Garamond", serif;
+    font-family: inherit;
     font-size: 26px; color: var(--ink); font-weight: 400;
   }
   .pcard .price-big .amount {
-    font-family: "Cormorant Garamond", serif;
+    font-family: inherit;
     font-size: 46px; color: var(--ink); font-weight: 500;
     letter-spacing: -.01em; line-height: 1;
   }
@@ -1529,7 +1528,7 @@ footer.site a:hover { color: var(--ink); }
   }
   .pcard .tokens {
     color: var(--sage-deep);
-    font-family: "Cormorant Garamond", serif;
+    font-family: inherit;
     font-size: 18px; font-weight: 600;
     margin-bottom: 6px;
   }
@@ -1567,8 +1566,8 @@ footer.site a:hover { color: var(--ink); }
     font-size: 13px; color: var(--ink-3);
   }
   .bonus-line b {
-    font-family: "Cormorant Garamond", serif;
-    color: var(--sage-deep); font-size: 18px; font-style: italic;
+    font-family: inherit;
+    color: var(--sage-deep); font-size: 16px; font-style: normal;
     font-weight: 600;
   }
 
@@ -1617,7 +1616,7 @@ footer.site a:hover { color: var(--ink); }
     <div class="container">
       <div class="section-head" style="text-align:center;max-width:720px;margin:0 auto;">
         <div class="eyebrow">PRICING</div>
-        <h2 style="font-family:'Cormorant Garamond', serif;font-style:italic;font-weight:500;font-size:44px;letter-spacing:-.02em;">토큰으로 시작, 구독으로 흐름.</h2>
+        <h2 style="font-weight:800;font-size:44px;letter-spacing:-.02em;">토큰으로 시작, 구독으로 이어집니다.</h2>
         <p>한두 번 풀이는 무료. 본격적으로 신청 준비할 때만 토큰 충전 또는 월 구독.</p>
       </div>
 
@@ -1866,7 +1865,7 @@ const LABELS = {
   fields: {},
   types: { "자금":"자금 지원","융자":"융자","공간":"공간·입주","멘토링":"멘토링·컨설팅","교육":"교육·연수","가산점":"가산점만" },
   moneyRanges: { "under-1000":"1,000만 이하","1000-5000":"1,000만~5,000만","5000-10000":"5,000만~1억","over-10000":"1억 이상","loan":"융자 지원" },
-  deadlineRanges: { "d14":"2주 이내","d30":"1개월 이내","d60":"2개월 이내","d60plus":"2개월 이상 남음" }
+  deadlineRanges: { "d3":"3일 이내","d14":"2주 이내","d30":"1개월 이내","d60":"2개월 이내","d60plus":"2개월 이상 남음" }
 };
 const REGION_LABELS = {
   all:"전체", national:"전국",
@@ -1916,6 +1915,7 @@ function matchesMoneyRange(x, range){
 function matchesDeadlineRange(x, range){
   const d = daysLeft(x.deadline);
   if(d < 0) return false;
+  if(range === "d3")      return d <= 3;
   if(range === "d14")     return d <= 14;
   if(range === "d30")     return d <= 30;
   if(range === "d60")     return d <= 60;
@@ -2151,7 +2151,7 @@ function updateDeadlineBanner(){
 
 function filterDeadlineSoon(e){
   if(e) e.preventDefault();
-  state.deadlineRanges = ["d3"];  // 기존 필터에 d3 있다면 사용, 없으면 무시
+  state.deadlineRanges = ["d3"];
   // 정렬도 deadline 오름차순
   state.sort = "deadline-asc";
   renderAll();

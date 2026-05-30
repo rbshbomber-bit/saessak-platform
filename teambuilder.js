@@ -897,7 +897,7 @@ if (devTopupButton) {
       if (!resp.ok) throw new Error(data.error || resp.status);
       await loadAccount();
       refreshCostPreview();
-      showToast(`개발용 크레딧 +${data.amount} 충전`, "success");
+      showToast(`운영자 테스트 크레딧 +${data.amount} 충전`, "success");
     } catch (err) {
       showToast(`충전 실패: ${err.message}`, "error");
     } finally {
