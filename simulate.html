@@ -648,6 +648,94 @@ header.site {
   flex-wrap: wrap;
   margin-top: 6px;
 }
+.interview-room-card {
+  background: rgba(255,255,255,.94);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-s);
+  overflow: hidden;
+}
+.interview-room-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--bg-2), white);
+}
+.interview-room-head small {
+  display: block;
+  color: var(--sage-deep);
+  font-size: 11px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+.interview-room-head h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.round-chip {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.interview-room-body {
+  padding: 18px;
+}
+.interview-progress {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.progress-dot {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--line);
+}
+.progress-dot.is-done { background: var(--sage); }
+.progress-dot.is-active { background: var(--ink); }
+.chair-note {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--sage-soft);
+  color: var(--sage-deep);
+  font-size: 13px;
+  font-weight: 800;
+}
+.sim-immersive .interview-room-card {
+  background: rgba(18,22,29,.64);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.94);
+  backdrop-filter: blur(16px) saturate(1.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.14);
+}
+.sim-immersive .interview-room-head {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.12);
+}
+.sim-immersive .interview-room-head small {
+  color: #b8d3b4;
+}
+.sim-immersive .round-chip {
+  background: rgba(216,227,212,.90);
+  color: #18221c;
+}
+.sim-immersive .progress-dot {
+  background: rgba(255,255,255,.16);
+}
+.sim-immersive .progress-dot.is-done { background: rgba(184,211,180,.78); }
+.sim-immersive .progress-dot.is-active { background: white; }
+.sim-immersive .chair-note {
+  background: rgba(216,227,212,.14);
+  color: rgba(235,255,232,.90);
+}
 .score-hero {
   display: grid;
   grid-template-columns: 170px minmax(0, 1fr);
@@ -853,6 +941,12 @@ body.sim-immersive {
 .sim-immersive .panel-label span {
   font-size: 12px;
   color: #1f2a22;
+}
+.sim-immersive .panel-label.is-active {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: rgba(216,227,212,.96);
+  border-color: rgba(255,255,255,.88);
+  box-shadow: 0 0 0 4px rgba(216,227,212,.22), 0 16px 36px rgba(0,0,0,.22);
 }
 .sim-immersive .interview-stage.has-video .question-rail {
   display: none;
@@ -1474,6 +1568,19 @@ function buildInterviewQuestions(target, field, text) {
 }
 
 let activeRecognition = null;
+let activeInterviewSession = null;
+
+function setActivePanelLabel(index) {
+  document.querySelectorAll(".panel-label").forEach((label, i) => {
+    label.classList.toggle("is-active", i === index);
+  });
+}
+
+function saveInterviewAnswer(index) {
+  if (!activeInterviewSession) return;
+  const textarea = document.querySelector(`[data-answer-index="${index}"]`);
+  if (textarea) activeInterviewSession.answers[index] = textarea.value.trim();
+}
 
 function speakInterviewQuestion(index) {
   const question = window._currentInterviewQuestions?.[index]?.question;
@@ -1541,6 +1648,7 @@ function startVoiceAnswer(index) {
     }
     const merged = [previous, finalText || interim].filter(Boolean).join(previous ? "\n" : "");
     textarea.value = merged;
+    saveInterviewAnswer(index);
     if (status) status.textContent = finalText ? "받아쓰기 완료" : "받아쓰는 중...";
   };
   recognition.onerror = event => {
@@ -1558,6 +1666,95 @@ function startVoiceAnswer(index) {
 }
 
 function renderInterviewSession({ target, field, text }) {
+  const questions = buildInterviewQuestions(target, field, text);
+  window._currentInterviewQuestions = questions;
+  activeInterviewSession = {
+    target,
+    field,
+    text,
+    questions,
+    answers: questions.map(() => ""),
+    current: 0,
+  };
+  renderInterviewRound();
+}
+
+function renderInterviewRound() {
+  if (!activeInterviewSession) return;
+  const { target, field, text, questions, answers, current } = activeInterviewSession;
+  const item = questions[current];
+  const meta = PERSONA_META[item.key];
+  const panel = document.getElementById("result-area");
+  const progress = questions.map((_, i) => `<span class="progress-dot ${i < current ? "is-done" : ""} ${i === current ? "is-active" : ""}"></span>`).join("");
+  const isLast = current === questions.length - 1;
+  setActivePanelLabel(current);
+  panel.innerHTML = `
+    <div class="interview-room-card">
+      <div class="interview-room-head">
+        <div>
+          <small>지원사업 심사 면접 진행 중</small>
+          <h3>${escapeHtml(meta.name)}</h3>
+        </div>
+        <span class="round-chip">${current + 1} / ${questions.length}</span>
+      </div>
+      <div class="interview-room-body">
+        <div class="interview-progress">${progress}</div>
+        <p class="chair-note">위원장 안내: 질문을 들은 뒤 1~2분 분량으로 핵심 근거를 답변하세요.</p>
+        <div class="bubble-row">
+          <div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.role)}</span></div>
+          <div class="speech-card">
+            <p>${escapeHtml(item.question)}</p>
+            <div class="speech-tools">
+              <button type="button" data-speak-index="${current}">질문 듣기</button>
+              <button type="button" data-mic-index="${current}">마이크 답변</button>
+              <span class="voice-status" data-voice-status="${current}">클릭해서 듣거나 말하세요.</span>
+            </div>
+            <textarea data-answer-index="${current}" placeholder="심사위원에게 답변하듯 말하거나 입력하세요.">${escapeHtml(answers[current] || "")}</textarea>
+          </div>
+        </div>
+        <div class="interview-actions">
+          <button class="btn-secondary" type="button" id="s-prev-question" ${current === 0 ? "disabled" : ""}>이전 질문</button>
+          <button class="btn-secondary" type="button" id="s-restart-interview">처음부터</button>
+          <button class="btn-run" type="button" id="${isLast ? "s-evaluate" : "s-next-question"}" data-idle-label="${isLast ? "최종 평가 받기 (80 토큰)" : "다음 심사위원 질문"}" style="width:auto;min-width:220px;">${isLast ? "최종 평가 받기 (80 토큰)" : "다음 심사위원 질문"}</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">실제 심사와 동일하지는 않지만, 제출 문서를 바탕으로 면접 질의응답 흐름을 연습하는 AI 보조 시뮬레이션입니다.</div>
+  `;
+  if (!document.body.classList.contains("sim-immersive")) {
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  const textarea = panel.querySelector(`[data-answer-index="${current}"]`);
+  textarea?.addEventListener("input", () => saveInterviewAnswer(current));
+  panel.querySelector("[data-speak-index]")?.addEventListener("click", () => speakInterviewQuestion(current));
+  panel.querySelector("[data-mic-index]")?.addEventListener("click", () => startVoiceAnswer(current));
+  document.getElementById("s-prev-question")?.addEventListener("click", () => {
+    saveInterviewAnswer(current);
+    activeInterviewSession.current = Math.max(0, current - 1);
+    renderInterviewRound();
+  });
+  document.getElementById("s-restart-interview")?.addEventListener("click", () => {
+    stopVoiceAnswer();
+    window.speechSynthesis?.cancel?.();
+    activeInterviewSession.current = 0;
+    renderInterviewRound();
+  });
+  document.getElementById("s-next-question")?.addEventListener("click", () => {
+    saveInterviewAnswer(current);
+    if ((activeInterviewSession.answers[current] || "").length < 8) {
+      alert("현재 질문에 최소 한 줄 이상 답변해주세요. 모르면 '확인 필요'라고 적어도 됩니다.");
+      return;
+    }
+    activeInterviewSession.current = Math.min(questions.length - 1, current + 1);
+    renderInterviewRound();
+  });
+  document.getElementById("s-evaluate")?.addEventListener("click", () => {
+    saveInterviewAnswer(current);
+    runFinalEvaluation({ target, field, text, questions });
+  });
+}
+
+function renderLegacyInterviewSession({ target, field, text }) {
   const questions = buildInterviewQuestions(target, field, text);
   window._currentInterviewQuestions = questions;
   const panel = document.getElementById("result-area");
@@ -1591,7 +1788,7 @@ function renderInterviewSession({ target, field, text }) {
       }).join("")}
       <div class="interview-actions">
         <button class="btn-secondary" type="button" id="s-reset-interview">질문 다시 보기</button>
-        <button class="btn-run" type="button" id="s-evaluate" style="width:auto;min-width:220px;">답변 제출 및 평가 (80 토큰)</button>
+        <button class="btn-run" type="button" id="s-evaluate" data-idle-label="답변 제출 및 평가 (80 토큰)" style="width:auto;min-width:220px;">답변 제출 및 평가 (80 토큰)</button>
       </div>
     </div>
     <div class="footer-note">AI는 작성 보조 도구입니다. 이 평가는 실제 합격 여부를 보장하지 않고, 제출 전 보완 우선순위를 잡기 위한 시뮬레이션입니다.</div>
@@ -1631,11 +1828,17 @@ async function runFinalEvaluation({ target, field, text, questions }) {
   const u = getCurrentUser();
   const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
   let charged = false;
-  const answers = Array.from(document.querySelectorAll("[data-answer-index]")).map((el, i) => ({
-    persona: questions[i]?.key,
-    question: questions[i]?.question,
-    answer: el.value.trim()
-  }));
+  const answers = activeInterviewSession?.questions === questions
+    ? questions.map((question, i) => ({
+        persona: question.key,
+        question: question.question,
+        answer: (activeInterviewSession.answers[i] || "").trim()
+      }))
+    : Array.from(document.querySelectorAll("[data-answer-index]")).map((el, i) => ({
+        persona: questions[i]?.key,
+        question: questions[i]?.question,
+        answer: el.value.trim()
+      }));
   if(answers.some(item => item.answer.length < 8)){
     alert("각 질문에 최소 한 줄 이상 답변해주세요. 아직 모르는 항목은 '확인 필요'라고 적어도 됩니다.");
     return;
@@ -1753,7 +1956,7 @@ ${answers.map((item, i) => `${i + 1}. ${PERSONA_META[item.persona]?.name || item
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "답변 제출 및 평가 (80 토큰)";
+    btn.textContent = btn.dataset.idleLabel || "답변 제출 및 평가 (80 토큰)";
   }
 }
 
@@ -1764,6 +1967,7 @@ function verdictClass(verdict) {
 }
 
 function renderResult(data, target, answers){
+  setActivePanelLabel(-1);
   // 결과 저장 (히스토리)
   const planText = document.getElementById("s-text").value;
   window.saessak?.saveHistory?.({
