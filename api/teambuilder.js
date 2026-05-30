@@ -19,9 +19,12 @@ import path from 'path';
 import { buildReadinessPrompt, evaluateReadiness } from './grant-readiness-core.js';
 
 const STUDIOS_PATH = path.join(process.cwd(), 'data', 'agent-studios.json');
+const RUBRICS_PATH = path.join(process.cwd(), 'data', 'grant-rubrics.json');
 
 // 데이터는 cold start 시 1회만 로드
 let STUDIOS_CACHE = null;
+let RUBRICS_CACHE = null;
+
 function loadStudios() {
   if (STUDIOS_CACHE) return STUDIOS_CACHE;
   try {
@@ -32,6 +35,38 @@ function loadStudios() {
     console.error('[teambuilder] agent-studios.json 로드 실패', e);
     throw new Error('agent-studios.json 로드 실패: ' + e.message);
   }
+}
+
+function loadRubrics() {
+  if (RUBRICS_CACHE) return RUBRICS_CACHE;
+  try {
+    const raw = fs.readFileSync(RUBRICS_PATH, 'utf8');
+    RUBRICS_CACHE = JSON.parse(raw);
+    return RUBRICS_CACHE;
+  } catch (e) {
+    console.warn('[teambuilder] grant-rubrics.json 로드 실패 — fallback 사용', e.message);
+    return { rubrics: [] };
+  }
+}
+
+// 추천 사업명 또는 사용자 targetGrant를 rubric에 매칭. 없으면 default rubric.
+function matchRubric(haystack) {
+  const rubrics = loadRubrics().rubrics || [];
+  const text = String(haystack || '').toLowerCase();
+  for (const r of rubrics) {
+    if (!Array.isArray(r.match) || r.match.length === 0) continue;
+    if (r.match.some(kw => text.includes(String(kw).toLowerCase()))) return r;
+  }
+  return rubrics.find(r => r.id === 'default') || null;
+}
+
+// Plan Writer 전용 — 추천 사업/사용자 희망 사업에서 rubric 찾기
+function pickRubricForPlan(userData, previousResults) {
+  const top = previousResults?.grantScout?.topRecommendation || '';
+  const firstCand = previousResults?.grantScout?.candidates?.[0]?.name || '';
+  const target = userData?.targetGrant || '';
+  const haystack = [target, firstCand, top].filter(Boolean).join(' ');
+  return matchRubric(haystack);
 }
 
 function limitText(value, max = 12000) {
@@ -125,7 +160,54 @@ function formatAdditionalUserData(userData) {
     .join('\n');
 }
 
-function buildUserPrompt(userData, request, previousResults, agentId, kstartupContext, readiness) {
+function buildHumanizeGuide(userData) {
+  // 사용자가 채운 정성 필드 중 글감으로 쓸 만한 것 추출
+  const sources = [
+    ['strength', '운영자 강점'],
+    ['customers', '핵심 고객'],
+    ['evidence', '검증 근거'],
+    ['competitors', '경쟁/대안'],
+    ['risk', '리스크 관리'],
+    ['region', '지역'],
+    ['age', '연령']
+  ];
+  const filled = sources
+    .filter(([k]) => userData?.[k] && String(userData[k]).trim().length > 0)
+    .map(([k, label]) => `- ${label}: "${userData[k]}" → 본문에 그대로 또는 자연스러운 표현으로 녹여라.`);
+  if (filled.length === 0) return '';
+  return `[Humanize 가이드 — 글에 녹일 본인 데이터]
+다음 표현은 사용자가 직접 제공한 검증된 사실이다. 본문에서 그대로 또는 가까운 표현으로 1번 이상 인용하라. 일반론으로 추상화하지 마라.
+${filled.join('\n')}
+
+또한:
+- "저는", "저희는", "대표자는" 같은 1인칭/구체 주어 사용
+- 챕터당 최소 1번은 위 데이터에서 끌어낸 일화·배경·현장 관찰을 1~2문장으로 삽입
+- "혁신적", "획기적", "최적의" 같은 마케팅 형용사 금지
+- 위 사실 중 수치·고유명사는 그대로 보존 (예: "어머니 약사 40년" → 변형 금지)`;
+}
+
+function buildRubricGuide(rubric) {
+  if (!rubric) return '';
+  const heavy = (rubric.heavyDimensions || []).join(', ') || '균형';
+  const light = (rubric.lightDimensions || []).join(', ') || '없음';
+  const watch = (rubric.watchOuts || []).map((w, i) => `${i + 1}. ${w}`).join('\n');
+  const cues = (rubric.winningCues || []).map((w, i) => `${i + 1}. ${w}`).join('\n');
+  return `[지원사업 심사 가이드 — ${rubric.displayName}]
+- 심사 포커스: ${rubric.focus}
+- 평가자 관점: ${rubric.evaluatorPersona}
+- 더 두텁게 쓸 축 (heavyDimensions): ${heavy}
+- 상대적으로 가볍게 가도 되는 축 (lightDimensions): ${light}
+
+[피해야 할 함정 — watchOuts]
+${watch || '없음'}
+
+[가산점 신호 — winningCues, 자연스럽게 본문에 녹여라]
+${cues || '없음'}
+
+주의: 위 가이드는 공식 심사표가 아니라 공개 자료에서 관찰된 일반적 경향이다. 실제 공고문이 우선이다.`;
+}
+
+function buildUserPrompt(userData, request, previousResults, agentId, kstartupContext, readiness, rubric) {
   const dataSection = `[사용자 본인 데이터]
 - 사업 아이템: ${userData.item || '(미입력)'}
 - 운영자 강점: ${userData.strength || '(미입력)'}
@@ -173,7 +255,16 @@ ${request || '(요청 없음 — 본인 데이터 기반 종합 컨설팅)'}`;
 
   const readinessSection = readiness ? `\n\n${buildReadinessPrompt(readiness)}` : '';
 
-  return `${dataSection}\n\n${requestSection}${contextSection}${readinessSection}${kstartupSection}`;
+  // Plan Writer 전용: Humanize 가이드 + 공고별 심사 가중치
+  let planWriterSection = '';
+  if (agentId === 'plan-writer') {
+    const humanize = buildHumanizeGuide(userData);
+    const rubricGuide = buildRubricGuide(rubric);
+    const parts = [humanize, rubricGuide].filter(Boolean);
+    if (parts.length > 0) planWriterSection = '\n\n' + parts.join('\n\n');
+  }
+
+  return `${dataSection}\n\n${requestSection}${contextSection}${readinessSection}${kstartupSection}${planWriterSection}`;
 }
 
 function extractPlanText(request, previousResults) {
@@ -350,33 +441,63 @@ function fallbackResultFromText(agentId, rawText) {
   return null;
 }
 
-function scrubUnverifiedNumbers(text) {
+// 사용자 본인 데이터에 명시된 수치는 검증된 사실로 간주, scrub에서 보존.
+function extractUserDataNumbers(userData) {
+  if (!userData || typeof userData !== 'object') return [];
+  const allText = Object.values(userData)
+    .filter(v => typeof v === 'string')
+    .join(' ');
+  const matches = allText.match(/\d[\d,]*\s*(?:개월|만원|억원|명|건|곳|개|%|원|인|년|세|차|회)/g) || [];
+  // 길이 내림차순 — 긴 표현 먼저 마스킹해야 부분 매치로 잘려나가지 않음.
+  return [...new Set(matches)].sort((a, b) => b.length - a.length);
+}
+
+function scrubUnverifiedNumbers(text, userNumbers = []) {
   if (typeof text !== 'string') return text;
-  return text
+  // 본인 데이터 수치 토큰 마스킹
+  const tokens = {};
+  let working = text;
+  userNumbers.forEach((num, i) => {
+    const token = `__USER_NUM_${i}__`;
+    if (working.includes(num)) {
+      tokens[token] = num;
+      working = working.split(num).join(token);
+    }
+  });
+  // 일반 scrub — 검증되지 않은 수치를 '확인 필요'로
+  working = working
     .replace(/\d+\s*[~∼-]\s*\d+\s*(?:개월|만원|억원|명|건|곳|개|%|원|인)/g, '확인 필요')
     .replace(/\d[\d,]*\s*(?:개월|만원|억원|명|건|곳|개|%|원|인)\s*이상/g, '확인 필요')
     .replace(/\d[\d,]*\s*(?:개월|만원|억원|명|건|곳|개|%|원|인)/g, '확인 필요')
     .replace(/확인 필요\s*월/g, '확인 필요')
     .replace(/월\s*확인 필요\s*수준/g, '확인 필요 수준');
+  // 본인 데이터 수치 복원
+  Object.entries(tokens).forEach(([token, num]) => {
+    working = working.split(token).join(num);
+  });
+  return working;
 }
 
-function sanitizeResult(agentId, result) {
+function sanitizeResult(agentId, result, userData) {
   if (!result || typeof result !== 'object') return result;
   if (agentId !== 'plan-writer') return result;
+
+  const userNumbers = extractUserDataNumbers(userData);
+  const scrub = (s) => scrubUnverifiedNumbers(s, userNumbers);
 
   return {
     ...result,
     chapters: Array.isArray(result.chapters)
       ? result.chapters.map(chapter => ({
         ...chapter,
-        body: scrubUnverifiedNumbers(chapter.body)
+        body: scrub(chapter.body)
       }))
       : [],
     assumptions: Array.isArray(result.assumptions)
-      ? result.assumptions.map(scrubUnverifiedNumbers)
+      ? result.assumptions.map(scrub)
       : [],
     missingInputs: Array.isArray(result.missingInputs)
-      ? result.missingInputs.map(scrubUnverifiedNumbers)
+      ? result.missingInputs.map(scrub)
       : []
   };
 }
@@ -439,7 +560,10 @@ export default async function handler(req, res) {
       planText: extractPlanText(safeRequest, previousResults),
       listing: extractReadinessListing(previousResults)
     });
-    const userPrompt = buildUserPrompt(userData, safeRequest, previousResults, agentId, kstartupContext, readiness);
+    // Plan Writer에 한해 추천 사업/타깃 사업에 맞는 심사 가중치 가이드 주입
+    const rubric = agentId === 'plan-writer' ? pickRubricForPlan(userData, previousResults) : null;
+
+    const userPrompt = buildUserPrompt(userData, safeRequest, previousResults, agentId, kstartupContext, readiness, rubric);
     const maxTokens = (agentDef.estimatedTokens || 1500) + 500; // 여유분
 
     // 호출 + 재시도
@@ -511,7 +635,7 @@ export default async function handler(req, res) {
       });
     }
 
-    parsedResult = sanitizeResult(agentId, parsedResult);
+    parsedResult = sanitizeResult(agentId, parsedResult, userData);
 
     return res.status(200).json({
       ok: true,

@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "purpose": "주요 청년창업 지원사업의 공통 심사 포커스. Plan Writer가 작성 단계에서 어떤 축에 더 무게를 두어야 할지 가이드용.",
+    "disclaimer": "공식 심사표가 아니라 공개 공고문·합격 후기·심사위원 인터뷰에서 관찰된 일반적 경향. 실제 점수표는 공고마다 다르며 매년 변경됨. 작성 보조용 가이드일 뿐 합격 보장 아님.",
+    "lastUpdated": "2026-05-30"
+  },
+  "rubrics": [
+    {
+      "id": "yebi-changup",
+      "match": ["예비창업패키지", "예창패", "예비창업"],
+      "displayName": "예비창업패키지 (창업진흥원)",
+      "focus": "사업화 가능성과 실행력. 시제품·MVP가 있으면 강함.",
+      "heavyDimensions": ["solution", "evidence", "execution", "budget"],
+      "lightDimensions": ["impact"],
+      "evaluatorPersona": "기술 사업화 심사위원형 — '이 아이디어가 실제로 돌아갈까?' '6개월 안에 보일 결과가 뭔가?' 를 본다.",
+      "watchOuts": [
+        "추상적 시장 묘사 → 구체적 고객 1명",
+        "기능 나열 → '사용자가 무엇을 얻는가'",
+        "예산 항목별 필요 이유를 못 쓰면 감점"
+      ],
+      "winningCues": [
+        "현장 인터뷰/파일럿 데이터 1건이라도",
+        "시제품 스크린샷·데모 동영상 언급",
+        "협력자/멘토 역할 명시"
+      ]
+    },
+    {
+      "id": "choki-changup",
+      "match": ["초기창업패키지", "초기창업"],
+      "displayName": "초기창업패키지 (창업진흥원)",
+      "focus": "초기 시장 진입과 성장 가능성. 매출/유료 검증 흔적이 강함의 신호.",
+      "heavyDimensions": ["businessModel", "market", "evidence", "execution"],
+      "lightDimensions": ["impact"],
+      "evaluatorPersona": "스케일업 심사위원형 — '이 사업이 1년 안에 매출 어디까지 가능?' '재구매·재방문 신호 있나?' 를 본다.",
+      "watchOuts": [
+        "1회성 매출 → 반복 매출 구조 설명",
+        "고객 1명 → 세그먼트별 결제 주체 분리",
+        "기능 추가만 적으면 감점, 채널/유입 전략 같이"
+      ],
+      "winningCues": [
+        "유료 전환율 또는 첫 결제 사례",
+        "단가/구독료 근거 (경쟁 가격 비교)",
+        "다음 12개월 마일스톤 분기별"
+      ]
+    },
+    {
+      "id": "changup-sagwan",
+      "match": ["청년창업사관학교", "창업사관학교", "사관학교"],
+      "displayName": "청년창업사관학교 (중기부)",
+      "_note": "17기 모집 종료. 다음 기수 공고 확인 필요.",
+      "focus": "기술 차별성과 글로벌 확장 가능성. 만 39세 이하 + 기술기반.",
+      "heavyDimensions": ["solution", "market", "execution", "impact"],
+      "lightDimensions": [],
+      "evaluatorPersona": "기술 + 성장 잠재력 심사위원형 — '기술적 해자가 있나?' '글로벌·B2B 확장 가능?' 를 본다.",
+      "watchOuts": [
+        "단순 아이디어 → 기술적 차별점",
+        "내수 한정 → 해외/B2B 확장 가능성 1줄이라도",
+        "팀 미정 → 핵심 역할 후보 명시"
+      ],
+      "winningCues": [
+        "특허·IP·코어 알고리즘 언급",
+        "유사 기술 대비 우위 1문장",
+        "대표자 기술 백그라운드"
+      ]
+    },
+    {
+      "id": "ganghwa-region",
+      "match": ["강화", "강화군", "강화도", "인천 강화"],
+      "displayName": "강화군 지역창업 지원사업",
+      "focus": "지역 정착성과 지역 기여. 강화 거주·지역 고용·지역 자원 활용이 강함의 신호.",
+      "heavyDimensions": ["eligibility", "impact", "execution", "riskCompliance"],
+      "lightDimensions": ["market"],
+      "evaluatorPersona": "지역경제 심사위원형 — '강화에 정착할 사람인가?' '지역 청년 일자리 만들 수 있나?' 를 본다.",
+      "watchOuts": [
+        "수도권 사업처럼 보이면 감점 — 강화 맥락 명시",
+        "단기 사업이면 약함 — 정착 의지 표현",
+        "지역 자원/네트워크 미언급 시 감점"
+      ],
+      "winningCues": [
+        "강화 거주 기간/이주 계획",
+        "지역 청년·지역 사업자와 협력 사례",
+        "지역 자원(농수산·관광·역사) 활용"
+      ]
+    },
+    {
+      "id": "default",
+      "match": [],
+      "displayName": "공통 기준 (공고 미특정)",
+      "focus": "11개 공통 심사축 균형. 어느 축도 취약하지 않도록.",
+      "heavyDimensions": ["evidence", "execution", "businessModel"],
+      "lightDimensions": [],
+      "evaluatorPersona": "범용 심사위원형 — '이 사업이 자금을 받을 만큼 준비됐나?' 를 종합적으로 본다.",
+      "watchOuts": [
+        "추상적 표현 남발",
+        "수치 근거 부족",
+        "팀·실행계획 모호"
+      ],
+      "winningCues": [
+        "구체적 고객/문제/해결책 연결",
+        "근거 출처 명시",
+        "실행 일정 분기별"
+      ]
+    }
+  ]
+}
