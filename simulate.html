@@ -504,12 +504,99 @@ header.site {
   margin: 0 0 12px; font-size: 16px; color: var(--sage-deep);
 }
 .summary-card p { margin: 0 0 8px; font-size: 14px; line-height: 1.7; }
+.rubric-list {
+  display: grid;
+  gap: 10px;
+}
+.rubric-row {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.68);
+  border: 1px solid rgba(141,168,136,.35);
+}
+.rubric-row > * {
+  position: relative;
+  z-index: 1;
+}
+.rubric-row strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+}
+.rubric-row span {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-2);
+  font-size: 12px;
+}
+.rubric-row b {
+  color: var(--sage-deep);
+  font-size: 13px;
+}
+.rubric-row i {
+  position: absolute;
+  inset: auto auto 0 0;
+  width: var(--w);
+  height: 3px;
+  background: var(--sage);
+}
 
 .interview-brief {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin: 16px 0 0;
+}
+.review-brief-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(216,227,212,.86);
+  border: 1px solid rgba(141,168,136,.72);
+  color: var(--ink-2);
+}
+.review-brief-card small {
+  display: block;
+  color: var(--sage-deep);
+  font-size: 11px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+.review-brief-card strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+}
+.review-brief-card p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.gap-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 180px;
+}
+.gap-chips span {
+  display: inline-flex;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(141,168,136,.42);
+  color: var(--sage-deep);
+  font-size: 11px;
+  font-weight: 800;
 }
 .brief-stat {
   background: rgba(255,255,255,.78);
@@ -1255,6 +1342,8 @@ body.sim-immersive {
   }
   .panel-label span { font-size: 10px; }
   .interview-brief { grid-template-columns: 1fr; }
+  .review-brief-card { align-items: flex-start; flex-direction: column; }
+  .gap-chips { justify-content: flex-start; min-width: 0; }
   .bubble-row { grid-template-columns: 1fr; }
   .speech-card::before { display: none; }
   .score-hero { grid-template-columns: 1fr; }
@@ -1469,6 +1558,47 @@ const PERSONA_META = {
   legal: { initial: "R", name: "법무·리스크 검토형",  role: "리스크·규제 준수·운영 안정성 중심 평가 페르소나" },
   youth: { initial: "Y", name: "청년정책·지역 효과형", role: "청년·지역 효과·정책 부합성 중심 평가 페르소나" },
 };
+const REVIEW_GUIDES = {
+  common: {
+    label: "청년창업 지원사업 공통 심사 프레임",
+    criteria: [
+      { key: "problem", label: "문제정의", weight: 15, keywords: ["문제", "불편", "Pain", "고객", "수요", "검증", "인터뷰", "설문"] },
+      { key: "market", label: "시장성", weight: 15, keywords: ["시장", "TAM", "SAM", "SOM", "경쟁", "대체재", "고객군", "세그먼트"] },
+      { key: "model", label: "수익모델", weight: 15, keywords: ["수익", "가격", "결제", "매출", "구독", "토큰", "단가", "LTV", "CAC"] },
+      { key: "execution", label: "실행계획", weight: 15, keywords: ["일정", "마일스톤", "로드맵", "MVP", "출시", "검증", "운영", "채널"] },
+      { key: "budget", label: "사업비 적정성", weight: 10, keywords: ["사업비", "예산", "인건비", "외주", "홍보비", "서버", "집행", "견적"] },
+      { key: "team", label: "창업자 역량", weight: 10, keywords: ["역량", "경험", "대표", "팀", "이력", "전문성", "파트너"] },
+      { key: "differentiation", label: "차별성", weight: 10, keywords: ["차별", "독자", "특허", "데이터", "알고리즘", "기술", "비교"] },
+      { key: "risk", label: "리스크 관리", weight: 10, keywords: ["개인정보", "보안", "환불", "약관", "규제", "리스크", "책임", "면책"] }
+    ],
+    mustCheck: ["지원대상 적합성", "신청 제외 사유", "제출서류 누락", "사업비 집행 가능 항목", "가점·우대조건 증빙"]
+  },
+  "예비창업패키지": {
+    label: "예비창업패키지형",
+    focus: ["창업 아이템의 필요성", "BM 구체성", "대표자 역량", "시제품·MVP 검증", "사업비 사용 타당성"],
+    pressure: ["아직 창업 전이라면 고객 검증을 어디까지 했는가", "지원금 없이도 진행 가능한 부분과 지원금이 필요한 부분은 무엇인가"]
+  },
+  "초기창업패키지": {
+    label: "초기창업패키지형",
+    focus: ["기존 성과", "시장 진입 증거", "고객·매출 지표", "고도화 계획", "성장 가능성"],
+    pressure: ["이미 출시했다면 실제 지표가 무엇인가", "지원사업 이후 성장 경로가 숫자로 설명되는가"]
+  },
+  "청년창업사관학교": {
+    label: "청년창업사관학교형",
+    focus: ["대표자 몰입도", "교육·코칭 수용성", "사업화 실행력", "청년창업 정책 부합성", "성과 창출 가능성"],
+    pressure: ["입교 후 매주 어떤 실행 산출물을 만들 수 있는가", "대표자가 직접 해결할 수 있는 핵심 역량은 무엇인가"]
+  },
+  "딥테크 헬스케어 패키지": {
+    label: "딥테크·헬스케어형",
+    focus: ["기술 검증", "데이터·임상·규제 리스크", "전문가 협업", "IP·보안", "상용화 경로"],
+    pressure: ["기술적 차별성이 검증 가능한 자료로 있는가", "규제·개인정보 리스크를 어떤 순서로 낮출 것인가"]
+  },
+  "지자체 청년창업": {
+    label: "지자체 청년창업형",
+    focus: ["지역 문제 적합성", "지역 고용·상권 효과", "로컬 파트너십", "지속 운영 가능성", "정책 확산성"],
+    pressure: ["지역에 남는 효과가 무엇인가", "지역 기관·상권과 어떤 협력 증빙이 있는가"]
+  }
+};
 const PDFJS_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 const MAMMOTH_SRC = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js";
@@ -1487,6 +1617,100 @@ function countWords(text) {
   const koWords = (cleaned.match(/[가-힯]+/g) || []).length;
   const numWords = (cleaned.match(/\d+/g) || []).length;
   return enWords + koWords + numWords;
+}
+
+function getReviewGuide(target) {
+  return {
+    ...REVIEW_GUIDES.common,
+    ...(REVIEW_GUIDES[target] || {})
+  };
+}
+
+function extractEvidenceSnippets(text, keywords, limit = 2) {
+  const source = String(text || "").replace(/\s+/g, " ").trim();
+  if (!source) return [];
+  const snippets = [];
+  keywords.some(keyword => {
+    const idx = source.toLowerCase().indexOf(String(keyword).toLowerCase());
+    if (idx === -1) return false;
+    const start = Math.max(0, idx - 54);
+    const end = Math.min(source.length, idx + 118);
+    snippets.push(source.slice(start, end).trim());
+    return snippets.length >= limit;
+  });
+  return snippets;
+}
+
+function assessReviewEvidence(target, field, text) {
+  const guide = getReviewGuide(target);
+  const lower = String(text || "").toLowerCase();
+  const criteria = (guide.criteria || REVIEW_GUIDES.common.criteria).map(item => {
+    const hits = item.keywords.filter(keyword => lower.includes(String(keyword).toLowerCase()));
+    const snippets = extractEvidenceSnippets(text, item.keywords);
+    let status = "missing";
+    if (hits.length >= 3 && snippets.length) status = "strong";
+    else if (hits.length >= 1) status = "partial";
+    return {
+      ...item,
+      hits,
+      snippets,
+      status,
+      note: status === "strong"
+        ? "문서 안에서 관련 근거가 확인됩니다."
+        : status === "partial"
+          ? "관련 표현은 있으나 심사 답변용 근거가 더 필요합니다."
+          : "문서에서 직접 근거가 잘 보이지 않습니다."
+    };
+  });
+  const weighted = criteria.reduce((sum, item) => {
+    const ratio = item.status === "strong" ? 1 : item.status === "partial" ? .55 : .18;
+    return sum + (item.weight * ratio);
+  }, 0);
+  const missing = criteria.filter(item => item.status !== "strong").slice(0, 5);
+  return {
+    target,
+    field,
+    guide,
+    criteria,
+    localReadiness: Math.max(18, Math.min(92, Math.round(weighted))),
+    missing,
+    summary: `${guide.label || target} 기준으로 ${criteria.filter(x => x.status === "strong").length}/${criteria.length}개 항목에서 직접 근거가 확인됩니다.`
+  };
+}
+
+function formatReviewContext(context) {
+  if (!context) return "";
+  const focus = context.guide.focus?.length ? `\n[사업별 중점]\n- ${context.guide.focus.join("\n- ")}` : "";
+  const pressure = context.guide.pressure?.length ? `\n[사업별 압박 질문 축]\n- ${context.guide.pressure.join("\n- ")}` : "";
+  const criteria = context.criteria.map(item => {
+    const evidence = item.snippets.length ? ` / 근거 예: ${item.snippets[0].slice(0, 140)}` : "";
+    return `- ${item.label}(${item.weight}): ${item.status} / ${item.note}${evidence}`;
+  }).join("\n");
+  const gaps = context.missing.map(item => `- ${item.label}: ${item.note}`).join("\n") || "- 큰 누락 없음";
+  return `[심사 기준 브리핑]
+${context.summary}
+${focus}
+${pressure}
+
+[문서 근거 점검]
+${criteria}
+
+[우선 보완해야 할 공백]
+${gaps}`;
+}
+
+function renderReviewBrief(context) {
+  if (!context) return "";
+  const missing = context.missing.slice(0, 3).map(item => `<span>${escapeHtml(item.label)}</span>`).join("");
+  return `
+    <div class="review-brief-card">
+      <div>
+        <small>공고·양식 기준 라이트 RAG</small>
+        <strong>${escapeHtml(context.guide.label || context.target)} · 문서 근거 ${context.localReadiness}/100</strong>
+        <p>${escapeHtml(context.summary)} 지원사업 공고·제출양식에서 자주 확인되는 항목을 기준으로 질문을 보정합니다.</p>
+      </div>
+      <div class="gap-chips">${missing || "<span>핵심 공백 낮음</span>"}</div>
+    </div>`;
 }
 
 function loadExternalScript(src) {
@@ -1583,27 +1807,30 @@ document.getElementById("s-field")?.addEventListener("change", syncStageMeta);
 document.getElementById("s-file")?.addEventListener("change", handlePlanFileChange);
 syncStageMeta();
 
-function buildInterviewQuestions(target, field, text) {
+function buildInterviewQuestions(target, field, text, reviewContext = assessReviewEvidence(target, field, text)) {
+  const missingLabels = reviewContext.missing.map(item => item.label).slice(0, 3).join(", ") || "핵심 근거";
+  const focus = reviewContext.guide.focus || [];
+  const pressure = reviewContext.guide.pressure || [];
   return [
     {
       key: "gov",
-      question: `${target} 기준으로, 현재 사업계획서에서 지원금이 꼭 필요한 이유와 제출 후 바로 실행할 수 있는 근거는 무엇인가요?`
+      question: `${target} 기준으로 ${focus[0] || "지원 필요성"}과 ${missingLabels} 근거를 확인하겠습니다. 지원금이 꼭 필요한 이유와 제출 후 바로 실행할 수 있는 증빙은 무엇인가요?`
     },
     {
       key: "vc",
-      question: `${field} 시장에서 고객이 실제로 돈을 내거나 반복 사용할 이유를 한 문장으로 설명하면 무엇인가요?`
+      question: `${field} 시장에서 고객이 실제로 돈을 내거나 반복 사용할 이유를 한 문장으로 설명하고, 그 판단 근거가 문서 어디에 있는지 말해보세요.`
     },
     {
       key: "tech",
-      question: `지금 구현된 기능과 앞으로 만들 기능을 구분한다면, 심사위원에게 즉시 보여줄 수 있는 검증물은 무엇인가요?`
+      question: `지금 구현된 기능과 앞으로 만들 기능을 구분해 주세요. 심사위원에게 즉시 보여줄 수 있는 검증물과 아직 확인 필요한 기술 리스크는 무엇인가요?`
     },
     {
       key: "legal",
-      question: `개인정보, 결제, AI 결과물 고지, 환불 같은 운영 리스크를 어떻게 관리하고 있나요?`
+      question: `개인정보, 결제, AI 결과물 고지, 환불 같은 운영 리스크를 어떻게 관리하고 있나요? 제출서류에는 어떤 문구나 증빙으로 반영할 건가요?`
     },
     {
       key: "youth",
-      question: `이 사업이 청년 창업자나 지역 창업 생태계에 주는 효과를 측정 가능한 지표로 말하면 무엇인가요?`
+      question: `${pressure[1] || "정책 목적 부합성"} 관점에서 묻겠습니다. 이 사업이 청년 창업자나 지역 창업 생태계에 주는 효과를 어떤 지표로 측정할 수 있나요?`
     }
   ];
 }
@@ -1661,13 +1888,16 @@ function buildLocalFollowup(personaKey, answer) {
 
 async function generateFollowup({ index, answer }) {
   if (!activeInterviewSession) return buildLocalFollowup("gov", answer);
-  const { target, field, text, questions } = activeInterviewSession;
+  const { target, field, text, questions, reviewContext } = activeInterviewSession;
   const question = questions[index];
   const meta = PERSONA_META[question.key];
   const history = getRoundTurns(index).map(turn => `${turn.type === "answer" ? "지원자" : "심사위원"}: ${turn.text}`).join("\n");
   const prompt = `[신청 사업] ${target}
 [분야] ${field}
 [심사위원 역할] ${meta.name} / ${meta.role}
+[공고/심사 기준 보정 컨텍스트]
+${formatReviewContext(reviewContext)}
+
 [사업계획서 일부]
 ${text.slice(0, 3500)}
 
@@ -1814,12 +2044,14 @@ function startVoiceAnswer(index) {
 }
 
 function renderInterviewSession({ target, field, text }) {
-  const questions = buildInterviewQuestions(target, field, text);
+  const reviewContext = assessReviewEvidence(target, field, text);
+  const questions = buildInterviewQuestions(target, field, text, reviewContext);
   window._currentInterviewQuestions = questions;
   activeInterviewSession = {
     target,
     field,
     text,
+    reviewContext,
     questions,
     answers: questions.map(() => ""),
     turns: questions.map(() => []),
@@ -1830,7 +2062,7 @@ function renderInterviewSession({ target, field, text }) {
 
 function renderInterviewRound() {
   if (!activeInterviewSession) return;
-  const { target, field, text, questions, answers, current } = activeInterviewSession;
+  const { target, field, text, questions, answers, current, reviewContext } = activeInterviewSession;
   const item = questions[current];
   const meta = PERSONA_META[item.key];
   const panel = document.getElementById("result-area");
@@ -1839,6 +2071,7 @@ function renderInterviewRound() {
   const hasTurns = getRoundTurns(current).length > 0;
   setActivePanelLabel(current);
   panel.innerHTML = `
+    ${renderReviewBrief(reviewContext)}
     <div class="interview-room-card">
       <div class="interview-room-head">
         <div>
@@ -1920,10 +2153,12 @@ function renderInterviewRound() {
 }
 
 function renderLegacyInterviewSession({ target, field, text }) {
-  const questions = buildInterviewQuestions(target, field, text);
+  const reviewContext = assessReviewEvidence(target, field, text);
+  const questions = buildInterviewQuestions(target, field, text, reviewContext);
   window._currentInterviewQuestions = questions;
   const panel = document.getElementById("result-area");
   panel.innerHTML = `
+    ${renderReviewBrief(reviewContext)}
     <div class="summary-card">
       <h3>가상 면접 질문</h3>
       <p>아래 질문에 답하면 AI가 사업계획서와 답변을 함께 보고 제출 준비도와 적합 위험을 평가합니다.</p>
@@ -1993,6 +2228,7 @@ async function runFinalEvaluation({ target, field, text, questions }) {
   const u = getCurrentUser();
   const isAdmin = window.saessak && window.saessak.isAdmin && window.saessak.isAdmin(u);
   let charged = false;
+  const reviewContext = activeInterviewSession?.reviewContext || assessReviewEvidence(target, field, text);
   const answers = activeInterviewSession?.questions === questions
     ? questions.map((question, i) => ({
         persona: question.key,
@@ -2056,11 +2292,16 @@ async function runFinalEvaluation({ target, field, text, questions }) {
 - 등급은 정성 평가만: strong / good / medium / weak (합격률·선정확률 % 금지)
 - readinessScore는 합격률이 아니라 제출 준비도 점수(0~100)입니다.
 - verdict는 적합 / 보완 후 적합 / 부적합 위험 중 하나만 사용합니다. 합격 확정 표현 금지.
+- 제공된 심사 기준 브리핑과 문서 근거 점검을 우선 반영하되, 공식 점수처럼 단정하지 않습니다.
+- 점수는 문서 근거와 면접 답변 구체성의 조합으로 매기며, 증빙 없는 주장은 감점합니다.
 - 각 페르소나는 자기 관점에서 강점 2개, 약점 2개, 추가 압박 질문 2개 제시
 - JSON만 응답. 마크다운 코드블록 금지.`;
 
   const prompt = `[신청 사업] ${target}
 [분야] ${field}
+[공고/심사 기준 보정 컨텍스트]
+${formatReviewContext(reviewContext)}
+
 [사업계획서 본문]
 ${text}
 
@@ -2075,6 +2316,7 @@ ${answers.map((item, i) => `${i + 1}. ${PERSONA_META[item.persona]?.name || item
   "verdict": "적합|보완 후 적합|부적합 위험",
   "selectionSignal": "매우 강함|강함|보통|약함",
   "overall": "평가 종합 한 문단 (220자 이내)",
+  "rubricScores": [{"label":"문제정의", "score":0, "max":15, "reason":"한 문장 근거"}, {"label":"시장성", "score":0, "max":15, "reason":"..."}],
   "personas": {
     "gov":   {"grade":"strong|good|medium|weak", "strengths":["...","..."], "weaknesses":["...","..."], "questions":["추가 압박 질문 1","추가 압박 질문 2"]},
     "vc":    {"grade":"...", "strengths":[...], "weaknesses":[...], "questions":[...2개...]},
@@ -2083,7 +2325,8 @@ ${answers.map((item, i) => `${i + 1}. ${PERSONA_META[item.persona]?.name || item
     "youth": {...}
   },
   "topActions": ["가장 시급한 보완 액션 3개", "...", "..."],
-  "missingEvidence": ["제출 전 확인할 증거/서류"]
+  "missingEvidence": ["제출 전 확인할 증거/서류"],
+  "interviewNotes": ["면접 답변에서 좋아진 점 또는 여전히 부족한 점"]
 }`;
 
   try {
@@ -2096,7 +2339,7 @@ ${answers.map((item, i) => `${i + 1}. ${PERSONA_META[item.persona]?.name || item
     if(!responseText) throw new Error("AI 응답을 받지 못했습니다.");
     const m = responseText.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("응답 형식 오류");
-    const data = JSON.parse(m[0]);
+    const data = normalizeEvaluation(JSON.parse(m[0]), reviewContext);
     renderResult(data, target, answers);
     // 성공 후 일일 사용량 기록
     window.saessak.recordUsage && window.saessak.recordUsage('simulate');
@@ -2138,6 +2381,33 @@ function verdictClass(verdict) {
   if (verdict === "적합") return "grade-strong";
   if (verdict === "보완 후 적합") return "grade-good";
   return "grade-weak";
+}
+
+function normalizeEvaluation(data, reviewContext) {
+  const safe = data && typeof data === "object" ? data : {};
+  const localScore = reviewContext?.localReadiness || 50;
+  const aiScore = Number(safe.readinessScore);
+  safe.readinessScore = Number.isFinite(aiScore)
+    ? Math.round((Math.max(0, Math.min(100, aiScore)) * .68) + (localScore * .32))
+    : localScore;
+  if (!["적합", "보완 후 적합", "부적합 위험"].includes(safe.verdict)) {
+    safe.verdict = safe.readinessScore >= 78 ? "적합" : safe.readinessScore >= 52 ? "보완 후 적합" : "부적합 위험";
+  }
+  if (!["매우 강함", "강함", "보통", "약함"].includes(safe.selectionSignal)) {
+    safe.selectionSignal = safe.readinessScore >= 82 ? "매우 강함" : safe.readinessScore >= 68 ? "강함" : safe.readinessScore >= 48 ? "보통" : "약함";
+  }
+  if (!Array.isArray(safe.rubricScores) || !safe.rubricScores.length) {
+    safe.rubricScores = (reviewContext?.criteria || []).map(item => ({
+      label: item.label,
+      score: item.status === "strong" ? item.weight : item.status === "partial" ? Math.round(item.weight * .55) : Math.max(1, Math.round(item.weight * .18)),
+      max: item.weight,
+      reason: item.note
+    }));
+  }
+  const gapEvidence = (reviewContext?.missing || []).map(item => `${item.label}: ${item.note}`);
+  safe.missingEvidence = Array.from(new Set([...(safe.missingEvidence || []), ...gapEvidence])).slice(0, 8);
+  safe.interviewNotes = Array.isArray(safe.interviewNotes) ? safe.interviewNotes.slice(0, 5) : [];
+  return safe;
 }
 
 function renderResult(data, target, answers){
@@ -2196,6 +2466,25 @@ function renderResult(data, target, answers){
       <b style="color:var(--gold);">${i+1}.</b> ${escapeHtml(a)}
     </p>
   `).join("");
+  const rubricHTML = (data.rubricScores || []).map(item => {
+    const scoreValue = Math.max(0, Math.min(Number(item.max) || 0, Number(item.score) || 0));
+    const maxValue = Number(item.max) || 1;
+    const ratio = Math.max(4, Math.min(100, Math.round((scoreValue / maxValue) * 100)));
+    return `
+      <div class="rubric-row">
+        <div>
+          <strong>${escapeHtml(item.label)}</strong>
+          <span>${escapeHtml(item.reason || "")}</span>
+        </div>
+        <b>${scoreValue}/${maxValue}</b>
+        <i style="--w:${ratio}%"></i>
+      </div>`;
+  }).join("");
+  const notesHTML = (data.interviewNotes || []).map((item, i) => `
+    <p style="padding-left:18px;text-indent:-18px;">
+      <b style="color:var(--sage-deep);">${i+1}.</b> ${escapeHtml(item)}
+    </p>
+  `).join("");
 
   document.getElementById("result-area").innerHTML = `
     <div class="summary-card">
@@ -2214,6 +2503,18 @@ function renderResult(data, target, answers){
         </div>
       </div>
     </div>
+    ${rubricHTML ? `
+      <div class="summary-card">
+        <h3>심사 루브릭 점검</h3>
+        <div class="rubric-list">${rubricHTML}</div>
+      </div>
+    ` : ""}
+    ${notesHTML ? `
+      <div class="summary-card">
+        <h3>면접 답변 메모</h3>
+        ${notesHTML}
+      </div>
+    ` : ""}
     ${personaHTML}
     <div class="summary-card">
       <h3>가장 시급한 보완 액션 3가지</h3>
