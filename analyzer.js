@@ -583,10 +583,15 @@
         분석 시작 <span class="sa-launcher-cost">동적 견적</span>
       </button>
     `;
-    // council-panel과 studio-builder 사이에 끼우기
+    // council-panel과 studio-builder 사이에 끼우기.
+    // studio-builder가 lobbyInner 밖에 렌더링된 상태에서는 insertBefore가
+    // NotFoundError를 던지므로 같은 부모일 때만 기준 노드로 사용한다.
     const studioBuilder = document.querySelector("#studio-builder");
-    if (studioBuilder) lobbyInner.insertBefore(card, studioBuilder);
-    else lobbyInner.appendChild(card);
+    if (studioBuilder && studioBuilder.parentNode === lobbyInner) {
+      lobbyInner.insertBefore(card, studioBuilder);
+    } else {
+      lobbyInner.appendChild(card);
+    }
     card.querySelector("#sa-lobby-launch").addEventListener("click", openModal);
     injectStyles();
   }
