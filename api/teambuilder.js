@@ -140,6 +140,34 @@ async function fetchKstartupContext(userData, req) {
   }
 }
 
+async function fetchSupportContext(userData, request, previousResults, req) {
+  try {
+    const host = req.headers.host;
+    if (!host) return null;
+    const proto = req.headers['x-forwarded-proto'] || (host && host.startsWith('localhost') ? 'http' : 'https');
+    const url = `${proto}://${host}/api/support-context`;
+    const planText = extractPlanText(request, previousResults);
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({
+        target: userData.targetGrant,
+        field: userData.field,
+        region: userData.region,
+        userData,
+        planText,
+        listing: extractReadinessListing(previousResults)
+      })
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.ok ? data : null;
+  } catch (e) {
+    console.warn('[teambuilder] support context fetch failed:', e.message);
+    return null;
+  }
+}
+
 function formatAdditionalUserData(userData) {
   const labels = {
     businessStatus: '사업자 상태',
@@ -207,7 +235,39 @@ ${cues || '없음'}
 주의: 위 가이드는 공식 심사표가 아니라 공개 자료에서 관찰된 일반적 경향이다. 실제 공고문이 우선이다.`;
 }
 
-function buildUserPrompt(userData, request, previousResults, agentId, kstartupContext, readiness, rubric) {
+function buildSupportContextGuide(context, agentId) {
+  if (!context) return '';
+  const related = (context.relatedListings || [])
+    .slice(0, agentId === 'grant-scout' ? 6 : 3)
+    .map((item, i) => `${i + 1}. ${item.title} (${item.org || '기관 확인 필요'}, ${item.money || '지원금 문의'}, ${item.deadline || '마감 확인 필요'})`)
+    .join('\n');
+  const apis = (context.apiStatus || [])
+    .filter(api => api.priority === 'core' || api.priority === 'high' || api.configured)
+    .map(api => `- ${api.name}: ${api.configured ? '연동 가능' : '키 필요'} / ${api.use}`)
+    .join('\n');
+  const evidence = (context.evidenceNeeds || [])
+    .map(item => `- ${item.area}: ${item.need}`)
+    .join('\n');
+  const market = (context.marketPrompts || []).map(item => `- ${item}`).join('\n');
+  return `[지원사업 데이터 컨텍스트]
+이 컨텍스트는 공고·시장·정책 근거를 보강하기 위한 보조 자료입니다. 실제 공고 원문 확인이 우선입니다.
+
+[API 상태]
+${apis || '확인된 API 상태 없음'}
+
+[관련 공고 후보]
+${related || '관련 공고 후보 없음'}
+
+[보강할 증거]
+${evidence || '확인 필요'}
+
+[시장·정책 근거 작성 지침]
+${market || '확인 필요'}
+
+사용자가 제공하지 않은 수치·실적·계약은 만들지 말고 '확인 필요'로 남기세요.`;
+}
+
+function buildUserPrompt(userData, request, previousResults, agentId, kstartupContext, readiness, rubric, supportContext) {
   const dataSection = `[사용자 본인 데이터]
 - 사업 아이템: ${userData.item || '(미입력)'}
 - 운영자 강점: ${userData.strength || '(미입력)'}
@@ -254,6 +314,7 @@ ${request || '(요청 없음 — 본인 데이터 기반 종합 컨설팅)'}`;
   }
 
   const readinessSection = readiness ? `\n\n${buildReadinessPrompt(readiness)}` : '';
+  const supportSection = supportContext ? `\n\n${buildSupportContextGuide(supportContext, agentId)}` : '';
 
   // Plan Writer 전용: Humanize 가이드 + 공고별 심사 가중치
   let planWriterSection = '';
@@ -264,7 +325,7 @@ ${request || '(요청 없음 — 본인 데이터 기반 종합 컨설팅)'}`;
     if (parts.length > 0) planWriterSection = '\n\n' + parts.join('\n\n');
   }
 
-  return `${dataSection}\n\n${requestSection}${contextSection}${readinessSection}${kstartupSection}${planWriterSection}`;
+  return `${dataSection}\n\n${requestSection}${contextSection}${readinessSection}${supportSection}${kstartupSection}${planWriterSection}`;
 }
 
 function extractPlanText(request, previousResults) {
@@ -560,10 +621,11 @@ export default async function handler(req, res) {
       planText: extractPlanText(safeRequest, previousResults),
       listing: extractReadinessListing(previousResults)
     });
+    const supportContext = await fetchSupportContext(userData, safeRequest, previousResults, req);
     // Plan Writer에 한해 추천 사업/타깃 사업에 맞는 심사 가중치 가이드 주입
     const rubric = agentId === 'plan-writer' ? pickRubricForPlan(userData, previousResults) : null;
 
-    const userPrompt = buildUserPrompt(userData, safeRequest, previousResults, agentId, kstartupContext, readiness, rubric);
+    const userPrompt = buildUserPrompt(userData, safeRequest, previousResults, agentId, kstartupContext, readiness, rubric, supportContext);
     const maxTokens = (agentDef.estimatedTokens || 1500) + 500; // 여유분
 
     // 호출 + 재시도

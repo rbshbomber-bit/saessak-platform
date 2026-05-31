@@ -2389,18 +2389,27 @@ async function runPlan(){
   }
 
   btn.disabled = true; btn.textContent = "AI가 사업계획서 초안 작성 중...";
-  out.innerHTML = `<div class="loading">⏳ 심사축 진단 + 사업계획서 초안 생성 중... (10~25초)</div>`;
+  out.innerHTML = `<div class="loading">⏳ 심사축 진단 + 공고 데이터 컨텍스트 + 사업계획서 초안 생성 중... (10~30초)</div>`;
   incUsage("plan");
   window.saessak.recordUsage && window.saessak.recordUsage('planner');
 
   let readiness = null;
+  let supportContext = null;
   try {
-    readiness = await fetchPlanReadiness(planInputs);
+    const [readinessResult, supportResult] = await Promise.allSettled([
+      fetchPlanReadiness(planInputs),
+      fetchSupportContext(planInputs)
+    ]);
+    if (readinessResult.status === "fulfilled") readiness = readinessResult.value;
+    else console.warn("[planner] readiness skipped", readinessResult.reason);
+    if (supportResult.status === "fulfilled") supportContext = supportResult.value;
+    else console.warn("[planner] support context skipped", supportResult.reason);
   } catch (e) {
-    console.warn("[planner] readiness skipped", e);
+    console.warn("[planner] preflight skipped", e);
   }
 
   const readinessPrompt = readiness ? formatReadinessForPrompt(readiness) : "";
+  const supportPrompt = supportContext ? formatSupportContextForPrompt(supportContext) : "";
   const inputPrompt = formatPlanInputsForPrompt(planInputs, quality);
 
   const prompt = `당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다.
@@ -2411,12 +2420,16 @@ ${inputPrompt}
 [준비도 진단]
 ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반 심사축 기준으로 누락 근거를 보수적으로 표시하세요."}
 
+[공고·시장·정책 데이터 컨텍스트]
+${supportPrompt || "지원사업 데이터 컨텍스트 API를 사용할 수 없습니다. 공고 원문, 통계, 상권, 특허 자료는 확인 필요로 남기세요."}
+
 [작업]
 1) 6개 챕터 본문을 한국어로 작성. 각 챕터 4~7문장. 정부 지원사업 사업계획서 톤(객관적·근거 중심·제출용 문장).
 2) 사용자가 제공하지 않은 수치·실적·계약·사용자 수는 절대 만들지 말고 "확인 필요"로 남기세요.
 3) 각 챕터는 "문제 → 근거 → 실행 → 검증 방법" 중 최소 2개 이상을 포함하세요.
 4) 사용자가 제공한 구체 표현은 일반론으로 흐리지 말고 자연스럽게 반영하세요.
-5) 본문 뒤에 심사 보강용 review, appendix 객체를 넣으세요. 합격률/선정확률 % 금지.
+5) 공고·시장·정책 데이터 컨텍스트에서 제시된 관련 공고, API 상태, 보강 근거를 review와 appendix에 반영하세요.
+6) 본문 뒤에 심사 보강용 review, appendix 객체를 넣으세요. 합격률/선정확률 % 금지.
 [출력 JSON만]
 { "title": "사업계획서 제목 한 줄",
   "chapters": [
@@ -2444,6 +2457,9 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
     ],
     "milestones": [
       {"period": "M+1~M+3", "goal": "목표", "proof": "검증 지표 또는 산출물"}
+    ],
+    "sourceChecklist": [
+      {"topic": "시장/정책 근거", "source": "확인할 API 또는 공고 원문", "status": "확인 필요"}
     ]
   }
 }`;
@@ -2459,8 +2475,11 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
       {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 안정화와 사용자 검증. M+4~M+6: 유료화 또는 기관 협력 검증. M+7~M+12: 재사용률·신청 완료율 개선과 운영 리스크 보완. 각 단계의 수치는 실제 측정 후 반영합니다.`},
       {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [확인 필요], (2) 마케팅·사용자 획득 [확인 필요], (3) 인프라·운영비 [확인 필요], (4) 예비비 [확인 필요]로 배분합니다.${strength ? " 운영자 강점: " + strength : ""}`}
     ],
-    review: buildFallbackPlanReview(readiness, quality),
-    appendix: buildFallbackPlanAppendix(planInputs)
+    review: buildFallbackPlanReview(supportContext?.readiness || readiness, quality),
+    appendix: {
+      ...buildFallbackPlanAppendix(planInputs),
+      sourceChecklist: buildFallbackSourceChecklist(supportContext)
+    }
   };
 
   try {
@@ -2486,8 +2505,11 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
     const m = text.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("JSON not found");
     const parsed = JSON.parse(m[0]);
-    if(!parsed.review && readiness) parsed.review = buildFallbackPlanReview(readiness, quality);
+    if(!parsed.review && (supportContext?.readiness || readiness)) parsed.review = buildFallbackPlanReview(supportContext?.readiness || readiness, quality);
     if(!parsed.appendix) parsed.appendix = buildFallbackPlanAppendix(planInputs);
+    parsed.appendix.sourceChecklist = Array.isArray(parsed.appendix.sourceChecklist)
+      ? parsed.appendix.sourceChecklist
+      : buildFallbackSourceChecklist(supportContext);
     renderPlan(parsed);
   } catch(e){
     console.error(e);
@@ -2621,6 +2643,51 @@ async function fetchPlanReadiness(inputs) {
   return data;
 }
 
+async function fetchSupportContext(inputs) {
+  const planText = [
+    `사업 아이템: ${inputs.item}`,
+    `분야: ${inputs.field}`,
+    `지역: ${inputs.region}`,
+    `신청 사업: ${inputs.targetGrant}`,
+    `강점: ${inputs.strength || "미입력"}`,
+    `핵심 고객: ${inputs.customers || "미입력"}`,
+    `문제: ${inputs.problemEvidence || "미입력"}`,
+    `검증 근거: ${inputs.evidence || "미입력"}`,
+    `제품 기능: ${inputs.features || "미입력"}`,
+    `시장/경쟁: ${inputs.market || "미입력"}`,
+    `수익모델: ${inputs.revenue || "미입력"}`,
+    `예산: ${inputs.budget || "미입력"}`,
+    `일정: ${inputs.timeline || "미입력"}`,
+    `서류/리스크: ${inputs.risk || "미입력"}`
+  ].join("\n");
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 9000);
+  const resp = await fetch("/api/support-context", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal: controller.signal,
+    body: JSON.stringify({
+      target: inputs.targetGrant,
+      field: inputs.field,
+      region: inputs.region,
+      userData: inputs,
+      planText
+    })
+  }).finally(() => clearTimeout(timer));
+  const data = await resp.json();
+  if (!resp.ok || !data.ok) throw new Error(data.error || data.detail || resp.status);
+  return data;
+}
+
+function formatSupportContextForPrompt(context) {
+  if (!context) return "";
+  return context.promptContext || [
+    "[지원사업 데이터 컨텍스트]",
+    ...(context.evidenceNeeds || []).map(item => `- ${item.area}: ${item.need}`),
+    ...(context.marketPrompts || []).map(item => `- ${item}`)
+  ].join("\n");
+}
+
 function formatReadinessForPrompt(readiness) {
   const dims = (readiness.dimensions || [])
     .map(d => `- ${d.label}: ${d.score}/${d.max}, ${d.status}, 누락: ${(d.missingInputs || []).join(", ") || "없음"}`)
@@ -2681,6 +2748,25 @@ function buildFallbackPlanAppendix(inputs = {}) {
       { period: "M+7~M+12", goal: "재사용률·신청 완료율 개선", proof: "운영 지표와 사용자 인터뷰" }
     ]
   };
+}
+
+function buildFallbackSourceChecklist(context) {
+  const apiItems = (context?.apiStatus || [])
+    .filter(api => api.priority === "core" || api.priority === "high" || api.configured)
+    .slice(0, 4)
+    .map(api => ({
+      topic: api.use,
+      source: api.name,
+      status: api.configured ? "연동 가능" : "키 필요"
+    }));
+  const evidenceItems = (context?.evidenceNeeds || [])
+    .slice(0, 4)
+    .map(item => ({
+      topic: item.area,
+      source: item.sourceHint,
+      status: "확인 필요"
+    }));
+  return [...apiItems, ...evidenceItems].slice(0, 7);
 }
 
 function renderPlan(parsed){
@@ -2806,7 +2892,8 @@ function renderPlanAppendix(appendix = {}) {
   const evidence = Array.isArray(appendix.evidenceTable) ? appendix.evidenceTable.slice(0, 6) : [];
   const budget = Array.isArray(appendix.budgetDraft) ? appendix.budgetDraft.slice(0, 5) : [];
   const milestones = Array.isArray(appendix.milestones) ? appendix.milestones.slice(0, 5) : [];
-  if (!evidence.length && !budget.length && !milestones.length) return "";
+  const sources = Array.isArray(appendix.sourceChecklist) ? appendix.sourceChecklist.slice(0, 7) : [];
+  if (!evidence.length && !budget.length && !milestones.length && !sources.length) return "";
   const rowStyle = "display:grid;grid-template-columns:1fr 1fr minmax(72px,.35fr);gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:12px;color:var(--ink-2);line-height:1.55;";
   return `
     <div style="border:1px solid var(--line);background:var(--bg-2);border-radius:12px;padding:16px;margin:24px 0;">
@@ -2825,6 +2912,11 @@ function renderPlanAppendix(appendix = {}) {
         <b style="display:block;margin-top:16px;font-size:12px;color:var(--ink);">실행 마일스톤</b>
         <div style="${rowStyle};font-weight:700;color:var(--ink);"><span>기간</span><span>목표</span><span>검증</span></div>
         ${milestones.map(item => `<div style="${rowStyle}"><span>${escapeHtml(item.period)}</span><span>${escapeHtml(item.goal)}</span><span>${escapeHtml(item.proof)}</span></div>`).join("")}
+      ` : ""}
+      ${sources.length ? `
+        <b style="display:block;margin-top:16px;font-size:12px;color:var(--ink);">출처·API 확인 체크리스트</b>
+        <div style="${rowStyle};font-weight:700;color:var(--ink);"><span>확인 주제</span><span>출처 후보</span><span>상태</span></div>
+        ${sources.map(item => `<div style="${rowStyle}"><span>${escapeHtml(item.topic)}</span><span>${escapeHtml(item.source)}</span><span>${escapeHtml(item.status || "확인 필요")}</span></div>`).join("")}
       ` : ""}
     </div>`;
 }
@@ -2861,6 +2953,12 @@ function buildPlanDocxSections(parsed = {}) {
     sections.push({
       heading: "실행 마일스톤",
       content: appendix.milestones.map(item => `- ${item.period}: ${item.goal} / 검증: ${item.proof}`).join("\n")
+    });
+  }
+  if (Array.isArray(appendix.sourceChecklist) && appendix.sourceChecklist.length) {
+    sections.push({
+      heading: "출처·API 확인 체크리스트",
+      content: appendix.sourceChecklist.map(item => `- ${item.topic}: ${item.source} (${item.status || "확인 필요"})`).join("\n")
     });
   }
   return sections;
