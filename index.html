@@ -1302,6 +1302,54 @@ footer.site a:hover { color: var(--ink); }
             <textarea id="p-strength" placeholder="예: 도메인 전문성 (전 직장 5년 경력) + 시제품 작동 중 + 본인 데이터 확보"></textarea>
           </div>
           <div class="field full">
+            <details open style="background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:14px;">
+              <summary style="cursor:pointer;font-weight:800;color:var(--ink);">심사용 근거 보강 입력</summary>
+              <p style="margin:8px 0 14px;color:var(--ink-3);font-size:12px;line-height:1.6;">많이 채울수록 초안이 일반론에서 벗어납니다. 모르는 항목은 비워도 되지만, AI가 누락 증거로 표시합니다.</p>
+              <div class="match-form" style="padding:0;gap:12px;">
+                <div class="field">
+                  <label>핵심 고객</label>
+                  <textarea id="p-customer" placeholder="예: 정부지원사업을 처음 신청하는 만 39세 이하 1인 창업자"></textarea>
+                </div>
+                <div class="field">
+                  <label>고객 문제·기존 대안의 한계</label>
+                  <textarea id="p-problem" placeholder="예: 공고 조건을 직접 해석하기 어렵고, 사업계획서 구조를 잡는 데 시간이 오래 걸림"></textarea>
+                </div>
+                <div class="field">
+                  <label>수요 검증·근거</label>
+                  <textarea id="p-evidence" placeholder="예: 인터뷰, 베타 피드백, 실제 운영 로그, 출처 있는 통계. 없으면 확인 필요"></textarea>
+                </div>
+                <div class="field">
+                  <label>현재 제품·구현 기능</label>
+                  <textarea id="p-product" placeholder="예: 공고 수집, AI 매칭, 신청 트래커, 사업계획서 초안, 심사 시뮬레이션"></textarea>
+                </div>
+                <div class="field">
+                  <label>시장·경쟁 대안</label>
+                  <textarea id="p-market" placeholder="예: K-Startup 직접 검색, 컨설팅 업체, 일반 AI 챗봇 대비 차별점"></textarea>
+                </div>
+                <div class="field">
+                  <label>수익모델·유료화 근거</label>
+                  <textarea id="p-revenue" placeholder="예: 토큰 충전형 베타 유료화 예정, 구독은 추후. 실제 결제 수치는 확인 필요"></textarea>
+                </div>
+                <div class="field">
+                  <label>예산 사용 계획</label>
+                  <textarea id="p-budget" placeholder="예: 개발비, API/서버비, 사용자 검증비, 마케팅비. 금액 미정이면 확인 필요"></textarea>
+                </div>
+                <div class="field">
+                  <label>3~12개월 실행 일정</label>
+                  <textarea id="p-timeline" placeholder="예: 1개월 UX 안정화, 2개월 베타 유료화, 3개월 사용자 피드백 반영"></textarea>
+                </div>
+                <div class="field">
+                  <label>보유 서류·리스크 관리</label>
+                  <textarea id="p-risk" placeholder="예: 사업자등록, 통신판매업, 통장, 개인정보/AI 면책/환불 정책 정비"></textarea>
+                </div>
+                <div class="field">
+                  <label>제출 전 꼭 반영할 메모</label>
+                  <textarea id="p-memo" placeholder="예: 가짜 수치 금지, 현재 베타 운영, Opus 4.8 적용 예정 등"></textarea>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="field full">
             <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink-2);background:var(--bg-2);padding:12px 14px;border-radius:10px;border:1px solid var(--line);cursor:pointer;">
               <input type="checkbox" id="p-agree" style="margin-top:3px;flex-shrink:0;" />
               <span>
@@ -2293,6 +2341,8 @@ async function runPlan(){
   const region = document.getElementById("p-region").value;
   const target = document.getElementById("p-target").value;
   const strength = document.getElementById("p-strength").value || "";
+  const planInputs = collectPlanInputs({ item, field, region, target, strength });
+  const quality = assessPlanInputQuality(planInputs);
 
   if(!item.trim()){
     out.innerHTML = `<div class="empty-state">사업 아이템 한 줄을 먼저 입력해주세요.</div>`;
@@ -2345,23 +2395,28 @@ async function runPlan(){
 
   let readiness = null;
   try {
-    readiness = await fetchPlanReadiness({ item, field, region, target, strength });
+    readiness = await fetchPlanReadiness(planInputs);
   } catch (e) {
     console.warn("[planner] readiness skipped", e);
   }
 
   const readinessPrompt = readiness ? formatReadinessForPrompt(readiness) : "";
+  const inputPrompt = formatPlanInputsForPrompt(planInputs, quality);
 
   const prompt = `당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다.
 다음 정보로 "${target}" 양식에 맞는 사업계획서 초안을 작성하세요.
-[사업 정보] 아이템: ${item} / 분야: ${field} / 지역: ${region} / 신청: ${target} / 강점: ${strength || "(없음)"}
+[사용자 입력 데이터]
+${inputPrompt}
+
 [준비도 진단]
 ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반 심사축 기준으로 누락 근거를 보수적으로 표시하세요."}
 
 [작업]
-1) 6개 챕터 본문을 한국어로 작성. 각 챕터 3~5문장. 정부 양식 톤(객관적·근거 중심).
+1) 6개 챕터 본문을 한국어로 작성. 각 챕터 4~7문장. 정부 지원사업 사업계획서 톤(객관적·근거 중심·제출용 문장).
 2) 사용자가 제공하지 않은 수치·실적·계약·사용자 수는 절대 만들지 말고 "확인 필요"로 남기세요.
-3) 본문 뒤에 심사 보강용 review 객체를 넣으세요. 합격률/선정확률 % 금지.
+3) 각 챕터는 "문제 → 근거 → 실행 → 검증 방법" 중 최소 2개 이상을 포함하세요.
+4) 사용자가 제공한 구체 표현은 일반론으로 흐리지 말고 자연스럽게 반영하세요.
+5) 본문 뒤에 심사 보강용 review, appendix 객체를 넣으세요. 합격률/선정확률 % 금지.
 [출력 JSON만]
 { "title": "사업계획서 제목 한 줄",
   "chapters": [
@@ -2377,7 +2432,19 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
     "readinessGrade": "매우 강함|강함|보통|약함",
     "priorityActions": ["제출 전 가장 먼저 보강할 액션 1", "액션 2", "액션 3"],
     "missingEvidence": ["증빙/수치/서류 확인 필요 항목"],
-    "reviewerQuestions": ["심사위원 예상 질문 1", "심사위원 예상 질문 2", "심사위원 예상 질문 3"]
+    "reviewerQuestions": ["심사위원 예상 질문 1", "심사위원 예상 질문 2", "심사위원 예상 질문 3"],
+    "qualityWarnings": ["초안에서 사용자가 반드시 검수할 위험 또는 빈칸"]
+  },
+  "appendix": {
+    "evidenceTable": [
+      {"claim": "사업계획서에서 주장할 내용", "neededEvidence": "필요한 증거", "status": "보유|확인 필요"}
+    ],
+    "budgetDraft": [
+      {"item": "예산 항목", "purpose": "사용 목적", "amountNote": "금액 또는 확인 필요"}
+    ],
+    "milestones": [
+      {"period": "M+1~M+3", "goal": "목표", "proof": "검증 지표 또는 산출물"}
+    ]
   }
 }`;
 
@@ -2387,12 +2454,13 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
     chapters: [
       {h:"1. 문제 정의", body: `${region} 지역의 ${field} 분야는 디지털 전환과 시장 변화로 인해 기존 사업 모델만으로는 한계에 직면해 있습니다. 청년 창업자가 진입하려 해도 정보·네트워크가 부족하여 시행착오 비용이 큽니다.`},
       {h:"2. 솔루션·핵심 가치", body: `본 사업은 "${item}"을(를) 핵심 솔루션으로 제시합니다. 사용자가 직면한 핵심 페인 포인트를 디지털 기술의 결합으로 해소하며, 기존 대안 대비 명확한 차별점을 제공합니다.`},
-      {h:"3. 시장 분석·타깃", body: `${field} 시장 규모는 국내 약 [추정 규모] 원이며 연 [%] 성장 중입니다. 1차 타깃은 ${region} 거주 [구체 페르소나]이고, 향후 전국으로 확장 가능합니다.`},
-      {h:"4. 비즈니스 모델", body: `수익은 [구독료 / 1회 결제 / B2B 라이선스 등] 다축 모델로 구성됩니다. 1년차 목표 매출은 [N]원, 3년차 [N]원이며, 비용 구조는 호스팅·AI API·인건비 중심으로 마진 [%] 확보가 가능합니다.`},
-      {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 출시 및 초기 사용자 확보 (목표 N명). M+4~M+6: 핵심 기능 고도화 및 첫 매출 발생. M+7~M+9: 시장 확장 및 인력 1명 채용. M+10~M+12: 매출 안정화 및 차기 라운드 준비.`},
+      {h:"3. 시장 분석·타깃", body: `${field} 시장과 타깃 규모는 공신력 있는 출처로 확인해 기입해야 합니다. 1차 타깃은 ${region} 기반의 [구체 페르소나 확인 필요]이며, 직접 경쟁·간접 대안·선택 이유를 분리해 검증해야 합니다.`},
+      {h:"4. 비즈니스 모델", body: `수익은 [토큰 충전 / 구독 / B2B 라이선스 등 확인 필요] 구조로 검토합니다. 매출 목표와 전환율은 실제 결제·문의·사용 로그가 확보된 뒤 기입하고, 초기에는 무료 사용 → 유료 전환 조건을 명확히 검증합니다.`},
+      {h:"5. 추진 일정 (12개월)", body: `M+1~M+3: MVP 안정화와 사용자 검증. M+4~M+6: 유료화 또는 기관 협력 검증. M+7~M+12: 재사용률·신청 완료율 개선과 운영 리스크 보완. 각 단계의 수치는 실제 측정 후 반영합니다.`},
       {h:"6. 자금 운용 계획", body: `${target} 자금은 (1) 개발 인건비·외주 [확인 필요], (2) 마케팅·사용자 획득 [확인 필요], (3) 인프라·운영비 [확인 필요], (4) 예비비 [확인 필요]로 배분합니다.${strength ? " 운영자 강점: " + strength : ""}`}
     ],
-    review: buildFallbackPlanReview(readiness)
+    review: buildFallbackPlanReview(readiness, quality),
+    appendix: buildFallbackPlanAppendix(planInputs)
   };
 
   try {
@@ -2418,7 +2486,8 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
     const m = text.match(/\{[\s\S]*\}/);
     if(!m) throw new Error("JSON not found");
     const parsed = JSON.parse(m[0]);
-    if(!parsed.review && readiness) parsed.review = buildFallbackPlanReview(readiness);
+    if(!parsed.review && readiness) parsed.review = buildFallbackPlanReview(readiness, quality);
+    if(!parsed.appendix) parsed.appendix = buildFallbackPlanAppendix(planInputs);
     renderPlan(parsed);
   } catch(e){
     console.error(e);
@@ -2434,13 +2503,105 @@ ${readinessPrompt || "준비도 진단 API를 사용할 수 없습니다. 일반
   }
 }
 
-async function fetchPlanReadiness({ item, field, region, target, strength }) {
+function collectPlanInputs(base) {
+  const value = id => (document.getElementById(id)?.value || "").trim();
+  return {
+    item: base.item,
+    field: base.field,
+    region: base.region,
+    targetGrant: base.target,
+    strength: base.strength,
+    customers: value("p-customer"),
+    problemEvidence: value("p-problem"),
+    evidence: value("p-evidence"),
+    features: value("p-product"),
+    market: value("p-market"),
+    competitors: value("p-market"),
+    revenue: value("p-revenue"),
+    pricing: value("p-revenue"),
+    budget: value("p-budget"),
+    funding: value("p-budget"),
+    timeline: value("p-timeline"),
+    documents: value("p-risk"),
+    risk: value("p-risk"),
+    memo: value("p-memo")
+  };
+}
+
+function assessPlanInputQuality(inputs) {
+  const fields = [
+    ["item", "사업 아이템"],
+    ["customers", "핵심 고객"],
+    ["problemEvidence", "고객 문제"],
+    ["evidence", "수요 검증"],
+    ["features", "구현 기능"],
+    ["market", "시장·경쟁"],
+    ["revenue", "수익모델"],
+    ["budget", "예산 계획"],
+    ["timeline", "실행 일정"],
+    ["risk", "서류·리스크"]
+  ];
+  const filled = fields.filter(([key]) => inputs[key] && String(inputs[key]).trim().length >= 5);
+  const missing = fields.filter(([key]) => !inputs[key] || String(inputs[key]).trim().length < 5).map(([, label]) => label);
+  const ratio = filled.length / fields.length;
+  return {
+    filled: filled.length,
+    total: fields.length,
+    missing,
+    grade: ratio >= 0.8 ? "강함" : ratio >= 0.55 ? "보통" : "약함",
+    note: ratio >= 0.8
+      ? "입력 근거가 충분해 제출용 문장에 가깝게 만들 수 있습니다."
+      : ratio >= 0.55
+        ? "초안 작성은 가능하지만 일부 근거는 확인 필요로 남깁니다."
+        : "입력이 부족해 일반론이 섞일 수 있습니다. 누락 항목을 결과에서 먼저 보강하세요."
+  };
+}
+
+function formatPlanInputsForPrompt(inputs, quality) {
+  const labels = {
+    item: "사업 아이템",
+    field: "분야",
+    region: "지역",
+    targetGrant: "신청 사업",
+    strength: "강점·차별점",
+    customers: "핵심 고객",
+    problemEvidence: "고객 문제·기존 대안 한계",
+    evidence: "수요 검증·근거",
+    features: "현재 제품·구현 기능",
+    market: "시장·경쟁 대안",
+    revenue: "수익모델·유료화 근거",
+    budget: "예산 사용 계획",
+    timeline: "3~12개월 실행 일정",
+    risk: "보유 서류·리스크 관리",
+    memo: "제출 전 메모"
+  };
+  const lines = Object.entries(labels)
+    .map(([key, label]) => `- ${label}: ${inputs[key] || "(미입력)"}`)
+    .join("\n");
+  return `${lines}
+
+[입력 품질]
+- 입력 충실도: ${quality.filled}/${quality.total}, ${quality.grade}
+- 해석: ${quality.note}
+- 누락 입력: ${quality.missing.join(", ") || "없음"}`;
+}
+
+async function fetchPlanReadiness(inputs) {
   const planText = [
-    `사업 아이템: ${item}`,
-    `분야: ${field}`,
-    `지역: ${region}`,
-    `신청 사업: ${target}`,
-    `강점: ${strength || "미입력"}`
+    `사업 아이템: ${inputs.item}`,
+    `분야: ${inputs.field}`,
+    `지역: ${inputs.region}`,
+    `신청 사업: ${inputs.targetGrant}`,
+    `강점: ${inputs.strength || "미입력"}`,
+    `핵심 고객: ${inputs.customers || "미입력"}`,
+    `문제: ${inputs.problemEvidence || "미입력"}`,
+    `검증 근거: ${inputs.evidence || "미입력"}`,
+    `제품 기능: ${inputs.features || "미입력"}`,
+    `시장/경쟁: ${inputs.market || "미입력"}`,
+    `수익모델: ${inputs.revenue || "미입력"}`,
+    `예산: ${inputs.budget || "미입력"}`,
+    `일정: ${inputs.timeline || "미입력"}`,
+    `서류/리스크: ${inputs.risk || "미입력"}`
   ].join("\n");
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
@@ -2450,11 +2611,7 @@ async function fetchPlanReadiness({ item, field, region, target, strength }) {
     signal: controller.signal,
     body: JSON.stringify({
       userData: {
-        item,
-        field,
-        region,
-        targetGrant: target,
-        strength
+        ...inputs
       },
       planText
     })
@@ -2482,7 +2639,7 @@ ${dims}
 ${actions || "큰 취약 항목 없음"}`;
 }
 
-function buildFallbackPlanReview(readiness) {
+function buildFallbackPlanReview(readiness, quality = {}) {
   const actions = (readiness?.priorityActions || []).slice(0, 3).map(a => `${a.area}: ${a.action}`);
   const missing = (readiness?.requiredInputs || []).slice(0, 6).map(key => `${key} 확인 필요`);
   return {
@@ -2498,6 +2655,30 @@ function buildFallbackPlanReview(readiness) {
       "이 문제를 실제 고객이 지금 겪고 있다는 근거는 무엇인가요?",
       "지원금이 투입되면 3개월 안에 무엇을 검증할 수 있나요?",
       "비슷한 대안과 비교했을 때 사용자가 선택할 이유는 무엇인가요?"
+    ],
+    qualityWarnings: [
+      quality.note || "사용자 입력이 부족한 항목은 확인 필요로 남겨야 합니다.",
+      ...(quality.missing || []).slice(0, 4).map(label => `${label} 보강 필요`)
+    ]
+  };
+}
+
+function buildFallbackPlanAppendix(inputs = {}) {
+  return {
+    evidenceTable: [
+      { claim: "핵심 고객이 실제로 문제를 겪고 있다", neededEvidence: inputs.evidence || "인터뷰, 설문, MVP 피드백, 출처 있는 통계", status: inputs.evidence ? "보유" : "확인 필요" },
+      { claim: "제품이 문제 해결에 직접 기여한다", neededEvidence: inputs.features || "현재 구현 기능, 화면 캡처, 사용 시나리오", status: inputs.features ? "보유" : "확인 필요" },
+      { claim: "지원금 사용처가 실행계획과 연결된다", neededEvidence: inputs.budget || "예산 항목별 산출 근거", status: inputs.budget ? "보유" : "확인 필요" }
+    ],
+    budgetDraft: [
+      { item: "제품 개발·고도화", purpose: "핵심 기능 안정화 및 사용자 피드백 반영", amountNote: inputs.budget || "확인 필요" },
+      { item: "사용자 검증·마케팅", purpose: "초기 고객 인터뷰, 베타 테스트, 전환 검증", amountNote: "확인 필요" },
+      { item: "운영 인프라", purpose: "서버, AI API, 보안·개인정보 관리", amountNote: "확인 필요" }
+    ],
+    milestones: [
+      { period: "M+1~M+3", goal: inputs.timeline || "MVP 안정화 및 초기 검증", proof: "테스트 결과, 피드백 로그, 개선 이력" },
+      { period: "M+4~M+6", goal: "유료화 또는 기관 협력 검증", proof: "결제/문의/상담 기록 등 실제 측정값" },
+      { period: "M+7~M+12", goal: "재사용률·신청 완료율 개선", proof: "운영 지표와 사용자 인터뷰" }
     ]
   };
 }
@@ -2508,6 +2689,7 @@ function renderPlan(parsed){
   const item = document.getElementById("p-item").value;
   const chapters = Array.isArray(parsed.chapters) ? parsed.chapters : [];
   const review = parsed.review || {};
+  const appendix = parsed.appendix || {};
   const planFullText = chapters.map(c => `${c.h}\n${c.body}`).join("\n\n");
 
   // 결과 저장 (히스토리)
@@ -2543,6 +2725,8 @@ function renderPlan(parsed){
 
       ${chapters.map(c => `<h4>${escapeHtml(c.h)}</h4><p>${escapeHtml(c.body)}</p>`).join("")}
 
+      ${renderPlanAppendix(appendix)}
+
       <!-- 하단 면책 워터마크 -->
       <div style="margin-top:32px;padding:14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);text-align:center;">
         🤖 AI 자동 생성 · 본인 검토 후 사용 · 합격 보장 없음 · © 새싹매치 베타
@@ -2561,7 +2745,7 @@ function renderPlan(parsed){
   document.getElementById("plan-download-docx").addEventListener("click", () => {
     const cur = window._currentPlanData;
     if(!cur){ alert("저장된 결과가 없습니다."); return; }
-    const sections = (cur.parsed.chapters || []).map(c => ({ heading: c.h, content: c.body }));
+    const sections = buildPlanDocxSections(cur.parsed);
     window.saessak.downloadDocx({
       title: cur.parsed.title || `${cur.target} 사업계획서 초안`,
       subtitle: `${cur.target} 신청용 초안`,
@@ -2578,6 +2762,7 @@ function renderPlanReview(review = {}) {
   const actions = Array.isArray(review.priorityActions) ? review.priorityActions.slice(0, 4) : [];
   const missing = Array.isArray(review.missingEvidence) ? review.missingEvidence.slice(0, 5) : [];
   const questions = Array.isArray(review.reviewerQuestions) ? review.reviewerQuestions.slice(0, 4) : [];
+  const warnings = Array.isArray(review.qualityWarnings) ? review.qualityWarnings.slice(0, 4) : [];
   if (score == null && actions.length === 0 && missing.length === 0 && questions.length === 0) return "";
   return `
     <div style="border:1px solid var(--sage);background:linear-gradient(135deg,var(--sage-soft),#fff);border-radius:12px;padding:16px;margin:18px 0 24px;">
@@ -2607,8 +2792,78 @@ function renderPlanReview(review = {}) {
             ${(questions.length ? questions : ["왜 지금 이 사업을 해야 하나요?"]).map(item => `<li>${escapeHtml(item)}</li>`).join("")}
           </ul>
         </div>
+        <div>
+          <b style="font-size:12px;color:var(--ink-2);">검수 경고</b>
+          <ul style="margin:8px 0 0;padding-left:18px;color:var(--ink-2);font-size:12px;line-height:1.6;">
+            ${(warnings.length ? warnings : ["제출 전 사실관계와 수치를 직접 검증하세요."]).map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </div>
       </div>
     </div>`;
+}
+
+function renderPlanAppendix(appendix = {}) {
+  const evidence = Array.isArray(appendix.evidenceTable) ? appendix.evidenceTable.slice(0, 6) : [];
+  const budget = Array.isArray(appendix.budgetDraft) ? appendix.budgetDraft.slice(0, 5) : [];
+  const milestones = Array.isArray(appendix.milestones) ? appendix.milestones.slice(0, 5) : [];
+  if (!evidence.length && !budget.length && !milestones.length) return "";
+  const rowStyle = "display:grid;grid-template-columns:1fr 1fr minmax(72px,.35fr);gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:12px;color:var(--ink-2);line-height:1.55;";
+  return `
+    <div style="border:1px solid var(--line);background:var(--bg-2);border-radius:12px;padding:16px;margin:24px 0;">
+      <h4 style="margin:0 0 10px;border-bottom:none;font-size:16px;">제출 전 보강 표</h4>
+      ${evidence.length ? `
+        <b style="font-size:12px;color:var(--ink);">주장-증거 매칭</b>
+        <div style="${rowStyle};font-weight:700;color:var(--ink);"><span>주장</span><span>필요 증거</span><span>상태</span></div>
+        ${evidence.map(item => `<div style="${rowStyle}"><span>${escapeHtml(item.claim)}</span><span>${escapeHtml(item.neededEvidence)}</span><b style="color:${item.status === "보유" ? "var(--good)" : "var(--warn)"};">${escapeHtml(item.status || "확인 필요")}</b></div>`).join("")}
+      ` : ""}
+      ${budget.length ? `
+        <b style="display:block;margin-top:16px;font-size:12px;color:var(--ink);">예산 초안</b>
+        <div style="${rowStyle};font-weight:700;color:var(--ink);"><span>항목</span><span>목적</span><span>금액</span></div>
+        ${budget.map(item => `<div style="${rowStyle}"><span>${escapeHtml(item.item)}</span><span>${escapeHtml(item.purpose)}</span><span>${escapeHtml(item.amountNote || "확인 필요")}</span></div>`).join("")}
+      ` : ""}
+      ${milestones.length ? `
+        <b style="display:block;margin-top:16px;font-size:12px;color:var(--ink);">실행 마일스톤</b>
+        <div style="${rowStyle};font-weight:700;color:var(--ink);"><span>기간</span><span>목표</span><span>검증</span></div>
+        ${milestones.map(item => `<div style="${rowStyle}"><span>${escapeHtml(item.period)}</span><span>${escapeHtml(item.goal)}</span><span>${escapeHtml(item.proof)}</span></div>`).join("")}
+      ` : ""}
+    </div>`;
+}
+
+function buildPlanDocxSections(parsed = {}) {
+  const sections = (parsed.chapters || []).map(c => ({ heading: c.h, content: c.body }));
+  const review = parsed.review || {};
+  const appendix = parsed.appendix || {};
+  if (review.readinessScore != null || review.priorityActions || review.missingEvidence) {
+    sections.unshift({
+      heading: "제출 준비도 진단",
+      content: [
+        `준비도: ${review.readinessScore ?? "확인 필요"}/100 · ${review.readinessGrade || "확인 필요"}`,
+        `우선 보강 액션: ${(review.priorityActions || []).join(" / ") || "확인 필요"}`,
+        `누락 증거: ${(review.missingEvidence || []).join(" / ") || "확인 필요"}`,
+        `심사 예상 질문: ${(review.reviewerQuestions || []).join(" / ") || "확인 필요"}`,
+        `검수 경고: ${(review.qualityWarnings || []).join(" / ") || "제출 전 사실관계 검증 필요"}`
+      ].join("\n")
+    });
+  }
+  if (Array.isArray(appendix.evidenceTable) && appendix.evidenceTable.length) {
+    sections.push({
+      heading: "주장-증거 매칭",
+      content: appendix.evidenceTable.map(item => `- ${item.claim}: ${item.neededEvidence} (${item.status || "확인 필요"})`).join("\n")
+    });
+  }
+  if (Array.isArray(appendix.budgetDraft) && appendix.budgetDraft.length) {
+    sections.push({
+      heading: "예산 초안",
+      content: appendix.budgetDraft.map(item => `- ${item.item}: ${item.purpose} / ${item.amountNote || "확인 필요"}`).join("\n")
+    });
+  }
+  if (Array.isArray(appendix.milestones) && appendix.milestones.length) {
+    sections.push({
+      heading: "실행 마일스톤",
+      content: appendix.milestones.map(item => `- ${item.period}: ${item.goal} / 검증: ${item.proof}`).join("\n")
+    });
+  }
+  return sections;
 }
 
 // 결제 모달
