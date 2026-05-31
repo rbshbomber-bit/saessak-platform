@@ -359,9 +359,16 @@
     if (runAllInFlight) return;
     const briefEl = document.getElementById("saessak-runall-brief");
     const brief = (briefEl?.value || "").trim();
+    const userData = getUserData();
     if (!brief) {
       const s = document.getElementById("saessak-runall-status");
       if (s) { s.textContent = "한 줄 요청을 입력해주세요"; s.className = "saessak-err"; }
+      return;
+    }
+    if (!userData.item || !String(userData.item).trim()) {
+      const s = document.getElementById("saessak-runall-status");
+      if (s) { s.textContent = "본인 데이터의 사업 아이템을 먼저 입력해주세요"; s.className = "saessak-err"; }
+      openUserDataModal();
       return;
     }
 
@@ -405,6 +412,10 @@
           previousResults[camelKey] = data.raw;
         } catch (e) {
           step.status = "error"; step.statusText = "실패: " + e.message;
+          if (/로그인|토큰 부족|auth-required|tokens-insufficient/i.test(e.message)) {
+            renderRunAllPipeline(steps);
+            throw e;
+          }
         }
         renderRunAllPipeline(steps);
       }
@@ -417,6 +428,11 @@
           status.textContent = "✅ 전체 완료 · 산출물에 저장됨";
           status.className = "saessak-ok";
         }
+      }
+    } catch (e) {
+      if (status) {
+        status.textContent = `중단: ${e.message}`;
+        status.className = "saessak-err";
       }
     } finally {
       runAllInFlight = false;

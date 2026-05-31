@@ -19,11 +19,15 @@
   window.saessak.callClaude = async function (prompt, options) {
     options = options || {};
     const fallback = options.fallback || '⚠️ AI 응답 생성에 실패했어요. 잠시 후 다시 시도해주세요.';
+    const timeoutMs = Number(options.timeout_ms || options.timeoutMs || 45000);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const res = await fetch('/api/claude', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           prompt,
           system: options.system,
@@ -53,8 +57,14 @@
       const data = await res.json();
       return data.text || fallback;
     } catch (err) {
-      console.error('[saessak.callClaude] error', err);
+      if (err && err.name === 'AbortError') {
+        console.error('[saessak.callClaude] timeout', timeoutMs);
+      } else {
+        console.error('[saessak.callClaude] error', err);
+      }
       return fallback;
+    } finally {
+      clearTimeout(timer);
     }
   };
 

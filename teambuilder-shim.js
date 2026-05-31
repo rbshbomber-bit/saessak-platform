@@ -96,10 +96,40 @@
     catch (e) { return []; }
   }
   function pushEvent(e) {
+    const normalized = normalizeEvent(e || {});
     const log = getEvents();
-    log.push(e);
+    log.push(normalized);
     while (log.length > 100) log.shift();
     localStorage.setItem(EVENT_LOG_KEY, JSON.stringify(log));
+  }
+
+  function normalizeEvent(e) {
+    const type = e.type || e.kind || "info";
+    const agentId = e.agentId || e.agent || null;
+    const kindMap = {
+      dispatch: "done",
+      council: "done",
+      "run-start": "progress",
+      "run-step-start": "progress",
+      "run-step-done": "done",
+      "run-step-error": "error",
+      "run-complete": "done"
+    };
+    const labelMap = {
+      "run-start": "전체 실행 시작",
+      "run-step-start": `${e.agentName || agentId || "에이전트"} 작업 시작`,
+      "run-step-done": `${e.agentName || agentId || "에이전트"} 작업 완료`,
+      "run-step-error": `${e.agentName || agentId || "에이전트"} 작업 실패`,
+      "run-complete": `전체 실행 완료 · 완료 ${Array.isArray(e.completed) ? e.completed.length : 0}개 · 실패 ${e.errors || 0}개`
+    };
+    const message = e.message || e.response || e.summary || e.brief || e.error || labelMap[type] || "작업 기록";
+    return {
+      ...e,
+      kind: e.kind || kindMap[type] || type,
+      agentId,
+      message,
+      time: e.time || new Date().toISOString()
+    };
   }
 
   // ── saessak 헬퍼 안전 래퍼 ──
@@ -462,10 +492,21 @@
       // brief가 길수록 + 0.5씩 (200자 초과 시 1당 0.05)
       const extra = Math.max(0, Math.ceil((briefLen - 200) * 0.05));
       const total = baseCost + extra;
+      const user = currentUser();
+      const unlimited = isAdmin(user);
+      const balance = Number(user?.tokens || 0);
+      const balanceAfter = unlimited ? balance : balance - total;
       return jsonResponse({
+        ok: true,
         estimated: total,
+        estimatedCredits: total,
+        displayCredits: total,
         baseCost,
         extra,
+        unlimited,
+        canRun: unlimited || balanceAfter >= 0,
+        balanceAfter,
+        creditsRemaining: unlimited ? null : balanceAfter,
         currency: "credits",
         note: extra > 0 ? `기본 ${baseCost} + 길이 가산 ${extra}` : `기본 ${baseCost}`
       });

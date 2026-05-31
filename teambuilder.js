@@ -354,7 +354,7 @@ function renderPricing() {
       <span>${escapeHtml(plan.audience)}</span>
       <strong>${escapeHtml(plan.name)}</strong>
       <em>${formatMoney(plan.monthly[pricingCurrency], pricingCurrency)} / 월</em>
-      <p>${Number(plan.credits).toLocaleString("ko-KR")} credits · ${plan.studioLimit} studios · ${plan.seats} seats</p>
+      <p>${Number(plan.credits).toLocaleString("ko-KR")} 토큰 · ${plan.studioLimit}개 스튜디오 · ${plan.seats}명</p>
       <small>${plan.features.map(escapeHtml).join(" · ")}</small>
     </article>
   `).join("");
@@ -366,7 +366,7 @@ function renderPricing() {
       <div class="operation-row">
         <span>${escapeHtml(op.name)}</span>
         <span>${op.variable ? `${op.minSeconds || 1}s 최소 / ${escapeHtml(op.unit)}` : escapeHtml(op.unit)}</span>
-        <strong>${op.credits} credits${op.variable ? " / sec" : ""}</strong>
+        <strong>${op.credits} 토큰${op.variable ? " / sec" : ""}</strong>
       </div>
     `).join("")}
   `;
@@ -455,10 +455,10 @@ async function refreshCostPreview() {
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || resp.status);
-    estimatedCredits.textContent = data.unlimited ? `관리자 무제한` : `${data.estimatedCredits} credits`;
+    estimatedCredits.textContent = data.unlimited ? `관리자 무제한` : `${data.estimatedCredits} 토큰`;
     balanceAfter.textContent = data.unlimited
-      ? `예상 사용량 ${data.displayCredits || 0} credits · 차감 없음`
-      : (data.canRun ? `실행 후 ${data.balanceAfter} 남음` : `부족: ${Math.abs(data.balanceAfter)} credits`);
+      ? `예상 사용량 ${data.displayCredits || 0} 토큰 · 차감 없음`
+      : (data.canRun ? `실행 후 ${data.balanceAfter} 남음` : `부족: ${Math.abs(data.balanceAfter)} 토큰`);
     balanceAfter.classList.toggle("is-danger", !data.canRun);
     briefSubmit.disabled = !data.canRun;
   } catch (e) {
@@ -1131,7 +1131,7 @@ briefSubmit.addEventListener("click", async () => {
       briefStatus.className = "brief-status error";
       if (resp.status === 402) await loadAccount();
     } else {
-      const chargeText = data.creditsCharged === 0 ? "관리자 무제한 실행" : `${data.creditsCharged} credits 사용 · 잔액 ${data.creditsRemaining}`;
+      const chargeText = data.creditsCharged === 0 ? "관리자 무제한 실행" : `${data.creditsCharged} 토큰 사용 · 잔액 ${data.creditsRemaining}`;
       briefStatus.textContent = `보냄 (${data.requestId.slice(0, 16)}…) · ${chargeText}`;
       briefStatus.className = "brief-status ok";
       if (logPanelDetails) logPanelDetails.open = true;
