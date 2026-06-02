@@ -243,6 +243,21 @@ footer.site .row { display: flex; justify-content: space-between; flex-wrap: wra
           <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--sage);font-size:12px;color:var(--ink-2);" id="sub-status">현재 구독 없음 — 단건 충전만 가능</div>
         </div>
 
+        <div class="card" id="refund-card" style="margin-bottom:16px;">
+          <div class="card-head">
+            <h2>결제·환불 문의</h2>
+            <a class="more" href="terms.html#refund">정책 보기 →</a>
+          </div>
+          <p style="margin:0 0 12px;font-size:13px;color:var(--ink-2);line-height:1.7;">
+            결제 오류, 중복 결제, 환불 요청은 영수증과 결제 시간을 함께 보내주시면 확인 후 처리합니다.
+            AI 호출 실패로 차감된 토큰은 자동 환불 기준을 우선 적용합니다.
+          </p>
+          <a href="mailto:rbshbomber@gmail.com?subject=%5B%EC%83%88%EC%8B%B9%EB%A7%A4%EC%B9%98%5D%20%EA%B2%B0%EC%A0%9C%C2%B7%ED%99%98%EB%B6%88%20%EB%AC%B8%EC%9D%98"
+             style="display:inline-flex;align-items:center;justify-content:center;width:100%;padding:11px 14px;border-radius:10px;background:var(--ink);color:white;font-size:13px;font-weight:700;">
+            이메일로 문의하기
+          </a>
+        </div>
+
         <div class="card" style="margin-bottom:16px;">
           <div class="card-head">
             <h2>이번 달 활동</h2>
@@ -367,8 +382,8 @@ function getCurrentUser(){
 const user = getCurrentUser();
 if(!user){
   alert("로그인이 필요합니다");
-  location.href = "auth.html";
-}
+  location.replace("auth.html");
+} else {
 
 // 인사
 document.getElementById("hello").textContent = `안녕하세요, ${user.name}님!`;
@@ -509,6 +524,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
     location.href = "index.html";
   }
 });
+}
 
 // ===== 내 자료실 (AI 히스토리) =====
 let currentHistoryFilter = "";

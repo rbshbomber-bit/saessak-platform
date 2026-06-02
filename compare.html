@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>사업계획서 비교 분석 — 새싹매치</title>
-<meta name="description" content="당신의 사업계획서를 합격 사례 12건과 비교 분석하여 강점·약점을 짚어드립니다." />
+<meta name="description" content="당신의 사업계획서를 일반 심사 항목과 비교 분석하여 강점·약점을 짚어드립니다." />
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-client.js" defer></script>
@@ -220,7 +220,7 @@ footer.site {
   <div class="container">
     <span class="badge">⭐ PREMIUM · 회당 10 토큰</span>
     <h1>사업계획서 비교 분석</h1>
-    <p>당신의 사업계획서를 합격 사례 12건과 비교하여 강점·약점·보완 포인트를 도출합니다. (10 토큰)</p>
+    <p>당신의 사업계획서를 일반 심사 항목과 비교하여 강점·약점·보완 포인트를 도출합니다. (10 토큰)</p>
   </div>
 </section>
 
@@ -229,7 +229,7 @@ footer.site {
     <div class="ico">🤝</div>
     <div>
       <b>AI는 자동화가 아닌 ‘비교 분석 보조 도구’입니다.</b><br />
-      합격 사례와의 패턴 비교를 통해 객관적 인사이트를 제공하지만, 합격을 보장하지 않습니다.
+      일반 심사 항목과의 비교를 통해 객관적 인사이트를 제공하지만, 합격을 보장하지 않습니다.
       본인이 결과를 검토하고 본인의 상황·차별점에 맞게 활용해야 합니다.
     </div>
   </div>
@@ -258,7 +258,7 @@ footer.site {
       <label>사업계획서 본문 (필수 — 6개 챕터 모두 또는 핵심 부분만)</label>
       <textarea id="c-text" placeholder="예시:&#10;1. 문제 정의 — ...&#10;2. 솔루션 — ...&#10;3. 시장 분석 — ...&#10;4. BM — ...&#10;5. 추진 일정 — ...&#10;6. 자금 운용 — ..."></textarea>
     </div>
-    <button class="btn-run" id="c-run">합격 사례 12건과 비교 분석 시작 (10 토큰)</button>
+    <button class="btn-run" id="c-run">심사 항목 비교 분석 시작 (10 토큰)</button>
   </div>
 
   <div id="result-area" class="result-area"></div>
@@ -373,12 +373,12 @@ document.getElementById("c-run").addEventListener("click", async () => {
 
   const btn = document.getElementById("c-run");
   btn.disabled = true;
-  btn.textContent = "AI가 합격 사례와 비교 분석 중...";
+  btn.textContent = "AI가 심사 항목과 비교 분석 중...";
   document.getElementById("result-area").innerHTML = `
-    <div class="loading">합격 사례 12건의 패턴과 비교 분석 중... (10~20초)</div>`;
+    <div class="loading">일반 심사 항목과 비교 분석 중... (10~20초)</div>`;
 
   const systemPrompt = `당신은 정부 청년창업 지원사업 사업계획서 심사 경험이 풍부한 전문가입니다.
-새싹매치 플랫폼의 합격 사업계획서 라이브러리 12건 (예비창업패키지, 청년창업사관학교, 딥테크 헬스케어 등에서 합격한 익명화 케이스)의 일반적인 패턴을 알고 있습니다.
+한국 청년창업 지원사업에서 자주 쓰이는 일반 심사 항목과 사업계획서 평가 기준을 알고 있습니다.
 
 다음 규칙으로 답변하세요:
 - 정확한 합격률 % 추정은 금지. 정성적 평가만.
@@ -392,14 +392,14 @@ document.getElementById("c-run").addEventListener("click", async () => {
 ${text}
 
 [작업]
-사용자의 사업계획서를 합격 사례 12건의 일반적 패턴과 비교 분석하세요.
-6개 챕터별로 등급(strong/good/medium/weak) + 합격 사례 대비 평가 + 보완 포인트를 제시하세요.
+사용자의 사업계획서를 일반 심사 항목과 비교 분석하세요.
+6개 챕터별로 등급(strong/good/medium/weak) + 일반 심사 항목 대비 평가 + 보완 포인트를 제시하세요.
 
 [JSON 출력 형식]
 {
   "overall": "전반 평가 한 문단 (200자 이내)",
   "chapters": [
-    {"name":"1. 문제 정의","grade":"strong|good|medium|weak","comment":"합격 사례 대비 평가 + 보완 포인트 (50~80자)"},
+    {"name":"1. 문제 정의","grade":"strong|good|medium|weak","comment":"심사 항목 대비 평가 + 보완 포인트 (50~80자)"},
     {"name":"2. 솔루션·핵심 가치","grade":"...","comment":"..."},
     {"name":"3. 시장 분석","grade":"...","comment":"..."},
     {"name":"4. 비즈니스 모델","grade":"...","comment":"..."},
@@ -437,7 +437,7 @@ ${text}
       </div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "합격 사례 12건과 비교 분석 시작 (10 토큰)";
+    btn.textContent = "심사 항목 비교 분석 시작 (10 토큰)";
   }
 });
 
@@ -472,7 +472,7 @@ function renderResult(data, target){
 
   document.getElementById("result-area").innerHTML = `
     <div class="result-card">
-      <div class="meta">신청 사업: ${target} · 비교 기준: 합격 사례 12건 · 분석 일시: ${new Date().toLocaleString("ko-KR")} · ✅ 마이페이지에 자동 저장됨</div>
+      <div class="meta">신청 사업: ${target} · 비교 기준: 일반 심사 항목 · 분석 일시: ${new Date().toLocaleString("ko-KR")} · ✅ 마이페이지에 자동 저장됨</div>
       <h2>비교 분석 결과</h2>
       <p style="background:var(--sage-soft);padding:14px 16px;border-radius:10px;border-left:3px solid var(--sage-deep);">
         <b style="color:var(--sage-deep);">전반 평가</b><br />
@@ -485,12 +485,12 @@ function renderResult(data, target){
 
       <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;">
         <button onclick="downloadDocx()" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink-2);">📥 워드 다운로드</button>
-        <a href="simulate.html?from=compare" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 심사 시뮬레이션 (50토큰)</a>
+        <a href="simulate.html?from=compare" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 심사 시뮬레이션 (80토큰)</a>
         <a href="slides.html?from=compare" style="flex:1;min-width:160px;padding:12px;background:var(--card);border:1px solid var(--line-2);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;color:var(--ink-2);text-align:center;text-decoration:none;">→ 발표 슬라이드 (30토큰)</a>
       </div>
 
       <div class="footer-note">
-        🤖 AI 비교 분석 결과 · 합격 사례 12건의 패턴 기반 추정 · 실제 심사 결과와 무관할 수 있음 ·
+        🤖 AI 비교 분석 결과 · 일반 심사 항목 기반 참고 분석 · 실제 심사 결과와 무관할 수 있음 ·
         본 분석은 보조 도구이며 본인의 최종 판단과 차별화된 본인 데이터가 반드시 추가되어야 합니다.
       </div>
     </div>`;
