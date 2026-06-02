@@ -431,6 +431,8 @@ ${text}
     const responseText = await window.saessak.callClaude(prompt, {
       system: systemPrompt,
       max_tokens: 4000,
+      feature: "slides",
+      cost: SLIDES_COST,
       fallback: ""
     });
 

@@ -182,6 +182,10 @@ async function verifySupabaseUser(req) {
 }
 
 async function spendCreditsIfRequired(user, feature, requestedCost) {
+  if (isAdminUser(user)) {
+    return { ok: true, cost: 0, balance: null, unlimited: true };
+  }
+
   if (String(process.env.CLAUDE_REQUIRE_CREDITS || '').toLowerCase() !== 'true') {
     return { ok: true, cost: null, balance: null, unlimited: false };
   }
@@ -252,6 +256,7 @@ function resolveCreditCost(feature, requestedCost) {
     slides: 50,
     library: 5,
     analyzer: 20,
+    'simulate-followup': 1,
     teambuilder: 60,
     claude: 10
   };
@@ -268,4 +273,18 @@ function makeRequestId() {
     return crypto.randomUUID();
   }
   return `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function isAdminUser(user) {
+  const email = String(user && user.email || '').toLowerCase().trim();
+  if (!email) return false;
+  return getAdminEmails().includes(email);
+}
+
+function getAdminEmails() {
+  const raw = process.env.ADMIN_EMAILS || 'rbshbomber@gmail.com';
+  return raw
+    .split(',')
+    .map(email => email.toLowerCase().trim())
+    .filter(Boolean);
 }

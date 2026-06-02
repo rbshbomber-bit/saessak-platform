@@ -506,6 +506,8 @@ ${text}
     const replyText = await window.saessak.callClaude(systemPrompt, {
       system: "당신은 한국 청년창업 지원사업 전문 멘토입니다. 친근하지만 전문적으로, 3~5문장 분량으로 구체적으로 답변하세요. 합격 보장 표현은 피하고 '도움이 됩니다' 정도로.",
       max_tokens: 1024,
+      feature: "mentor",
+      cost: SESSION_COST,
       fallback: fallbackByTopic[currentTopic] || "구체적으로 어떤 부분이 궁금하신가요?"
     });
     removeLoading();

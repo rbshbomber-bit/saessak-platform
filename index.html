@@ -2428,6 +2428,8 @@ async function runMatch(){
       system: "당신은 한국 청년창업 지원사업 큐레이션 전문가입니다. 반드시 JSON으로만 응답하세요. 다른 설명, 마크다운 코드블록은 금지.",
       max_tokens: 1200,
       model: "claude-haiku-4-5-20251001",  // 매칭은 무료·고빈도 → Haiku로 비용 방어
+      feature: "match",
+      cost: 1,
       fallback: ""  // 빈 문자열 → 아래 catch에서 폴백 처리
     });
 
@@ -2872,6 +2874,8 @@ ${supportPrompt || "지원사업 데이터 컨텍스트 API를 사용할 수 없
     const text = await window.saessak.callClaude(prompt, {
       system: "당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다. 반드시 JSON으로만 응답하고, 마크다운 코드블록(```)은 사용하지 마세요. 검증되지 않은 사용자 수, 고객사 수, 매출, 시장 규모, 성장률, 합격률, 선정 가능성 수치를 임의로 만들지 마세요. 사용자가 제공하지 않은 숫자 범위나 예시 수치도 만들지 말고, 필요한 수치는 사용자 입력 필요 또는 공식 출처 확인 필요로 표시하세요.",
       max_tokens: 2500,
+      feature: "planner",
+      cost: PLAN_COST,
       fallback: ""
     });
 

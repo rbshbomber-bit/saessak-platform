@@ -413,6 +413,8 @@ ${text}
     const responseText = await window.saessak.callClaude(prompt, {
       system: systemPrompt,
       max_tokens: 2000,
+      feature: "compare",
+      cost: COMPARE_COST,
       fallback: ""
     });
 

@@ -1946,6 +1946,8 @@ ${answer}
       system: "당신은 한국 청년창업 지원사업의 가상 심사위원입니다. 실제 인물/기관이 아니며, 합격 보장 표현 없이 면접 연습용 꼬리질문만 만듭니다. JSON만 반환하세요.",
       max_tokens: 700,
       timeoutMs: 18000,
+      feature: "simulate-followup",
+      cost: 1,
       fallback: ""
     });
     if (!responseText) throw new Error("empty");
@@ -2375,6 +2377,8 @@ ${answers.map((item, i) => `${i + 1}. ${PERSONA_META[item.persona]?.name || item
     const responseText = await window.saessak.callClaude(prompt, {
       system: systemPrompt,
       max_tokens: 4000,
+      feature: "simulate",
+      cost: SIMULATE_COST,
       fallback: ""
     });
 
