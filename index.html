@@ -687,6 +687,124 @@ header.site {
 .loading { padding: 28px; text-align: center; color: var(--ink-3); font-size: 14px; }
 @media (max-width: 760px) { .match-form { grid-template-columns: 1fr; } }
 
+/* 사업계획서 챗봇 */
+.planner-card { padding: 0; overflow: hidden; }
+.planner-card .head-row {
+  padding: 24px 28px 18px; margin-bottom: 0;
+  border-bottom: 1px solid var(--line);
+}
+.planner-chat-layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px;
+  min-height: 560px;
+}
+.plan-chat-panel {
+  display: flex; flex-direction: column;
+  min-height: 560px;
+  background: var(--card);
+}
+.plan-chat-messages {
+  flex: 1; padding: 24px 28px;
+  display: flex; flex-direction: column; gap: 12px;
+  overflow-y: auto;
+}
+.plan-msg {
+  max-width: 82%;
+  padding: 12px 14px; border-radius: 14px;
+  font-size: 14px; line-height: 1.6;
+}
+.plan-msg.bot {
+  align-self: flex-start;
+  background: var(--bg-2); color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 6px;
+}
+.plan-msg.user {
+  align-self: flex-end;
+  background: var(--ink); color: white;
+  border-bottom-right-radius: 6px;
+}
+.plan-chat-chips {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 0 28px 14px;
+}
+.plan-chat-chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.plan-chat-chip:hover { border-color: var(--sage); color: var(--sage-deep); background: var(--sage-soft); }
+.plan-chat-composer {
+  display: grid; grid-template-columns: 1fr auto auto;
+  gap: 8px; padding: 16px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+.plan-chat-composer textarea {
+  min-height: 46px; max-height: 120px; resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px 14px;
+  font-family: inherit; font-size: 14px;
+  background: var(--card); color: var(--ink);
+}
+.plan-chat-composer button {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 16px;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  cursor: pointer;
+}
+.plan-chat-composer .ghost { background: var(--card); color: var(--ink-2); }
+.plan-chat-composer .primary { background: var(--ink); color: white; border-color: var(--ink); min-width: 112px; }
+.plan-chat-composer .primary:disabled { opacity: .5; cursor: wait; }
+.plan-chat-composer .primary:hover:not(:disabled) { background: var(--sage-deep); border-color: var(--sage-deep); }
+.plan-summary {
+  border-left: 1px solid var(--line);
+  background: var(--bg);
+  padding: 22px;
+}
+.plan-summary h4 {
+  margin: 0 0 12px; font-size: 14px; font-weight: 800;
+}
+.plan-summary-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.plan-summary-item {
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.plan-summary-item .k {
+  font-size: 11px; color: var(--ink-3); font-weight: 800;
+  margin-bottom: 3px;
+}
+.plan-summary-item .v {
+  font-size: 13px; color: var(--ink-2);
+  word-break: keep-all;
+}
+.plan-summary-note {
+  margin-top: 14px; padding: 12px;
+  border-radius: 10px; background: var(--sage-soft);
+  color: var(--sage-deep); font-size: 12px; line-height: 1.6;
+}
+.plan-form-hidden { display: none; }
+@media (max-width: 900px) {
+  .planner-chat-layout { grid-template-columns: 1fr; }
+  .plan-summary { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 640px) {
+  .planner-card .head-row { padding: 20px; }
+  .plan-chat-messages { padding: 20px; }
+  .plan-msg { max-width: 94%; }
+  .plan-chat-chips { padding: 0 20px 12px; }
+  .plan-chat-composer { grid-template-columns: 1fr; padding: 14px; }
+  .plan-chat-composer button { min-height: 42px; }
+}
+
 /* 사업계획서 AI 결과 */
 .plan-doc {
   background: var(--bg); border: 1px solid var(--line);
@@ -927,10 +1045,10 @@ footer.site a:hover { color: var(--ink); }
 <body>
 
 <div class="promo" style="background:#b45309;">
-  🚧 <b>베타 운영 중</b> — AI 매칭·사업계획서 정식 가동 <b>2026년 7월</b> · 결제 시스템 정식 가동 <b>2026년 8월</b> · 현재는 시연 모드
+  🚧 <b>베타 운영 중</b> — 공고 큐레이션·AI 매칭 사용 가능 · 사업계획서 AI는 베타 보조 도구 · 결제 시스템은 단계 적용 중
 </div>
 <div class="promo">
-  ✨ <span class="em">Claude Opus 계열</span> — 현재 Opus 4.7 기반 · <b>Opus 4.8 적용 예정</b> · <a href="#pricing">요금 보기 →</a>
+  ✨ <span class="em">AI 작성 보조</span> — 매칭·초안·심사 준비를 빠르게 정리하고, 제출 전 최종 검토는 사용자가 직접 진행합니다 · <a href="#pricing">요금 보기 →</a>
 </div>
 <div id="deadline-banner" class="promo" style="background:#b91c1c;display:none;">
   ⏰ <b>마감 임박</b> — <span id="deadline-count">0</span>건의 공고가 D-3 이내로 마감됩니다 · <a href="#listings" onclick="filterDeadlineSoon(event)">바로가기 →</a>
@@ -1265,12 +1383,30 @@ footer.site a:hover { color: var(--ink); }
         </div>
       </div>
 
-      <div class="demo-card">
+      <div class="demo-card planner-card">
         <div class="head-row">
-          <h3>사업계획서 AI 체험</h3>
-          <span class="premium-badge">Claude Opus 계열 · 20토큰</span>
+          <h3>AI와 대화하며 사업계획서 초안 만들기</h3>
+          <span class="premium-badge">작성 보조 · 20토큰</span>
         </div>
-        <div class="match-form" id="plan-form">
+        <div class="planner-chat-layout">
+          <div class="plan-chat-panel">
+            <div class="plan-chat-messages" id="plan-chat-messages"></div>
+            <div class="plan-chat-chips" id="plan-chat-chips"></div>
+            <div class="plan-chat-composer">
+              <textarea id="plan-chat-input" placeholder="답변을 입력하세요. 잘 모르겠으면 비워두고 다음으로 넘어갈 수 있어요."></textarea>
+              <button class="ghost" type="button" id="plan-chat-back">이전</button>
+              <button class="primary" type="button" id="p-run">다음</button>
+            </div>
+          </div>
+          <aside class="plan-summary" aria-live="polite">
+            <h4>초안 재료</h4>
+            <div class="plan-summary-list" id="plan-summary-list"></div>
+            <div class="plan-summary-note">
+              AI는 빈칸을 임의 숫자로 채우지 않고, 부족한 근거는 보완 과제로 표시합니다.
+            </div>
+          </aside>
+        </div>
+        <div class="match-form plan-form-hidden" id="plan-form" aria-hidden="true">
           <div class="field full">
             <label>사업 아이템 한 줄 (필수)</label>
             <input id="p-item" placeholder="예: 직장인 1:1 멘토 매칭 AI 플랫폼 (B2B SaaS)" />
@@ -1351,14 +1487,13 @@ footer.site a:hover { color: var(--ink); }
           </div>
           <div class="field full">
             <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink-2);background:var(--bg-2);padding:12px 14px;border-radius:10px;border:1px solid var(--line);cursor:pointer;">
-              <input type="checkbox" id="p-agree" style="margin-top:3px;flex-shrink:0;" />
+              <input type="checkbox" id="p-agree" checked style="margin-top:3px;flex-shrink:0;" />
               <span>
                 <b style="color:var(--ink);">AI 결과물 면책 동의 (필수)</b><br />
                 <span style="font-size:12px;color:var(--ink-3);">AI가 생성하는 사업계획서는 <b style="color:var(--bad);">합격을 보장하지 않으며</b>, 본인이 반드시 검토·수정·검증해야 함을 이해합니다. 신청 결과에 대한 모든 책임은 본인에게 있으며, <a href="terms.html#ai-disclaimer" target="_blank" style="color:var(--sage-deep);text-decoration:underline;">AI 면책 조항</a>에 동의합니다.</span>
               </span>
             </label>
           </div>
-          <button class="submit" id="p-run">✨ AI에게 사업계획서 초안 요청</button>
         </div>
         <div id="plan-result"></div>
       </div>
@@ -1419,7 +1554,7 @@ footer.site a:hover { color: var(--ink); }
       </div>
 
       <div class="as-cta-row">
-        <p class="meta">새싹매치와 GreatStream Agent 모두 <b style="color:var(--ink-2);">태계(太溪)</b>가 운영합니다 ·
+        <p class="meta">새싹매치와 GreatStream Agent는 동일 운영팀이 관리합니다 ·
           <b style="color:var(--sage-deep);">팀빌더 베타 공개 (v0.1)</b> — 청년창업 도우미 1개 도메인 · 6명 에이전트 · 디스패치 5토큰 / 회의 10토큰
         </p>
         <a href="teambuilder.html?studio=saessak-match&embed=1&source=saessak" class="as-cta-btn" id="greatstream-agent-cta" style="text-decoration:none;display:inline-block;">
@@ -2332,6 +2467,256 @@ function renderMatches(parsed){
   bindCardActions(out);
 }
 
+// 사업계획서 챗봇형 입력
+const PLAN_CHAT_STEPS = [
+  {
+    key: "item",
+    label: "사업 아이템",
+    question: "어떤 사업 아이템을 준비 중이세요? 한 줄로만 적어도 괜찮습니다.",
+    placeholder: "예: 강화도 로컬 상권을 위한 AI 관광 예약 CRM",
+    required: true,
+  },
+  {
+    key: "field",
+    label: "분야",
+    question: "가장 가까운 분야를 골라주세요.",
+    choices: ["딥테크·AI", "웰니스·헬스케어", "커머스·로컬", "농업·푸드", "기타"],
+    required: true,
+  },
+  {
+    key: "region",
+    label: "지역",
+    question: "어느 지역 기준으로 신청서를 잡을까요?",
+    choices: ["서울", "인천", "경기", "강원", "부산", "전국"],
+    required: true,
+  },
+  {
+    key: "target",
+    label: "신청 사업",
+    question: "생각 중인 신청 사업이 있나요?",
+    choices: ["예비창업패키지", "초기창업패키지", "청년창업사관학교", "딥테크 헬스케어 패키지", "기타"],
+    required: true,
+  },
+  {
+    key: "customer",
+    label: "핵심 고객",
+    question: "누가 가장 먼저 돈을 내거나 써볼 고객인가요?",
+    placeholder: "예: 정부지원사업을 처음 신청하는 만 39세 이하 예비창업자",
+  },
+  {
+    key: "pain",
+    label: "고객 문제",
+    question: "그 고객이 지금 겪는 불편이나 기존 대안의 한계는 무엇인가요?",
+    placeholder: "예: 공고 조건 해석과 사업계획서 구조 잡는 데 시간이 오래 걸림",
+  },
+  {
+    key: "evidence",
+    label: "검증 근거",
+    question: "지금 가진 근거가 있나요? 없으면 비워두면 AI가 보완 과제로 표시합니다.",
+    placeholder: "예: 고객 인터뷰, 베타 피드백, 실제 운영 로그, 출처 있는 통계",
+  },
+  {
+    key: "strength",
+    label: "강점·차별점",
+    question: "대표님의 강점, 만든 기능, 경쟁 대안 대비 차별점을 적어주세요.",
+    placeholder: "예: 지역 네트워크, MVP 작동 중, 직접 겪은 문제 기반",
+  },
+];
+
+const planChatState = {
+  step: 0,
+  answers: {},
+  history: [],
+  initialized: false,
+};
+
+function escapeHtml(value){
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function currentPlanStep(){
+  return PLAN_CHAT_STEPS[Math.min(planChatState.step, PLAN_CHAT_STEPS.length - 1)];
+}
+
+function planAnswerValue(step, raw){
+  const value = (raw || "").trim();
+  if(value) return value;
+  return step.required ? "" : "확인 필요";
+}
+
+function addPlanChatMessage(role, text){
+  planChatState.history.push({ role, text });
+  renderPlanChatMessages();
+}
+
+function renderPlanChatMessages(){
+  const box = document.getElementById("plan-chat-messages");
+  if(!box) return;
+  box.innerHTML = planChatState.history.map(m => `
+    <div class="plan-msg ${m.role === "user" ? "user" : "bot"}">${escapeHtml(m.text).replace(/\n/g, "<br />")}</div>
+  `).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+function renderPlanChatChips(){
+  const wrap = document.getElementById("plan-chat-chips");
+  if(!wrap) return;
+  const step = currentPlanStep();
+  if(planChatState.step >= PLAN_CHAT_STEPS.length || !step?.choices?.length){
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.innerHTML = step.choices.map(choice => `
+    <button class="plan-chat-chip" type="button" data-plan-choice="${escapeHtml(choice)}">${choice}</button>
+  `).join("");
+  wrap.querySelectorAll("[data-plan-choice]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById("plan-chat-input").value = btn.dataset.planChoice || "";
+      handlePlanChatPrimary();
+    });
+  });
+}
+
+function renderPlanSummary(){
+  const list = document.getElementById("plan-summary-list");
+  if(!list) return;
+  list.innerHTML = PLAN_CHAT_STEPS.map(step => {
+    const value = planChatState.answers[step.key] || "아직 입력 전";
+    return `
+      <div class="plan-summary-item">
+        <div class="k">${step.label}</div>
+        <div class="v">${escapeHtml(value)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderPlanChatPrompt(){
+  const input = document.getElementById("plan-chat-input");
+  const btn = document.getElementById("p-run");
+  const back = document.getElementById("plan-chat-back");
+  if(!input || !btn) return;
+
+  if(planChatState.step >= PLAN_CHAT_STEPS.length){
+    input.value = "";
+    input.placeholder = "필요하면 보완하고 싶은 내용을 적은 뒤 초안을 생성하세요.";
+    btn.textContent = "초안 생성하기";
+    if(back) back.disabled = false;
+    renderPlanChatChips();
+    renderPlanSummary();
+    return;
+  }
+
+  const step = currentPlanStep();
+  input.value = planChatState.answers[step.key] && planChatState.answers[step.key] !== "확인 필요"
+    ? planChatState.answers[step.key]
+    : "";
+  input.placeholder = step.placeholder || "답변을 입력하세요.";
+  btn.textContent = planChatState.step === PLAN_CHAT_STEPS.length - 1 ? "정리하기" : "다음";
+  if(back) back.disabled = planChatState.step === 0;
+  renderPlanChatChips();
+  renderPlanSummary();
+}
+
+function setValueIfExists(id, value){
+  const el = document.getElementById(id);
+  if(el) el.value = value || "";
+}
+
+function syncPlanChatToForm(){
+  const a = planChatState.answers;
+  setValueIfExists("p-item", a.item || "");
+  setValueIfExists("p-field", a.field || "딥테크·AI");
+  setValueIfExists("p-region", a.region || "서울");
+  setValueIfExists("p-target", a.target || "예비창업패키지");
+  setValueIfExists("p-strength", a.strength || "");
+  setValueIfExists("p-customer", a.customer || "");
+  setValueIfExists("p-problem", a.pain || "");
+  setValueIfExists("p-evidence", a.evidence || "");
+  setValueIfExists("p-market", a.market || "");
+  setValueIfExists("p-memo", "챗봇형 입력으로 수집됨. 검증되지 않은 수치와 사례는 확인 필요로 표시.");
+  const agree = document.getElementById("p-agree");
+  if(agree) agree.checked = true;
+}
+
+function finishPlanChatCollection(){
+  syncPlanChatToForm();
+  if(!planChatState.history.some(m => m.role === "bot" && m.text.includes("좋습니다. 필요한 재료가 정리됐습니다."))){
+    addPlanChatMessage("bot", "좋습니다. 필요한 재료가 정리됐습니다.\n이제 초안 생성을 누르면 심사축 진단과 함께 6개 챕터로 정리해드릴게요.");
+  }
+  renderPlanChatPrompt();
+}
+
+function handlePlanChatPrimary(){
+  const input = document.getElementById("plan-chat-input");
+  const out = document.getElementById("plan-result");
+  if(!input) return;
+
+  if(planChatState.step >= PLAN_CHAT_STEPS.length){
+    const extra = input.value.trim();
+    if(extra){
+      planChatState.answers.strength = [planChatState.answers.strength, extra].filter(Boolean).join("\n추가 메모: ");
+      addPlanChatMessage("user", extra);
+      syncPlanChatToForm();
+      renderPlanSummary();
+      input.value = "";
+    }
+    runPlan();
+    return;
+  }
+
+  const step = currentPlanStep();
+  const value = planAnswerValue(step, input.value);
+  if(step.required && !value){
+    if(out) out.innerHTML = `<div class="empty-state">${step.label}은 먼저 입력해주세요.</div>`;
+    return;
+  }
+
+  planChatState.answers[step.key] = value;
+  addPlanChatMessage("user", value);
+  planChatState.step += 1;
+
+  if(planChatState.step >= PLAN_CHAT_STEPS.length){
+    finishPlanChatCollection();
+    return;
+  }
+
+  addPlanChatMessage("bot", currentPlanStep().question);
+  renderPlanChatPrompt();
+}
+
+function handlePlanChatBack(){
+  if(planChatState.step <= 0) return;
+  planChatState.step -= 1;
+  const step = currentPlanStep();
+  addPlanChatMessage("bot", `${step.label} 단계로 돌아왔습니다. 수정할 내용을 입력해주세요.`);
+  renderPlanChatPrompt();
+}
+
+function initPlanChat(){
+  if(planChatState.initialized) return;
+  planChatState.initialized = true;
+  planChatState.history = [
+    { role: "bot", text: "복잡한 양식 대신 질문 하나씩만 받을게요. 모르는 항목은 비워도 됩니다." },
+    { role: "bot", text: currentPlanStep().question },
+  ];
+  renderPlanChatMessages();
+  renderPlanChatPrompt();
+
+  document.getElementById("plan-chat-input")?.addEventListener("keydown", e => {
+    if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){
+      e.preventDefault();
+      handlePlanChatPrimary();
+    }
+  });
+  document.getElementById("plan-chat-back")?.addEventListener("click", handlePlanChatBack);
+}
+
 // 사업계획서 AI
 async function runPlan(){
   const btn = document.getElementById("p-run");
@@ -2382,13 +2767,13 @@ async function runPlan(){
             </p>
             <a href="#pricing" style="display:inline-block;padding:11px 22px;background:var(--ink);color:white;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;">토큰 충전하기 →</a>
           </div>`;
-        btn.disabled = false; btn.textContent = "✨ AI에게 사업계획서 초안 요청";
+        btn.disabled = false; btn.textContent = "초안 생성하기";
         return;
       }
     }
   }
 
-  btn.disabled = true; btn.textContent = "AI가 사업계획서 초안 작성 중...";
+  btn.disabled = true; btn.textContent = "초안 작성 중...";
   out.innerHTML = `<div class="loading">⏳ 심사축 진단 + 공고 데이터 컨텍스트 + 사업계획서 초안 생성 중... (10~30초)</div>`;
   incUsage("plan");
   window.saessak.recordUsage && window.saessak.recordUsage('planner');
@@ -2430,6 +2815,7 @@ ${supportPrompt || "지원사업 데이터 컨텍스트 API를 사용할 수 없
 4) 사용자가 제공한 구체 표현은 일반론으로 흐리지 말고 자연스럽게 반영하세요.
 5) 공고·시장·정책 데이터 컨텍스트에서 제시된 관련 공고, API 상태, 보강 근거를 review와 appendix에 반영하세요.
 6) 본문 뒤에 심사 보강용 review, appendix 객체를 넣으세요. 합격률/선정확률 % 금지.
+7) "10~20개", "연 15%", "1억원" 같은 범위·예시 수치도 사용자가 제공하지 않았다면 금지입니다. 필요한 수치는 "사용자 입력 필요" 또는 "공식 출처 확인 필요"로 남기세요.
 [출력 JSON만]
 { "title": "사업계획서 제목 한 줄",
   "chapters": [
@@ -2484,7 +2870,7 @@ ${supportPrompt || "지원사업 데이터 컨텍스트 API를 사용할 수 없
 
   try {
     const text = await window.saessak.callClaude(prompt, {
-      system: "당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다. 반드시 JSON으로만 응답하고, 마크다운 코드블록(```)은 사용하지 마세요.",
+      system: "당신은 한국 청년창업 지원사업 사업계획서 작성 전문가입니다. 반드시 JSON으로만 응답하고, 마크다운 코드블록(```)은 사용하지 마세요. 검증되지 않은 사용자 수, 고객사 수, 매출, 시장 규모, 성장률, 합격률, 선정 가능성 수치를 임의로 만들지 마세요. 사용자가 제공하지 않은 숫자 범위나 예시 수치도 만들지 말고, 필요한 수치는 사용자 입력 필요 또는 공식 출처 확인 필요로 표시하세요.",
       max_tokens: 2500,
       fallback: ""
     });
@@ -2521,7 +2907,7 @@ ${supportPrompt || "지원사업 데이터 컨텍스트 API를 사용할 수 없
     renderPlan(fallbackPlan);
     out.insertAdjacentHTML('afterbegin', `<div style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;">AI 응답 파싱 실패 — 데모 초안으로 표시됩니다.</div>`);
   } finally {
-    btn.disabled = false; btn.textContent = "✨ AI에게 사업계획서 초안 요청";
+    btn.disabled = false; btn.textContent = "초안 다시 생성";
   }
 }
 
@@ -3542,7 +3928,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   document.getElementById("m-run").addEventListener("click", runMatch);
-  document.getElementById("p-run").addEventListener("click", runPlan);
+  initPlanChat();
+  document.getElementById("p-run").addEventListener("click", handlePlanChatPrimary);
   document.getElementById("cta-enterprise")?.addEventListener("click", () => openModal("enterprise"));
 
   // ===== 토큰 충전/구독 토글 + 결제 =====
