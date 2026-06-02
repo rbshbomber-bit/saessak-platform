@@ -127,11 +127,51 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'DB 업데이트 실패. 관리자에게 문의: ' + orderId });
   }
 
+  const creditResult = await grantCreditsIfPossible({
+    supabaseUrl,
+    supabaseKey,
+    tx,
+    orderId
+  });
+
   return res.status(200).json({
     success:   true,
     tokens:    tx.tokens,
     packageId: tx.package_id,
     orderId,
     amount:    tx.amount,
+    serverCreditsApplied: creditResult.applied,
+    serverCreditsBalance: creditResult.balance,
   });
+}
+
+async function grantCreditsIfPossible({ supabaseUrl, supabaseKey, tx, orderId }) {
+  if (!tx.supabase_user_id || !tx.tokens) {
+    return { applied: false, balance: null };
+  }
+
+  const rpcRes = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/grant_user_credits`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+    },
+    body: JSON.stringify({
+      p_user_id: tx.supabase_user_id,
+      p_email: tx.user_email || null,
+      p_amount: tx.tokens,
+      p_reason: `payment:${tx.package_id || 'token-charge'}`,
+      p_request_id: orderId,
+    }),
+  });
+
+  if (!rpcRes.ok) {
+    const errText = await rpcRes.text();
+    console.error('[payment/confirm] 서버 크레딧 적립 실패:', errText);
+    return { applied: false, balance: null };
+  }
+
+  const balance = await rpcRes.json().catch(() => null);
+  return { applied: true, balance };
 }

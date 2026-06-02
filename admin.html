@@ -251,6 +251,7 @@ tr:hover { background: var(--bg); }
       <li data-section="users"><span class="ico">👥</span>회원 관리</li>
       <li data-section="listings"><span class="ico">📋</span>공고 관리</li>
       <li data-section="payments"><span class="ico">💳</span>결제·매출</li>
+      <li data-section="db"><span class="ico">🗄️</span>DB·보안</li>
       <li data-section="b2b"><span class="ico">🏛️</span>B2B 지자체</li>
       <li data-section="settings"><span class="ico">⚙️</span>설정</li>
     </ul>
@@ -282,7 +283,7 @@ tr:hover { background: var(--bg); }
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div class="lbl">실제 가입자 (DB)</div><div class="val" id="kpi-real-users">0</div><div class="delta">실시간 카운트</div></div>
+        <div class="kpi"><div class="lbl">실제 가입자 (DB)</div><div class="val" id="kpi-real-users">0</div><div class="delta" id="kpi-real-delta">실시간 카운트</div></div>
         <div class="kpi"><div class="lbl">AI 매칭 누적</div><div class="val" id="kpi-matches">0</div><div class="delta">실시간 카운트</div></div>
         <div class="kpi"><div class="lbl">사업계획서 AI 결제</div><div class="val" id="kpi-plans">0</div><div class="delta">실시간 카운트</div></div>
         <div class="kpi"><div class="lbl">진행 중 공고</div><div class="val" id="kpi-listings">—</div><div class="delta">K-Startup API 연동</div></div>
@@ -370,6 +371,41 @@ tr:hover { background: var(--bg); }
           토스페이먼츠 결제 승인 완료 건부터 실제 결제 내역이 표시됩니다.
           판매 추이·결제 내역 표는 첫 결제 발생 시 자동 활성화됩니다.
           가짜 시뮬레이션 데이터는 사용하지 않습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- DB·보안 -->
+    <section data-section="db" class="section-content" style="display:none;">
+      <div class="main-head">
+        <div><h1>DB·보안</h1><div class="sub">Claude API 크레딧 보호와 Supabase 서버 원장 전환 상태</div></div>
+        <div class="date-range">보안 점검</div>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="kpi"><div class="lbl">Claude API 인증</div><div class="val" style="font-size:22px;">필수</div><div class="delta">Supabase 세션 검증</div></div>
+        <div class="kpi"><div class="lbl">서버 크레딧 차감</div><div class="val" style="font-size:22px;">준비</div><div class="delta">CLAUDE_REQUIRE_CREDITS</div></div>
+        <div class="kpi"><div class="lbl">클라이언트 토큰</div><div class="val" style="font-size:22px;">전환 대상</div><div class="delta down">localStorage 단독 사용 금지</div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head"><h2>적용 순서</h2></div>
+        <table>
+          <tbody>
+            <tr><td>1</td><td>Supabase SQL Editor에서 <b>supabase-credit-schema.sql</b> 실행</td></tr>
+            <tr><td>2</td><td>Vercel 환경 변수에 <b>SUPABASE_URL</b>, <b>SUPABASE_SERVICE_KEY</b>, <b>CLAUDE_API_KEY</b> 확인</td></tr>
+            <tr><td>3</td><td><b>CLAUDE_REQUIRE_CREDITS=true</b> 추가 후 재배포</td></tr>
+            <tr><td>4</td><td>결제 성공 시 <b>user_credits</b> 적립, AI 실행 시 <b>credit_ledger</b> 차감 기록 확인</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>운영 메모</h2></div>
+        <p style="color:var(--ink-2);font-size:13px;line-height:1.8;margin:0;">
+          현재 배포 코드에서는 로그인 세션이 없는 사용자가 <b>/api/claude</b>를 직접 호출해도 차단됩니다.
+          서버 크레딧 강제 모드는 DB 스키마 적용 후 켜야 하며, 켜는 순간 브라우저 localStorage 잔액이 아니라 Supabase의
+          <b>user_credits.balance</b>가 실제 사용 가능 잔액이 됩니다.
         </p>
       </div>
     </section>

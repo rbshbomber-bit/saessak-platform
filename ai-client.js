@@ -24,15 +24,30 @@
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
+      let accessToken = options.access_token || options.accessToken || null;
+      if (!accessToken && window.saessak.getCurrentSession) {
+        try {
+          const session = await window.saessak.getCurrentSession();
+          accessToken = session && session.access_token;
+        } catch (e) {
+          console.warn('[saessak.callClaude] session lookup failed', e);
+        }
+      }
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
       const res = await fetch('/api/claude', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         signal: controller.signal,
         body: JSON.stringify({
           prompt,
           system: options.system,
           max_tokens: options.max_tokens || 1024,
           model: options.model,
+          feature: options.feature,
+          cost: options.cost,
           attachments: options.attachments
         })
       });
@@ -40,6 +55,10 @@
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
         console.warn('[saessak.callClaude] HTTP', res.status, errBody);
+
+        if (res.status === 401) {
+          return options.authFallback || '로그인 후 AI 기능을 사용할 수 있습니다.';
+        }
 
         // CLAUDE_API_KEY 미설정 — 데모 모드 안내
         if (res.status === 500 && errBody.error && errBody.error.includes('CLAUDE_API_KEY')) {

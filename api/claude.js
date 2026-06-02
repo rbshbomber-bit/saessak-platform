@@ -1,12 +1,12 @@
 // Vercel Serverless Function: /api/claude
 // 클라이언트에서 호출되면 Anthropic API로 프록시
-// 환경 변수: CLAUDE_API_KEY (Vercel Project Settings -> Environment Variables)
+// 환경 변수: CLAUDE_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY
 
 export default async function handler(req, res) {
   // CORS (같은 도메인이라 사실 필요없지만 안전장치)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -25,10 +25,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { prompt, system, max_tokens, model, attachments } = req.body || {};
+    const auth = await verifySupabaseUser(req);
+    if (!auth.ok) {
+      return res.status(auth.status).json(auth.body);
+    }
+
+    const { prompt, system, max_tokens, model, attachments, feature, cost } = req.body || {};
 
     if (!prompt || typeof prompt !== 'string') {
       return res.status(400).json({ error: 'prompt 필드가 필요합니다 (문자열).' });
+    }
+
+    const creditCharge = await spendCreditsIfRequired(auth.user, feature, cost);
+    if (!creditCharge.ok) {
+      return res.status(creditCharge.status).json(creditCharge.body);
     }
 
     // 메시지 구성
@@ -93,7 +103,11 @@ export default async function handler(req, res) {
     return res.status(200).json({
       text,
       raw: data,
-      usage: data.usage || null
+      usage: data.usage || null,
+      feature: feature || null,
+      cost: creditCharge.cost,
+      creditsRemaining: creditCharge.balance,
+      creditsUnlimited: creditCharge.unlimited
     });
   } catch (err) {
     console.error('Claude API proxy error:', err);
@@ -102,4 +116,156 @@ export default async function handler(req, res) {
       message: err && err.message ? err.message : String(err)
     });
   }
+}
+
+async function verifySupabaseUser(req) {
+  const authHeader = req.headers.authorization || req.headers.Authorization || '';
+  const token = String(authHeader).replace(/^Bearer\s+/i, '').trim();
+
+  if (!token) {
+    return {
+      ok: false,
+      status: 401,
+      body: {
+        error: 'AUTH_REQUIRED',
+        message: '로그인 후 AI 기능을 사용할 수 있습니다.'
+      }
+    };
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return {
+      ok: false,
+      status: 500,
+      body: {
+        error: 'AUTH_CONFIG_MISSING',
+        message: 'AI 인증 서버 설정이 누락되었습니다.'
+      }
+    };
+  }
+
+  const userRes = await fetch(`${supabaseUrl.replace(/\/$/, '')}/auth/v1/user`, {
+    method: 'GET',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!userRes.ok) {
+    return {
+      ok: false,
+      status: 401,
+      body: {
+        error: 'INVALID_SESSION',
+        message: '로그인 세션이 만료되었거나 유효하지 않습니다.'
+      }
+    };
+  }
+
+  const user = await userRes.json().catch(() => null);
+  if (!user || !user.id) {
+    return {
+      ok: false,
+      status: 401,
+      body: {
+        error: 'INVALID_SESSION',
+        message: '로그인 세션이 만료되었거나 유효하지 않습니다.'
+      }
+    };
+  }
+
+  return { ok: true, user };
+}
+
+async function spendCreditsIfRequired(user, feature, requestedCost) {
+  if (String(process.env.CLAUDE_REQUIRE_CREDITS || '').toLowerCase() !== 'true') {
+    return { ok: true, cost: null, balance: null, unlimited: false };
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    return {
+      ok: false,
+      status: 500,
+      body: {
+        error: 'CREDIT_CONFIG_MISSING',
+        message: '크레딧 서버 설정이 누락되었습니다.'
+      }
+    };
+  }
+
+  const cost = resolveCreditCost(feature, requestedCost);
+  const requestId = makeRequestId();
+  const spendRes = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/spend_user_credits`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`
+    },
+    body: JSON.stringify({
+      p_user_id: user.id,
+      p_email: user.email || null,
+      p_feature: feature || 'claude',
+      p_cost: cost,
+      p_request_id: requestId
+    })
+  });
+
+  if (!spendRes.ok) {
+    const detail = await spendRes.text();
+    const isInsufficient = /tokens-insufficient/i.test(detail);
+    return {
+      ok: false,
+      status: isInsufficient ? 402 : 500,
+      body: {
+        error: isInsufficient ? 'TOKENS_INSUFFICIENT' : 'CREDIT_SPEND_FAILED',
+        message: isInsufficient ? '토큰이 부족합니다.' : '크레딧 차감 중 오류가 발생했습니다.',
+        detail
+      }
+    };
+  }
+
+  const rows = await spendRes.json().catch(() => []);
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  return {
+    ok: true,
+    cost,
+    balance: row && row.balance != null ? row.balance : null,
+    unlimited: !!(row && row.unlimited)
+  };
+}
+
+function resolveCreditCost(feature, requestedCost) {
+  const featureCost = {
+    match: 1,
+    planner: 20,
+    plan: 20,
+    simulate: 80,
+    compare: 30,
+    mentor: 35,
+    slides: 50,
+    library: 5,
+    analyzer: 20,
+    teambuilder: 60,
+    claude: 10
+  };
+
+  const normalizedFeature = String(feature || 'claude').toLowerCase();
+  const baseCost = featureCost[normalizedFeature] ?? featureCost.claude;
+  const bodyCost = Number(requestedCost);
+  if (!Number.isFinite(bodyCost) || bodyCost < 0) return baseCost;
+  return Math.max(baseCost, Math.floor(bodyCost));
+}
+
+function makeRequestId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
