@@ -11,32 +11,36 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+  const supabaseUrl = getSupabaseUrl();
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || '';
+  const anonKey = process.env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
+  const supabaseKey = serviceKey || anonKey;
   if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({ error: 'SUPABASE_URL / SUPABASE_SERVICE_KEY 환경 변수가 필요합니다.' });
+    return res.status(500).json({ error: 'SUPABASE_URL / SUPABASE_ANON_KEY 환경 변수가 필요합니다.' });
   }
 
-  const admin = await verifyAdmin(req, supabaseUrl, supabaseKey);
+  const admin = await verifyAdmin(req, supabaseUrl, anonKey || supabaseKey);
   if (!admin.ok) return res.status(admin.status).json(admin.body);
+  const dbAuthToken = serviceKey || admin.token;
 
   try {
     if (req.method === 'GET') {
-      return getCredits(req, res, supabaseUrl, supabaseKey);
+      return getCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken);
     }
 
-    return updateCredits(req, res, supabaseUrl, supabaseKey, admin.user);
+    return updateCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken, admin.user);
   } catch (err) {
     console.error('[admin/credits] error:', err);
     return res.status(500).json({ error: '서버 오류', message: err?.message || String(err) });
   }
 }
 
-async function getCredits(req, res, supabaseUrl, supabaseKey) {
+async function getCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken) {
   const limit = clampInt(req.query?.limit, 1, 200, 100);
   const creditsRes = await supabaseFetch(
     supabaseUrl,
     supabaseKey,
+    dbAuthToken,
     `/rest/v1/user_credits?select=*&order=updated_at.desc&limit=${limit}`
   );
 
@@ -47,6 +51,7 @@ async function getCredits(req, res, supabaseUrl, supabaseKey) {
   const ledgerRes = await supabaseFetch(
     supabaseUrl,
     supabaseKey,
+    dbAuthToken,
     `/rest/v1/credit_ledger?select=*&order=created_at.desc&limit=${limit}`
   );
 
@@ -60,14 +65,14 @@ async function getCredits(req, res, supabaseUrl, supabaseKey) {
   });
 }
 
-async function updateCredits(req, res, supabaseUrl, supabaseKey, adminUser) {
+async function updateCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken, adminUser) {
   const { user_id, email, amount, reason, is_unlimited } = req.body || {};
   if (!user_id) return res.status(400).json({ error: 'user_id가 필요합니다.' });
 
   let grantBalance = null;
   const parsedAmount = Number(amount);
   if (Number.isFinite(parsedAmount) && parsedAmount > 0) {
-    const grantRes = await supabaseFetch(supabaseUrl, supabaseKey, '/rest/v1/rpc/grant_user_credits', {
+    const grantRes = await supabaseFetch(supabaseUrl, supabaseKey, dbAuthToken, '/rest/v1/rpc/grant_user_credits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -90,6 +95,7 @@ async function updateCredits(req, res, supabaseUrl, supabaseKey, adminUser) {
     const upsertRes = await supabaseFetch(
       supabaseUrl,
       supabaseKey,
+      dbAuthToken,
       '/rest/v1/user_credits?on_conflict=user_id',
       {
         method: 'POST',
@@ -112,6 +118,7 @@ async function updateCredits(req, res, supabaseUrl, supabaseKey, adminUser) {
     const patchRes = await supabaseFetch(
       supabaseUrl,
       supabaseKey,
+      dbAuthToken,
       `/rest/v1/user_credits?user_id=eq.${encodeURIComponent(user_id)}`,
       {
         method: 'PATCH',
@@ -154,18 +161,22 @@ async function verifyAdmin(req, supabaseUrl, supabaseKey) {
     return { ok: false, status: 403, body: { error: 'ADMIN_ONLY' } };
   }
 
-  return { ok: true, user };
+  return { ok: true, user, token };
 }
 
-function supabaseFetch(supabaseUrl, supabaseKey, path, options = {}) {
+function supabaseFetch(supabaseUrl, supabaseKey, dbAuthToken, path, options = {}) {
   return fetch(`${supabaseUrl.replace(/\/$/, '')}${path}`, {
     ...options,
     headers: {
       apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
+      Authorization: `Bearer ${dbAuthToken}`,
       ...(options.headers || {})
     }
   });
+}
+
+function getSupabaseUrl() {
+  return process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
 }
 
 function getAdminEmails() {
@@ -181,3 +192,6 @@ function clampInt(value, min, max, fallback) {
   if (!Number.isFinite(parsed)) return fallback;
   return Math.max(min, Math.min(max, parsed));
 }
+
+const DEFAULT_SUPABASE_URL = 'https://ifrqrhmmlrtainlsooym.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmcnFyaG1tbHJ0YWlubHNvb3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTc0NTgsImV4cCI6MjA5NDE3MzQ1OH0.s1_z4KKhRZylUdWsAggzdZ2367XnNRl-6eljOhEdvNU';

@@ -26,6 +26,14 @@ create table if not exists public.credit_ledger (
 alter table public.user_credits enable row level security;
 alter table public.credit_ledger enable row level security;
 
+create or replace function public.is_platform_admin()
+returns boolean
+language sql
+stable
+as $$
+  select lower(coalesce(auth.jwt() ->> 'email', '')) in ('rbshbomber@gmail.com');
+$$;
+
 drop policy if exists "Users can read own credit balance" on public.user_credits;
 create policy "Users can read own credit balance"
 on public.user_credits
@@ -33,12 +41,28 @@ for select
 to authenticated
 using (auth.uid() = user_id);
 
+drop policy if exists "Platform admins can manage all credit balances" on public.user_credits;
+create policy "Platform admins can manage all credit balances"
+on public.user_credits
+for all
+to authenticated
+using (public.is_platform_admin())
+with check (public.is_platform_admin());
+
 drop policy if exists "Users can read own credit ledger" on public.credit_ledger;
 create policy "Users can read own credit ledger"
 on public.credit_ledger
 for select
 to authenticated
 using (auth.uid() = user_id);
+
+drop policy if exists "Platform admins can manage all credit ledger" on public.credit_ledger;
+create policy "Platform admins can manage all credit ledger"
+on public.credit_ledger
+for all
+to authenticated
+using (public.is_platform_admin())
+with check (public.is_platform_admin());
 
 create or replace function public.touch_user_credits_updated_at()
 returns trigger
@@ -72,6 +96,12 @@ declare
   v_balance integer;
   v_unlimited boolean;
 begin
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role'
+     and auth.uid() <> p_user_id
+     and not public.is_platform_admin() then
+    raise exception 'admin-or-owner-required';
+  end if;
+
   if p_cost is null or p_cost < 0 then
     raise exception 'invalid credit cost';
   end if;
@@ -125,6 +155,11 @@ as $$
 declare
   v_balance integer;
 begin
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role'
+     and not public.is_platform_admin() then
+    raise exception 'admin-required';
+  end if;
+
   if p_amount is null or p_amount <= 0 then
     raise exception 'invalid credit amount';
   end if;

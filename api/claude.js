@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'prompt 필드가 필요합니다 (문자열).' });
     }
 
-    const creditCharge = await spendCreditsIfRequired(auth.user, feature, cost);
+    const creditCharge = await spendCreditsIfRequired(auth.user, feature, cost, auth.token);
     if (!creditCharge.ok) {
       return res.status(creditCharge.status).json(creditCharge.body);
     }
@@ -133,8 +133,8 @@ async function verifySupabaseUser(req) {
     };
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = getSupabaseUrl();
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     return {
@@ -178,10 +178,10 @@ async function verifySupabaseUser(req) {
     };
   }
 
-  return { ok: true, user };
+  return { ok: true, user, token };
 }
 
-async function spendCreditsIfRequired(user, feature, requestedCost) {
+async function spendCreditsIfRequired(user, feature, requestedCost, userToken) {
   if (isAdminUser(user)) {
     return { ok: true, cost: 0, balance: null, unlimited: true };
   }
@@ -190,8 +190,10 @@ async function spendCreditsIfRequired(user, feature, requestedCost) {
     return { ok: true, cost: null, balance: null, unlimited: false };
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+  const supabaseUrl = getSupabaseUrl();
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || '';
+  const supabaseKey = serviceKey || process.env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
+  const dbAuthToken = serviceKey || userToken;
   if (!supabaseUrl || !supabaseKey) {
     return {
       ok: false,
@@ -210,7 +212,7 @@ async function spendCreditsIfRequired(user, feature, requestedCost) {
     headers: {
       'Content-Type': 'application/json',
       apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`
+      Authorization: `Bearer ${dbAuthToken}`
     },
     body: JSON.stringify({
       p_user_id: user.id,
@@ -288,3 +290,10 @@ function getAdminEmails() {
     .map(email => email.toLowerCase().trim())
     .filter(Boolean);
 }
+
+function getSupabaseUrl() {
+  return process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
+}
+
+const DEFAULT_SUPABASE_URL = 'https://ifrqrhmmlrtainlsooym.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmcnFyaG1tbHJ0YWlubHNvb3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTc0NTgsImV4cCI6MjA5NDE3MzQ1OH0.s1_z4KKhRZylUdWsAggzdZ2367XnNRl-6eljOhEdvNU';
