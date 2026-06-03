@@ -712,6 +712,40 @@ header.site {
   font-size: 12px;
   font-weight: 700;
 }
+.voice-mode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+.voice-mode-card input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--sage-deep);
+}
+.voice-mode-card strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+}
+.voice-mode-card span {
+  display: block;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.voice-mode-card .free {
+  color: var(--good);
+  font-weight: 800;
+}
+.speech-card.is-speaking {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(141,168,136,.16), var(--shadow-s);
+}
 .speech-card textarea {
   width: 100%;
   min-height: 86px;
@@ -1242,6 +1276,10 @@ body.sim-immersive {
 .sim-immersive .voice-status {
   color: rgba(255,255,255,.70);
 }
+.sim-immersive .voice-mode-card {
+  background: rgba(255,255,255,.82);
+  border-color: rgba(255,255,255,.58);
+}
 .sim-immersive .persona-card {
   color: var(--ink);
   margin: 12px 0;
@@ -1462,6 +1500,14 @@ body.sim-immersive {
           <textarea id="s-text" hidden></textarea>
         </div>
 
+        <label class="voice-mode-card" for="s-voice-mode">
+          <input type="checkbox" id="s-voice-mode" />
+          <span>
+            <strong>리얼 음성 모드 <span class="free">무료 베타</span></strong>
+            질문과 꼬리질문이 말풍선 자막과 함께 자동 재생됩니다. 브라우저 내장 음성을 사용해서 추가 API 비용은 없습니다.
+          </span>
+        </label>
+
         <button class="btn-run" id="s-run">가상 면접 시작 (80 토큰)</button>
       </div>
     </section>
@@ -1485,6 +1531,7 @@ body.sim-immersive {
 const USER_KEY = "saessak_users";
 const CURRENT_KEY = "saessak_current_user";
 const SIMULATE_COST = 80;
+const SIMULATE_VOICE_KEY = "saessak_simulate_voice_mode";
 
 function getCurrentUser(){
   const id = localStorage.getItem(CURRENT_KEY);
@@ -1516,6 +1563,26 @@ function refreshTokenDisplay(){
   }
 }
 refreshTokenDisplay();
+
+function isRealtimeVoiceMode(){
+  return localStorage.getItem(SIMULATE_VOICE_KEY) === "true";
+}
+
+function syncVoiceModeToggle(){
+  const toggle = document.getElementById("s-voice-mode");
+  if(!toggle) return;
+  toggle.checked = isRealtimeVoiceMode();
+  toggle.addEventListener("change", () => {
+    localStorage.setItem(SIMULATE_VOICE_KEY, toggle.checked ? "true" : "false");
+    if(!toggle.checked) window.speechSynthesis?.cancel?.();
+    if(toggle.checked && !("speechSynthesis" in window)){
+      alert("이 브라우저는 질문 음성 재생을 지원하지 않습니다.");
+      toggle.checked = false;
+      localStorage.setItem(SIMULATE_VOICE_KEY, "false");
+    }
+  });
+}
+syncVoiceModeToggle();
 
 // 핸드오프 데이터 자동 입력
 setTimeout(() => {
@@ -1986,22 +2053,50 @@ async function handleAnswerAndFollowup(index) {
   }
 }
 
-function speakInterviewQuestion(index) {
+function speakInterviewQuestion(index, options = {}) {
   const question = window._currentInterviewQuestions?.[index]?.question;
   if (!question) return;
   if (!("speechSynthesis" in window)) {
-    alert("이 브라우저는 질문 듣기를 지원하지 않습니다.");
+    if (!options.auto) alert("이 브라우저는 질문 듣기를 지원하지 않습니다.");
     return;
   }
+  const status = document.querySelector(`[data-voice-status="${index}"]`);
+  const speechCard = document.querySelector(`[data-speech-card-index="${index}"]`);
+  const speakButton = document.querySelector(`[data-speak-index="${index}"]`);
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(question);
   utterance.lang = "ko-KR";
-  utterance.rate = 0.94;
-  utterance.pitch = 1;
+  utterance.rate = 0.92;
+  utterance.pitch = 0.92;
   const voices = window.speechSynthesis.getVoices?.() || [];
   const koVoice = voices.find(v => v.lang === "ko-KR") || voices.find(v => v.lang?.startsWith("ko"));
   if (koVoice) utterance.voice = koVoice;
+  utterance.onstart = () => {
+    speechCard?.classList.add("is-speaking");
+    if (status) status.textContent = options.auto ? "리얼 음성 모드 재생 중..." : "질문 재생 중...";
+    if (speakButton) speakButton.textContent = "다시 듣기";
+  };
+  utterance.onend = () => {
+    speechCard?.classList.remove("is-speaking");
+    if (status) status.textContent = "질문을 듣고 답변하세요.";
+  };
+  utterance.onerror = () => {
+    speechCard?.classList.remove("is-speaking");
+    if (status) status.textContent = "음성 재생 실패. 자막으로 확인하세요.";
+  };
   window.speechSynthesis.speak(utterance);
+}
+
+function stopInterviewSpeech(index) {
+  window.speechSynthesis?.cancel?.();
+  document.querySelectorAll(".speech-card.is-speaking").forEach(card => card.classList.remove("is-speaking"));
+  const status = document.querySelector(`[data-voice-status="${index}"]`);
+  if (status) status.textContent = "음성 재생 중지";
+}
+
+function maybeAutoSpeakQuestion(index) {
+  if (!isRealtimeVoiceMode()) return;
+  window.setTimeout(() => speakInterviewQuestion(index, { auto: true }), 450);
 }
 
 function stopVoiceAnswer() {
@@ -2112,13 +2207,14 @@ function renderInterviewRound() {
         <p class="chair-note">위원장 안내: 질문을 들은 뒤 1~2분 분량으로 핵심 근거를 답변하세요.</p>
         <div class="bubble-row">
           <div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.role)}</span></div>
-          <div class="speech-card">
+          <div class="speech-card" data-speech-card-index="${current}">
             <p>${escapeHtml(item.question)}</p>
             ${renderConversationThread(current)}
             <div class="speech-tools">
               <button type="button" data-speak-index="${current}">질문 듣기</button>
+              <button type="button" data-stop-speech-index="${current}">읽기 중지</button>
               <button type="button" data-mic-index="${current}">마이크 답변</button>
-              <span class="voice-status" data-voice-status="${current}">클릭해서 듣거나 말하세요.</span>
+              <span class="voice-status" data-voice-status="${current}">${isRealtimeVoiceMode() ? "리얼 음성 모드 대기 중..." : "클릭해서 듣거나 말하세요."}</span>
             </div>
             <textarea data-answer-index="${current}" placeholder="심사위원에게 답변하듯 말하거나 입력하세요.">${escapeHtml(answers[current] || "")}</textarea>
           </div>
@@ -2139,6 +2235,7 @@ function renderInterviewRound() {
   const textarea = panel.querySelector(`[data-answer-index="${current}"]`);
   textarea?.addEventListener("input", () => saveInterviewAnswer(current));
   panel.querySelector("[data-speak-index]")?.addEventListener("click", () => speakInterviewQuestion(current));
+  panel.querySelector("[data-stop-speech-index]")?.addEventListener("click", () => stopInterviewSpeech(current));
   panel.querySelector("[data-mic-index]")?.addEventListener("click", () => startVoiceAnswer(current));
   document.getElementById("s-prev-question")?.addEventListener("click", () => {
     saveInterviewAnswer(current);
@@ -2177,6 +2274,7 @@ function renderInterviewRound() {
     }
     runFinalEvaluation({ target, field, text, questions });
   });
+  maybeAutoSpeakQuestion(current);
 }
 
 function renderLegacyInterviewSession({ target, field, text }) {
@@ -2201,12 +2299,13 @@ function renderLegacyInterviewSession({ target, field, text }) {
         return `
           <div class="bubble-row">
             <div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.name)}</span></div>
-            <div class="speech-card">
+            <div class="speech-card" data-speech-card-index="${i}">
               <p>${escapeHtml(item.question)}</p>
               <div class="speech-tools">
                 <button type="button" data-speak-index="${i}">질문 듣기</button>
+                <button type="button" data-stop-speech-index="${i}">읽기 중지</button>
                 <button type="button" data-mic-index="${i}">마이크 답변</button>
-                <span class="voice-status" data-voice-status="${i}">클릭해서 듣거나 말하세요.</span>
+                <span class="voice-status" data-voice-status="${i}">${isRealtimeVoiceMode() ? "리얼 음성 모드 대기 중..." : "클릭해서 듣거나 말하세요."}</span>
               </div>
               <textarea data-answer-index="${i}" placeholder="답변을 입력하세요. 모르면 '확인 필요'라고 적어도 됩니다."></textarea>
             </div>
@@ -2228,9 +2327,13 @@ function renderLegacyInterviewSession({ target, field, text }) {
   panel.querySelectorAll("[data-speak-index]").forEach(btn => {
     btn.addEventListener("click", () => speakInterviewQuestion(Number(btn.dataset.speakIndex)));
   });
+  panel.querySelectorAll("[data-stop-speech-index]").forEach(btn => {
+    btn.addEventListener("click", () => stopInterviewSpeech(Number(btn.dataset.stopSpeechIndex)));
+  });
   panel.querySelectorAll("[data-mic-index]").forEach(btn => {
     btn.addEventListener("click", () => startVoiceAnswer(Number(btn.dataset.micIndex)));
   });
+  if (isRealtimeVoiceMode()) maybeAutoSpeakQuestion(0);
 }
 
 document.getElementById("s-run").addEventListener("click", async () => {
