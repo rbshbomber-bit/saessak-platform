@@ -403,7 +403,10 @@ tr:hover { background: var(--bg); }
       <div class="card" style="margin-bottom:16px;">
         <div class="card-head">
           <h2>서버 크레딧 관리</h2>
-          <button id="db-refresh" style="padding:8px 12px;border:1px solid var(--line);background:white;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">새로고침</button>
+          <div style="display:flex;gap:8px;">
+            <button id="self-unlimited" style="padding:8px 12px;border:1px solid var(--line);background:white;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">내 계정 무제한</button>
+            <button id="db-refresh" style="padding:8px 12px;border:1px solid var(--line);background:white;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">새로고침</button>
+          </div>
         </div>
         <div id="db-status" style="font-size:12px;color:var(--ink-3);margin-bottom:12px;">Supabase 관리자 세션 확인 중...</div>
         <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:16px;">
@@ -533,6 +536,7 @@ document.getElementById("admin-logout").addEventListener("click", () => {
 
 document.getElementById("db-refresh").addEventListener("click", loadServerCredits);
 document.getElementById("credit-grant").addEventListener("click", grantServerCredits);
+document.getElementById("self-unlimited").addEventListener("click", setSelfUnlimited);
 
 // 메뉴 전환
 document.querySelectorAll(".menu li").forEach(li => {
@@ -649,6 +653,11 @@ async function grantServerCredits(){
     return;
   }
   await postCreditUpdate({ user_id: userId, email, amount, reason: "admin-manual-grant" });
+}
+
+async function setSelfUnlimited(){
+  if(!confirm("현재 Supabase 관리자 로그인 계정을 서버 크레딧 무제한으로 등록할까요?")) return;
+  await postCreditUpdate({ self_admin_unlimited: true });
 }
 
 async function setServerUnlimited(userId, email, nextValue){

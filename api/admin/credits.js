@@ -66,7 +66,11 @@ async function getCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken) {
 }
 
 async function updateCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken, adminUser) {
-  const { user_id, email, amount, reason, is_unlimited } = req.body || {};
+  const { self_admin_unlimited, user_id: bodyUserId, email: bodyEmail, amount, reason, is_unlimited } = req.body || {};
+  const user_id = self_admin_unlimited ? adminUser.id : bodyUserId;
+  const email = self_admin_unlimited ? adminUser.email : bodyEmail;
+  const nextUnlimited = self_admin_unlimited ? true : is_unlimited;
+
   if (!user_id) return res.status(400).json({ error: 'user_id가 필요합니다.' });
 
   let grantBalance = null;
@@ -91,7 +95,7 @@ async function updateCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken, ad
     grantBalance = await grantRes.json().catch(() => null);
   }
 
-  if (typeof is_unlimited === 'boolean') {
+  if (typeof nextUnlimited === 'boolean') {
     const upsertRes = await supabaseFetch(
       supabaseUrl,
       supabaseKey,
@@ -126,7 +130,7 @@ async function updateCredits(req, res, supabaseUrl, supabaseKey, dbAuthToken, ad
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
         },
-        body: JSON.stringify({ email: email || null, is_unlimited })
+        body: JSON.stringify({ email: email || null, is_unlimited: nextUnlimited })
       }
     );
 
