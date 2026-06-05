@@ -2714,8 +2714,32 @@ function normalizeEvaluation(data, reviewContext) {
   return safe;
 }
 
+function summarizeInterviewRecord(data, answers) {
+  const answeredCount = (answers || []).filter(item => String(item.answer || "").trim().length >= 8).length;
+  const personaLines = (answers || []).map((item, i) => {
+    const meta = PERSONA_META[item.persona] || {};
+    const answerText = String(item.answer || "").trim();
+    const shortAnswer = answerText.length > 160 ? `${answerText.slice(0, 160)}...` : answerText;
+    return `${i + 1}. ${meta.name || item.persona}: ${shortAnswer || "답변 없음"}`;
+  });
+  const topActions = Array.isArray(data.topActions) ? data.topActions.slice(0, 3) : [];
+  const missingEvidence = Array.isArray(data.missingEvidence) ? data.missingEvidence.slice(0, 5) : [];
+  const notes = Array.isArray(data.interviewNotes) ? data.interviewNotes.slice(0, 5) : [];
+  return {
+    headline: `제출 준비도 ${data.readinessScore || 0}/100 · ${data.verdict || "보완 후 적합"} · ${data.selectionSignal || "보통"}`,
+    answeredCount,
+    totalQuestions: (answers || []).length,
+    overall: data.overall || "",
+    topActions,
+    missingEvidence,
+    notes,
+    personaDigest: personaLines,
+  };
+}
+
 function renderResult(data, target, answers){
   setActivePanelLabel(-1);
+  const conversationSummary = summarizeInterviewRecord(data, answers);
   // 결과 저장 (히스토리)
   const planText = document.getElementById("s-text").value;
   window.saessak?.saveHistory?.({
@@ -2723,8 +2747,16 @@ function renderResult(data, target, answers){
     title: `${target} 심사 시뮬레이션`,
     target,
     input: planText,
-    output: data,
-    meta: { field: document.getElementById("s-field").value, answers }
+    output: { ...data, conversationSummary },
+    meta: {
+      field: document.getElementById("s-field").value,
+      answers,
+      conversationSummary,
+      readinessScore: data.readinessScore || 0,
+      verdict: data.verdict || "",
+      tokenCost: SIMULATE_COST,
+      documentType: "simulation-report",
+    }
   });
   window.saessak?.handOff?.({ source: 'simulate', target, planText });
   window._currentSimulateData = { data, target, planText, answers };
@@ -2874,6 +2906,9 @@ function downloadSimDocx(){
     title: `${cur.target} 심사위원 시뮬레이션`,
     subtitle: '5명 가상 페르소나 평가 결과',
     sections,
+    target: cur.target,
+    sourceKind: 'simulate',
+    sourceTitle: `${cur.target} 심사위원 시뮬레이션`,
     filename: `심사시뮬레이션_${cur.target}_${new Date().toISOString().slice(0,10)}`,
     footerNote: '가상 페르소나 시뮬레이션 결과 · 실제 심사와 무관 · 합격 보장 없음 · 새싹매치'
   }).catch(e => alert('다운로드 실패: ' + e.message));

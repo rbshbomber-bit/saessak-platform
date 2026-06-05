@@ -174,5 +174,28 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    if (!opts.skipHistory && window.saessak?.saveHistory) {
+      window.saessak.saveHistory({
+        kind: 'docx',
+        title: opts.title || filename,
+        target: opts.target || opts.subtitle || '',
+        input: '',
+        output: {
+          filename,
+          title: opts.title || '문서',
+          subtitle: opts.subtitle || '',
+          sections,
+          footerNote: opts.footerNote || '',
+        },
+        meta: {
+          filename,
+          sourceKind: opts.sourceKind || '',
+          sourceTitle: opts.sourceTitle || opts.title || '',
+          downloadedAt: new Date().toISOString(),
+          sectionCount: sections.length,
+        }
+      });
+    }
   };
 })();

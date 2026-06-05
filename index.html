@@ -3226,6 +3226,9 @@ function renderPlan(parsed){
       title: cur.parsed.title || `${cur.target} 사업계획서 초안`,
       subtitle: `${cur.target} 신청용 초안`,
       sections,
+      target: cur.target,
+      sourceKind: 'plan',
+      sourceTitle: cur.parsed.title || `${cur.target} 사업계획서 초안`,
       filename: `사업계획서_${cur.target}_${new Date().toISOString().slice(0,10)}`,
       footerNote: '🤖 AI 자동 생성 초안 · 본인 검토 후 사용 · 합격 보장 없음 · 새싹매치'
     }).catch(e => alert('다운로드 실패: ' + e.message));

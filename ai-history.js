@@ -5,12 +5,12 @@
   window.saessak = window.saessak || {};
 
   const HISTORY_KEY = 'saessak_ai_history';
-  const MAX_ITEMS = 200;  // 사용자당 최대 200건 (localStorage 한도 고려)
+  const MAX_ITEMS = 300;  // 사용자당 최대 300건 (localStorage 한도 고려)
 
   /**
    * AI 결과물 저장
    * @param {object} record - { kind, title, target, input, output, meta }
-   *   kind: 'plan' | 'compare' | 'simulate' | 'slides' | 'mentor'
+   *   kind: 'plan' | 'compare' | 'simulate' | 'slides' | 'mentor' | 'docx'
    *   title: 표시용 제목
    *   target: 신청 사업명 (예: 예비창업패키지)
    *   input: 사용자 입력 (사업계획서 본문 등)
@@ -127,5 +127,6 @@
     simulate: '심사 시뮬레이션',
     slides: '발표 슬라이드',
     mentor: '1:1 멘토링',
+    docx: 'DOCX 문서',
   };
 })();

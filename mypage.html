@@ -7,6 +7,7 @@
 <script src="supabase-config.js" defer></script>
 <script src="admin-config.js" defer></script>
 <script src="ai-history.js" defer></script>
+<script src="docx-gen.js" defer></script>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 <style>
@@ -340,7 +341,7 @@ footer.site .row { display: flex; justify-content: space-between; flex-wrap: wra
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div>
           <h2 style="margin:0;font-size:18px;">📚 내 자료실 — AI 결과물 보관함</h2>
-          <p style="margin:4px 0 0;font-size:12px;color:var(--ink-3);">결제한 모든 AI 결과(사업계획서/비교/시뮬레이션/슬라이드)가 자동 저장됩니다. 언제든 다시 보고 다운로드.</p>
+          <p style="margin:4px 0 0;font-size:12px;color:var(--ink-3);">유료 토큰이 사용된 AI 결과, 심사 대화 요약, 생성한 DOCX 문서 기록이 자동 저장됩니다.</p>
         </div>
         <div id="history-count" style="font-size:12px;color:var(--ink-3);font-weight:600;"></div>
       </div>
@@ -350,6 +351,7 @@ footer.site .row { display: flex; justify-content: space-between; flex-wrap: wra
         <button class="hf-btn" data-kind="compare" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">비교 분석</button>
         <button class="hf-btn" data-kind="simulate" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">심사 시뮬레이션</button>
         <button class="hf-btn" data-kind="slides" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">발표 슬라이드</button>
+        <button class="hf-btn" data-kind="docx" style="padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-2);color:var(--ink-2);border:none;border-radius:6px;cursor:pointer;font-family:inherit;">DOCX 문서</button>
       </div>
       <div id="history-list"></div>
     </div>
@@ -445,12 +447,15 @@ if(sub){
 const log = user.tokenLog || [];
 const logEl = document.getElementById("token-log");
 if(log.length > 0){
-  logEl.innerHTML = `<b style="color:var(--ink);">최근 토큰 내역</b><br />` + log.slice(0,5).map(e => {
+  logEl.innerHTML = `<b style="color:var(--ink);">전체 토큰 내역</b><br />
+  <div style="max-height:230px;overflow:auto;margin-top:6px;padding-right:4px;">` + log.map(e => {
     const date = new Date(e.ts).toLocaleString("ko-KR", {month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
     const sign = e.amount > 0 ? "+" : "";
     const color = e.amount > 0 ? "var(--good)" : "var(--bad)";
     return `<div style="padding:4px 0;border-bottom:1px solid var(--line);"><span style="color:${color};font-weight:700;">${sign}${e.amount}</span> · ${e.memo} <span style="color:var(--ink-3);float:right;">${date}</span></div>`;
-  }).join("");
+  }).join("") + `</div>`;
+} else if (logEl) {
+  logEl.innerHTML = `<b style="color:var(--ink);">전체 토큰 내역</b><br /><span>아직 토큰 소비 기록이 없습니다.</span>`;
 }
 
 // 트래커
@@ -528,6 +533,34 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 
 // ===== 내 자료실 (AI 히스토리) =====
 let currentHistoryFilter = "";
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;" }[ch]));
+}
+function formatFullDate(value){
+  if(!value) return "";
+  return new Date(value).toLocaleString("ko-KR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+}
+function renderSmallList(items){
+  const arr = Array.isArray(items) ? items.filter(Boolean) : [];
+  if(!arr.length) return "";
+  return `<ul style="margin:8px 0 0;padding-left:18px;color:var(--ink-2);font-size:12px;line-height:1.7;">${arr.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`;
+}
+function historySummaryText(item){
+  if(item.kind === "simulate"){
+    const summary = item.meta?.conversationSummary || item.output?.conversationSummary || {};
+    const score = item.meta?.readinessScore || item.output?.readinessScore;
+    const verdict = item.meta?.verdict || item.output?.verdict;
+    return summary.headline || (score ? `제출 준비도 ${score}/100 · ${verdict || "심사 기록"}` : "심사 대화와 최종 평가 저장됨");
+  }
+  if(item.kind === "docx"){
+    return `${item.meta?.filename || "DOCX 파일"} · ${item.meta?.sectionCount || 0}개 섹션`;
+  }
+  if(item.kind === "plan"){
+    const score = item.output?.review?.readinessScore;
+    return score ? `사업계획서 초안 · 제출 준비도 ${score}/100` : "사업계획서 AI 결과 저장됨";
+  }
+  return item.target || "AI 결과 저장됨";
+}
 function renderHistory(){
   const items = (window.saessak?.getHistory?.(currentHistoryFilter) || []);
   const list = document.getElementById("history-list");
@@ -538,35 +571,89 @@ function renderHistory(){
     list.innerHTML = `<div style="text-align:center;padding:36px 16px;color:var(--ink-3);font-size:13px;">아직 저장된 결과가 없습니다.<br /><small>AI 도구를 사용하면 결과가 자동으로 여기 저장됩니다.</small></div>`;
     return;
   }
-  const KIND = { plan:"📋", compare:"📊", simulate:"🎯", slides:"📑", mentor:"💬" };
+  const KIND = { plan:"📋", compare:"📊", simulate:"🎯", slides:"📑", mentor:"💬", docx:"📄" };
   list.innerHTML = items.map(it => {
     const date = new Date(it.createdAt).toLocaleString("ko-KR", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
     const kindLabel = window.saessak?.KIND_LABEL?.[it.kind] || it.kind;
+    const summary = historySummaryText(it);
+    const docxButton = it.kind === "docx"
+      ? `<button onclick="downloadHistoryDocx('${it.id}')" style="padding:6px 10px;font-size:11px;font-weight:600;background:var(--sage-deep);border:1px solid var(--sage-deep);border-radius:6px;cursor:pointer;font-family:inherit;color:white;">재다운로드</button>`
+      : "";
     return `
       <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;">
         <div style="font-size:24px;flex-shrink:0;">${KIND[it.kind]||'📄'}</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${it.title}</div>
-          <div style="font-size:11px;color:var(--ink-3);">${kindLabel} · ${it.target||''} · ${date}</div>
+          <div style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(it.title)}</div>
+          <div style="font-size:11px;color:var(--ink-3);">${escapeHtml(kindLabel)} · ${escapeHtml(it.target||'')} · ${date}</div>
+          <div style="font-size:12px;color:var(--ink-2);margin-top:6px;line-height:1.5;">${escapeHtml(summary)}</div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
+          ${docxButton}
           <button onclick="viewHistoryItem('${it.id}')" style="padding:6px 10px;font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--line-2);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--ink-2);">보기</button>
           <button onclick="deleteHistoryItem('${it.id}')" style="padding:6px 10px;font-size:11px;font-weight:600;background:var(--card);border:1px solid var(--line-2);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--bad);">삭제</button>
         </div>
       </div>`;
   }).join("");
 }
+function buildHistoryDetailHtml(item){
+  const kindLabel = window.saessak?.KIND_LABEL?.[item.kind] || item.kind;
+  const summary = item.meta?.conversationSummary || item.output?.conversationSummary || {};
+  const answers = item.meta?.answers || [];
+  const tokenCost = item.meta?.tokenCost;
+  const docSections = item.kind === "docx" ? (item.output?.sections || []) : [];
+  const output = item.output || {};
+  const score = output.readinessScore || item.meta?.readinessScore;
+  const verdict = output.verdict || item.meta?.verdict;
+  const blocks = [];
+  blocks.push(`<section><h2>기본 정보</h2><p><b>종류</b> ${escapeHtml(kindLabel)}<br><b>대상</b> ${escapeHtml(item.target || "-")}<br><b>생성일</b> ${escapeHtml(formatFullDate(item.createdAt))}${tokenCost ? `<br><b>토큰</b> ${tokenCost} 토큰 사용` : ""}</p></section>`);
+  if(item.kind === "simulate"){
+    blocks.push(`<section><h2>심사 요약</h2><p><b>${escapeHtml(summary.headline || `${score || "-"}점 · ${verdict || "심사 기록"}`)}</b></p><p>${escapeHtml(summary.overall || output.overall || "")}</p>${renderSmallList(summary.notes)}</section>`);
+    blocks.push(`<section><h2>우선 보강 액션</h2>${renderSmallList(summary.topActions || output.topActions)}</section>`);
+    blocks.push(`<section><h2>제출 전 확인할 증거/서류</h2>${renderSmallList(summary.missingEvidence || output.missingEvidence)}</section>`);
+    blocks.push(`<section><h2>심사위원 대화 기록</h2>${answers.length ? answers.map((a, i) => `<article><h3>${i + 1}. ${escapeHtml(PERSONA_NAME(a.persona))}</h3><pre>${escapeHtml(a.answer || "답변 기록 없음")}</pre></article>`).join("") : "<p>저장된 대화 전문이 없습니다.</p>"}</section>`);
+  } else if(item.kind === "docx"){
+    blocks.push(`<section><h2>문서 정보</h2><p><b>파일명</b> ${escapeHtml(item.meta?.filename || item.output?.filename || "-")}<br><b>원본 기능</b> ${escapeHtml(item.meta?.sourceKind || "-")}<br><b>섹션 수</b> ${docSections.length}</p></section>`);
+    blocks.push(`<section><h2>문서 섹션 미리보기</h2>${docSections.slice(0, 12).map(sec => `<article><h3>${escapeHtml(sec.heading || sec.subheading || "섹션")}</h3>${sec.content ? `<p>${escapeHtml(sec.content).replace(/\n/g, "<br>")}</p>` : ""}${renderSmallList(sec.items || sec.bullets)}</article>`).join("")}</section>`);
+  } else if(item.kind === "plan"){
+    const chapters = Array.isArray(output.chapters) ? output.chapters : [];
+    blocks.push(`<section><h2>사업계획서 요약</h2><p>${escapeHtml(output.review?.summary || output.title || item.title)}</p></section>`);
+    blocks.push(`<section><h2>본문</h2>${chapters.map(c => `<article><h3>${escapeHtml(c.h)}</h3><p>${escapeHtml(c.body).replace(/\n/g, "<br>")}</p></article>`).join("") || "<p>저장된 본문이 없습니다.</p>"}</section>`);
+  } else {
+    blocks.push(`<section><h2>저장된 결과</h2><pre>${escapeHtml(JSON.stringify(output, null, 2))}</pre></section>`);
+  }
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${escapeHtml(item.title)}</title><style>
+    body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#fbfaf6;color:#14181f;margin:0;padding:28px;line-height:1.65}
+    main{max-width:840px;margin:0 auto} h1{font-size:26px;margin:0 0 6px} h2{font-size:17px;margin:0 0 10px;color:#5c7a5a} h3{font-size:14px;margin:12px 0 6px}
+    section{background:white;border:1px solid #e6e3da;border-radius:12px;padding:18px;margin:14px 0;box-shadow:0 2px 8px rgba(20,24,31,.04)}
+    p,li{font-size:14px} pre{white-space:pre-wrap;background:#f4f1ea;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;line-height:1.65}
+    .meta{color:#6c7280;font-size:12px;margin-bottom:18px}
+  </style></head><body><main><h1>${escapeHtml(item.title)}</h1><div class="meta">${escapeHtml(kindLabel)} · ${escapeHtml(formatFullDate(item.createdAt))}</div>${blocks.join("")}</main></body></html>`;
+}
+function PERSONA_NAME(key){
+  const names = { gov:"정부 사업 운영 경험형", vc:"VC·투자 경험형", tech:"학계·기술 검토형", legal:"법무·리스크 검토형", youth:"청년정책·지역 효과형" };
+  return names[key] || key || "심사위원";
+}
 function viewHistoryItem(id){
   const item = window.saessak?.getHistoryItem?.(id);
   if(!item) return alert("결과를 찾을 수 없습니다.");
-  // 종류별 페이지로 핸드오프 + 이동
-  const PAGE = { plan:"index.html#ai-planner", simulate:"simulate.html", slides:"slides.html" };
-  // 결과 보기는 새 창에 JSON 표시 (간단)
   const win = window.open("", "_blank", "width=720,height=720");
   if(win){
-    const safe = JSON.stringify(item.output, null, 2).replace(/</g,'&lt;');
-    win.document.write(`<title>${item.title}</title><pre style="font:13px monospace;padding:24px;line-height:1.6;background:#fbfaf6;color:#14181f;">${safe}</pre>`);
+    win.document.write(buildHistoryDetailHtml(item));
+    win.document.close();
   }
+}
+function downloadHistoryDocx(id){
+  const item = window.saessak?.getHistoryItem?.(id);
+  if(!item || item.kind !== "docx") return alert("DOCX 기록을 찾을 수 없습니다.");
+  const out = item.output || {};
+  window.saessak.downloadDocx({
+    title: out.title || item.title,
+    subtitle: out.subtitle || item.target || "",
+    sections: out.sections || [],
+    filename: (item.meta?.filename || out.filename || item.title || "문서").replace(/\.docx$/i, ""),
+    footerNote: out.footerNote || "",
+    skipHistory: true,
+  }).catch(e => alert("다운로드 실패: " + e.message));
 }
 function deleteHistoryItem(id){
   if(!confirm("이 결과를 삭제하시겠어요?")) return;
