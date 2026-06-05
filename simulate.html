@@ -979,19 +979,19 @@ body.sim-immersive {
 }
 .sim-immersive header.site {
   position: fixed;
-  top: 16px;
-  left: 16px;
-  right: 16px;
+  top: 10px;
+  left: 12px;
+  right: 12px;
   z-index: 90;
   border: 1px solid rgba(255,255,255,.12);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(16,18,24,.86);
   box-shadow: 0 18px 48px rgba(0,0,0,.26);
   backdrop-filter: blur(18px);
 }
 .sim-immersive .nav {
   max-width: none;
-  height: 74px;
+  height: 58px;
   padding: 0 18px;
 }
 .sim-immersive .brand,
@@ -1297,6 +1297,103 @@ body.sim-immersive {
   border-radius: 18px;
   box-shadow: 0 18px 54px rgba(0,0,0,.20);
 }
+body.sim-interview-active.sim-immersive .stage-title,
+body.sim-interview-active.sim-immersive .simulation-content,
+body.sim-interview-active.sim-immersive .review-brief-card,
+body.sim-interview-active.sim-immersive .interview-room-head,
+body.sim-interview-active.sim-immersive .interview-progress,
+body.sim-interview-active.sim-immersive .chair-note,
+body.sim-interview-active.sim-immersive .bubble-persona,
+body.sim-interview-active.sim-immersive .footer-note {
+  display: none;
+}
+body.sim-interview-active.sim-immersive .result-area {
+  left: 50%;
+  top: 88px;
+  bottom: auto;
+  width: min(820px, calc(100vw - 48px));
+  max-height: calc(100dvh - 112px);
+  overflow: visible;
+  padding: 0;
+  transform: translateX(-50%);
+  scrollbar-color: auto;
+}
+body.sim-interview-active.sim-immersive .interview-room-card {
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.sim-interview-active.sim-immersive .interview-room-body {
+  padding: 0;
+  overflow: visible;
+}
+body.sim-interview-active.sim-immersive .bubble-row {
+  display: block;
+}
+body.sim-interview-active.sim-immersive .speech-card {
+  position: relative;
+  border-radius: 28px;
+  padding: 18px 20px 16px;
+  background: rgba(255,255,255,.96);
+  border: 2px solid rgba(20,24,31,.08);
+  box-shadow: 0 20px 52px rgba(0,0,0,.25);
+}
+body.sim-interview-active.sim-immersive .speech-card::before {
+  left: 50%;
+  top: auto;
+  bottom: -12px;
+  width: 24px;
+  height: 24px;
+  background: rgba(255,255,255,.96);
+  border: 0;
+  border-right: 2px solid rgba(20,24,31,.08);
+  border-bottom: 2px solid rgba(20,24,31,.08);
+  transform: translateX(-50%) rotate(45deg);
+}
+body.sim-interview-active.sim-immersive .speech-card p {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.62;
+}
+body.sim-interview-active.sim-immersive .conversation-thread {
+  max-height: 128px;
+  overflow: auto;
+  margin: 8px 0 12px;
+  padding-right: 4px;
+}
+body.sim-interview-active.sim-immersive .thread-message {
+  padding: 9px 10px;
+}
+body.sim-interview-active.sim-immersive .speech-tools {
+  margin-top: 8px;
+}
+body.sim-interview-active.sim-immersive .voice-status {
+  color: var(--ink-3);
+}
+body.sim-interview-active.sim-immersive .speech-card textarea {
+  min-height: 64px;
+  max-height: 108px;
+  margin-top: 12px;
+  background: #fbfaf6;
+}
+body.sim-interview-active.sim-immersive .interview-actions {
+  justify-content: center;
+  margin-top: 18px;
+}
+body.sim-interview-active.sim-immersive .interview-actions button {
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+}
+body.sim-interview-active.sim-immersive .panel-label {
+  opacity: .32;
+  transform: translate(-50%, -50%) scale(.94);
+}
+body.sim-interview-active.sim-immersive .panel-label.is-active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.04);
+}
 
 @media (max-width: 980px) {
   .simulation-content { grid-template-columns: 1fr; }
@@ -1350,6 +1447,18 @@ body.sim-immersive {
   }
   .sim-immersive .card {
     grid-template-columns: 1fr;
+  }
+  body.sim-interview-active.sim-immersive .result-area {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    top: auto;
+    bottom: 16px;
+    width: auto;
+    max-height: 58dvh;
+    overflow: auto;
+    margin: 0;
+    transform: none;
   }
 }
 @media (max-width: 720px) {
@@ -2110,7 +2219,29 @@ function stopVoiceAnswer() {
   });
 }
 
-function startVoiceAnswer(index) {
+async function ensureMicrophonePermission(status) {
+  if (!navigator.mediaDevices?.getUserMedia) return true;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(track => track.stop());
+    return true;
+  } catch (error) {
+    console.warn("[simulate] microphone permission failed", error);
+    if (status) status.textContent = "마이크 권한이 필요합니다.";
+    alert("마이크 권한이 막혀 있어요. 주소창 왼쪽 아이콘에서 마이크 허용 후 다시 눌러주세요.");
+    return false;
+  }
+}
+
+function recognitionErrorMessage(error) {
+  if (error === "not-allowed" || error === "service-not-allowed") return "마이크 권한이 필요합니다.";
+  if (error === "audio-capture") return "마이크 장치를 찾지 못했습니다.";
+  if (error === "no-speech") return "말소리가 감지되지 않았습니다.";
+  if (error === "network") return "음성 인식 네트워크 오류";
+  return "음성 입력 실패";
+}
+
+async function startVoiceAnswer(index) {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const textarea = document.querySelector(`[data-answer-index="${index}"]`);
   const status = document.querySelector(`[data-voice-status="${index}"]`);
@@ -2125,13 +2256,20 @@ function startVoiceAnswer(index) {
     if (status) status.textContent = "음성 입력 중지";
     return;
   }
+  window.speechSynthesis?.cancel?.();
+  document.querySelectorAll(".speech-card.is-speaking").forEach(card => card.classList.remove("is-speaking"));
   stopVoiceAnswer();
+  if (status) status.textContent = "마이크 권한 확인 중...";
+  const hasPermission = await ensureMicrophonePermission(status);
+  if (!hasPermission) return;
   const recognition = new Recognition();
   activeRecognition = recognition;
   recognition.lang = "ko-KR";
   recognition.interimResults = true;
-  recognition.continuous = false;
-  const previous = textarea.value.trim();
+  recognition.continuous = true;
+  recognition.maxAlternatives = 1;
+  const baseText = textarea.value.trim();
+  let finalTranscript = "";
   if (status) status.textContent = "듣는 중...";
   if (button) {
     button.classList.add("is-listening");
@@ -2139,29 +2277,42 @@ function startVoiceAnswer(index) {
   }
   recognition.onresult = event => {
     let interim = "";
-    let finalText = "";
     for (let i = event.resultIndex; i < event.results.length; i += 1) {
-      const transcript = event.results[i][0]?.transcript || "";
-      if (event.results[i].isFinal) finalText += transcript;
+      const transcript = (event.results[i][0]?.transcript || "").trim();
+      if (!transcript) continue;
+      if (event.results[i].isFinal) finalTranscript = `${finalTranscript} ${transcript}`.trim();
       else interim += transcript;
     }
-    const merged = [previous, finalText || interim].filter(Boolean).join(previous ? "\n" : "");
+    const liveText = [finalTranscript, interim.trim()].filter(Boolean).join(" ");
+    const merged = [baseText, liveText].filter(Boolean).join(baseText ? "\n" : "");
     textarea.value = merged;
     saveInterviewAnswer(index);
-    if (status) status.textContent = finalText ? "받아쓰기 완료" : "받아쓰는 중...";
+    if (status) status.textContent = finalTranscript ? "받아쓰기 중..." : "받아쓰는 중...";
   };
   recognition.onerror = event => {
-    if (status) status.textContent = event.error === "not-allowed" ? "마이크 권한이 필요합니다." : "음성 입력 실패";
+    console.warn("[simulate] recognition error", event.error);
+    if (status) status.textContent = recognitionErrorMessage(event.error);
   };
   recognition.onend = () => {
     if (activeRecognition === recognition) activeRecognition = null;
+    saveInterviewAnswer(index);
     if (button) {
       button.classList.remove("is-listening");
       button.textContent = "마이크 답변";
     }
     if (status && status.textContent === "듣는 중...") status.textContent = "음성 입력 종료";
   };
-  recognition.start();
+  try {
+    recognition.start();
+  } catch (error) {
+    console.warn("[simulate] recognition start failed", error);
+    activeRecognition = null;
+    if (button) {
+      button.classList.remove("is-listening");
+      button.textContent = "마이크 답변";
+    }
+    if (status) status.textContent = "마이크 시작 실패. 다시 눌러주세요.";
+  }
 }
 
 function renderInterviewSession({ target, field, text, supportContext = null }) {
@@ -2184,6 +2335,7 @@ function renderInterviewSession({ target, field, text, supportContext = null }) 
 
 function renderInterviewRound() {
   if (!activeInterviewSession) return;
+  document.body.classList.add("sim-interview-active");
   const { target, field, text, questions, answers, current, reviewContext } = activeInterviewSession;
   const item = questions[current];
   const meta = PERSONA_META[item.key];
@@ -2418,6 +2570,9 @@ async function runFinalEvaluation({ target, field, text, questions }) {
   const btn = document.getElementById("s-evaluate");
   btn.disabled = true;
   btn.textContent = "평가 중...";
+  stopVoiceAnswer();
+  window.speechSynthesis?.cancel?.();
+  document.body.classList.remove("sim-interview-active");
   document.getElementById("result-area").innerHTML = `
     <div class="loading">
       <div>가상 심사위원단이 답변을 검토 중입니다.<span>준비도 점수, 적합 위험, 보완 우선순위를 계산하는 중...</span></div>
