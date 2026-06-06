@@ -1104,21 +1104,86 @@ body.sim-immersive {
 }
 .sim-immersive .simulation-content {
   position: fixed;
-  left: 28px;
-  right: 28px;
-  bottom: 22px;
+  left: 50%;
+  bottom: 18px;
   z-index: 60;
-  width: auto;
-  display: grid;
-  grid-template-columns: minmax(220px, .45fr) minmax(680px, 1.55fr);
-  gap: 12px;
-  align-items: end;
+  width: min(1080px, calc(100vw - 32px));
+  display: block;
   overflow: visible;
   padding: 0;
+  transform: translateX(-50%);
+}
+.sim-immersive .setup-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 18px 18px 0 0;
+  background: rgba(16,18,24,.88);
+  color: rgba(255,255,255,.94);
+  box-shadow: 0 16px 42px rgba(0,0,0,.26);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sim-immersive .setup-toggle span {
+  display: block;
+  color: rgba(255,255,255,.72);
+  font-size: 12px;
+  font-weight: 800;
+}
+.sim-immersive .setup-toggle strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.sim-immersive .setup-toggle::after {
+  content: "접기";
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(216,227,212,.16);
+  color: #dff1d9;
+  font-size: 12px;
+  font-weight: 900;
+}
+.sim-immersive .setup-toggle:focus {
+  outline: none;
+}
+.sim-immersive .setup-toggle:focus-visible {
+  outline: 2px solid rgba(216,227,212,.68);
+  outline-offset: 2px;
+}
+.sim-immersive .simulation-content.is-collapsed .setup-toggle {
+  border-radius: 18px;
+}
+.sim-immersive .simulation-content.is-collapsed .setup-toggle::after {
+  content: "펼치기";
+}
+.sim-immersive .setup-sheet {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  background: rgba(18,22,29,.72);
+  box-shadow: 0 22px 64px rgba(0,0,0,.34);
+  backdrop-filter: blur(18px) saturate(1.18);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+}
+.sim-immersive .simulation-content.is-collapsed .setup-sheet {
+  display: none;
 }
 .sim-immersive .disclaimer-box {
   margin: 0;
-  padding: 10px 12px;
+  padding: 14px;
   border-radius: 16px;
   background: rgba(33,48,40,.46);
   color: rgba(245,252,243,.88);
@@ -1126,8 +1191,7 @@ body.sim-immersive {
   box-shadow: 0 14px 42px rgba(0,0,0,.24);
   backdrop-filter: blur(14px) saturate(1.18);
   -webkit-backdrop-filter: blur(14px) saturate(1.18);
-  max-height: 74px;
-  overflow: auto;
+  min-height: 100%;
 }
 .sim-immersive .disclaimer-box .ico {
   font-size: 16px;
@@ -1146,18 +1210,19 @@ body.sim-immersive {
   -webkit-backdrop-filter: blur(14px) saturate(1.18);
 }
 .sim-immersive .card {
-  padding: 12px 16px;
+  padding: 14px;
   border-radius: 18px;
   color: rgba(255,255,255,.94);
   display: grid;
-  grid-template-columns: 1.05fr 1.05fr 1.9fr;
-  gap: 10px;
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
 }
 .sim-immersive .card h3 {
   grid-column: 1 / -1;
-  font-size: 15px;
-  margin-bottom: 0;
+  font-size: 14px;
+  margin: 0;
+  color: rgba(255,255,255,.82);
 }
 .sim-immersive .field {
   margin-bottom: 0;
@@ -1176,6 +1241,30 @@ body.sim-immersive {
   color: #111827;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.54);
 }
+.sim-immersive .field.has-choices select {
+  display: none;
+}
+.choice-grid {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.choice-chip {
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.84);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.choice-chip.is-active {
+  background: rgba(216,227,212,.96);
+  border-color: rgba(216,227,212,.96);
+  color: #172217;
+}
 .sim-immersive .field textarea::placeholder {
   color: #667085;
 }
@@ -1184,8 +1273,8 @@ body.sim-immersive {
   max-height: 120px;
 }
 .sim-immersive .file-drop {
-  min-height: 74px;
-  padding: 8px 10px;
+  min-height: 66px;
+  padding: 10px;
   background: rgba(255,255,255,.84);
   border-color: rgba(255,255,255,.36);
 }
@@ -1202,7 +1291,8 @@ body.sim-immersive {
 .sim-immersive .file-status.is-error { color: #991b1b; }
 .sim-immersive .btn-run {
   grid-column: 1 / -1;
-  padding: 9px 16px;
+  padding: 13px 16px;
+  border-radius: 14px;
 }
 .sim-immersive .result-area {
   position: fixed;
@@ -1279,6 +1369,10 @@ body.sim-immersive {
 .sim-immersive .voice-mode-card {
   background: rgba(255,255,255,.82);
   border-color: rgba(255,255,255,.58);
+  min-height: 100%;
+}
+.sim-immersive .file-field {
+  grid-column: 1 / -1;
 }
 .sim-immersive .persona-card {
   color: var(--ink);
@@ -1299,26 +1393,35 @@ body.sim-immersive {
 }
 body.sim-interview-active.sim-immersive .stage-title,
 body.sim-interview-active.sim-immersive .simulation-content,
+.sim-immersive .simulation-content.is-hidden-during-interview,
 body.sim-interview-active.sim-immersive .review-brief-card,
 body.sim-interview-active.sim-immersive .interview-room-head,
 body.sim-interview-active.sim-immersive .interview-progress,
 body.sim-interview-active.sim-immersive .chair-note,
 body.sim-interview-active.sim-immersive .bubble-persona,
-body.sim-interview-active.sim-immersive .footer-note {
+body.sim-interview-active.sim-immersive .footer-note,
+.sim-immersive .result-area.is-interview-live .review-brief-card,
+.sim-immersive .result-area.is-interview-live .interview-room-head,
+.sim-immersive .result-area.is-interview-live .interview-progress,
+.sim-immersive .result-area.is-interview-live .chair-note,
+.sim-immersive .result-area.is-interview-live .bubble-persona,
+.sim-immersive .result-area.is-interview-live .footer-note {
   display: none;
 }
-body.sim-interview-active.sim-immersive .result-area {
+body.sim-interview-active.sim-immersive .result-area,
+.sim-immersive .result-area.is-interview-live {
   left: 50%;
   top: 88px;
   bottom: auto;
-  width: min(820px, calc(100vw - 48px));
+  width: min(760px, calc(100vw - 48px));
   max-height: calc(100dvh - 112px);
   overflow: visible;
   padding: 0;
   transform: translateX(-50%);
   scrollbar-color: auto;
 }
-body.sim-interview-active.sim-immersive .interview-room-card {
+body.sim-interview-active.sim-immersive .interview-room-card,
+.sim-immersive .result-area.is-interview-live .interview-room-card {
   overflow: visible;
   background: transparent;
   border: 0;
@@ -1326,14 +1429,17 @@ body.sim-interview-active.sim-immersive .interview-room-card {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-body.sim-interview-active.sim-immersive .interview-room-body {
+body.sim-interview-active.sim-immersive .interview-room-body,
+.sim-immersive .result-area.is-interview-live .interview-room-body {
   padding: 0;
   overflow: visible;
 }
-body.sim-interview-active.sim-immersive .bubble-row {
+body.sim-interview-active.sim-immersive .bubble-row,
+.sim-immersive .result-area.is-interview-live .bubble-row {
   display: block;
 }
-body.sim-interview-active.sim-immersive .speech-card {
+body.sim-interview-active.sim-immersive .speech-card,
+.sim-immersive .result-area.is-interview-live .speech-card {
   position: relative;
   border-radius: 28px;
   padding: 18px 20px 16px;
@@ -1341,7 +1447,8 @@ body.sim-interview-active.sim-immersive .speech-card {
   border: 2px solid rgba(20,24,31,.08);
   box-shadow: 0 20px 52px rgba(0,0,0,.25);
 }
-body.sim-interview-active.sim-immersive .speech-card::before {
+body.sim-interview-active.sim-immersive .speech-card::before,
+.sim-immersive .result-area.is-interview-live .speech-card::before {
   left: 50%;
   top: auto;
   bottom: -12px;
@@ -1353,37 +1460,45 @@ body.sim-interview-active.sim-immersive .speech-card::before {
   border-bottom: 2px solid rgba(20,24,31,.08);
   transform: translateX(-50%) rotate(45deg);
 }
-body.sim-interview-active.sim-immersive .speech-card p {
+body.sim-interview-active.sim-immersive .speech-card p,
+.sim-immersive .result-area.is-interview-live .speech-card p {
   margin: 0 0 12px;
   font-size: 16px;
   line-height: 1.62;
 }
-body.sim-interview-active.sim-immersive .conversation-thread {
+body.sim-interview-active.sim-immersive .conversation-thread,
+.sim-immersive .result-area.is-interview-live .conversation-thread {
   max-height: 128px;
   overflow: auto;
   margin: 8px 0 12px;
   padding-right: 4px;
 }
-body.sim-interview-active.sim-immersive .thread-message {
+body.sim-interview-active.sim-immersive .thread-message,
+.sim-immersive .result-area.is-interview-live .thread-message {
   padding: 9px 10px;
 }
-body.sim-interview-active.sim-immersive .speech-tools {
+body.sim-interview-active.sim-immersive .speech-tools,
+.sim-immersive .result-area.is-interview-live .speech-tools {
   margin-top: 8px;
 }
-body.sim-interview-active.sim-immersive .voice-status {
+body.sim-interview-active.sim-immersive .voice-status,
+.sim-immersive .result-area.is-interview-live .voice-status {
   color: var(--ink-3);
 }
-body.sim-interview-active.sim-immersive .speech-card textarea {
+body.sim-interview-active.sim-immersive .speech-card textarea,
+.sim-immersive .result-area.is-interview-live .speech-card textarea {
   min-height: 64px;
   max-height: 108px;
   margin-top: 12px;
   background: #fbfaf6;
 }
-body.sim-interview-active.sim-immersive .interview-actions {
+body.sim-interview-active.sim-immersive .interview-actions,
+.sim-immersive .result-area.is-interview-live .interview-actions {
   justify-content: center;
   margin-top: 18px;
 }
-body.sim-interview-active.sim-immersive .interview-actions button {
+body.sim-interview-active.sim-immersive .interview-actions button,
+.sim-immersive .result-area.is-interview-live .interview-actions button {
   box-shadow: 0 12px 30px rgba(0,0,0,.22);
 }
 body.sim-interview-active.sim-immersive .panel-label {
@@ -1446,6 +1561,9 @@ body.sim-interview-active.sim-immersive .panel-label.is-active {
     z-index: 10;
   }
   .sim-immersive .card {
+    grid-template-columns: 1fr;
+  }
+  .sim-immersive .setup-sheet {
     grid-template-columns: 1fr;
   }
   body.sim-interview-active.sim-immersive .result-area {
@@ -1571,53 +1689,74 @@ body.sim-interview-active.sim-immersive .panel-label.is-active {
       </div>
     </section>
 
-    <section class="simulation-content">
-      <div class="disclaimer-box">
-        <div class="ico">!</div>
-        <div>
-          <b>AI 보조 가상 심사입니다.</b> 실제 심사·합격 여부와 무관하며, 제출 전 보완점을 찾기 위한 참고용입니다.
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>사업계획서 첨부</h3>
-        <div class="field">
-          <label>신청 사업</label>
-          <select id="s-target">
-            <option value="예비창업패키지">예비창업패키지</option>
-            <option value="초기창업패키지">초기창업패키지</option>
-            <option value="청년창업사관학교">청년창업사관학교</option>
-            <option value="딥테크 헬스케어 패키지">딥테크 헬스케어 패키지</option>
-            <option value="지자체 청년창업">지자체 청년창업</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>분야</label>
-          <select id="s-field">
-            <option>AI·딥테크</option><option>헬스케어</option>
-            <option>커머스·로컬</option><option>농업·푸드</option>
-            <option>문화·콘텐츠</option><option>기타</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>사업계획서 파일 (필수)</label>
-          <div class="file-drop">
-            <input type="file" id="s-file" accept=".pdf,.docx,.txt,.md" />
-            <div class="file-hint">PDF, DOCX, TXT, MD 첨부 필수</div>
-            <div class="file-status" id="s-file-status">아직 첨부된 사업계획서가 없습니다.</div>
+    <section class="simulation-content is-collapsed" id="setup-drawer">
+      <button class="setup-toggle" id="setup-toggle" type="button" aria-expanded="false">
+        <span>면접 준비</span>
+        <strong id="setup-summary">예비창업패키지 · AI·딥테크 · 사업계획서 파일 필요</strong>
+      </button>
+      <div class="setup-sheet">
+        <div class="disclaimer-box">
+          <div class="ico">!</div>
+          <div>
+            <b>AI 보조 가상 심사입니다.</b> 실제 심사·합격 여부와 무관하며, 제출 전 보완점을 찾기 위한 참고용입니다.
           </div>
-          <textarea id="s-text" hidden></textarea>
         </div>
 
-        <label class="voice-mode-card" for="s-voice-mode">
-          <input type="checkbox" id="s-voice-mode" />
-          <span>
-            <strong>리얼 음성 모드 <span class="free">무료 베타</span></strong>
-            질문과 꼬리질문이 말풍선 자막과 함께 자동 재생됩니다. 브라우저 내장 음성을 사용해서 추가 API 비용은 없습니다.
-          </span>
-        </label>
+        <div class="card setup-card">
+          <h3>사업계획서 첨부</h3>
+          <div class="field has-choices">
+            <label>신청 사업</label>
+            <select id="s-target">
+              <option value="예비창업패키지">예비창업패키지</option>
+              <option value="초기창업패키지">초기창업패키지</option>
+              <option value="청년창업사관학교">청년창업사관학교</option>
+              <option value="딥테크 헬스케어 패키지">딥테크 헬스케어 패키지</option>
+              <option value="지자체 청년창업">지자체 청년창업</option>
+            </select>
+            <div class="choice-grid" data-choice-for="s-target">
+              <button type="button" class="choice-chip is-active" data-value="예비창업패키지">예비창업</button>
+              <button type="button" class="choice-chip" data-value="초기창업패키지">초기창업</button>
+              <button type="button" class="choice-chip" data-value="청년창업사관학교">창업사관학교</button>
+              <button type="button" class="choice-chip" data-value="딥테크 헬스케어 패키지">딥테크</button>
+              <button type="button" class="choice-chip" data-value="지자체 청년창업">지자체</button>
+            </div>
+          </div>
+          <div class="field has-choices">
+            <label>분야</label>
+            <select id="s-field">
+              <option>AI·딥테크</option><option>헬스케어</option>
+              <option>커머스·로컬</option><option>농업·푸드</option>
+              <option>문화·콘텐츠</option><option>기타</option>
+            </select>
+            <div class="choice-grid" data-choice-for="s-field">
+              <button type="button" class="choice-chip is-active" data-value="AI·딥테크">AI·딥테크</button>
+              <button type="button" class="choice-chip" data-value="헬스케어">헬스케어</button>
+              <button type="button" class="choice-chip" data-value="커머스·로컬">커머스·로컬</button>
+              <button type="button" class="choice-chip" data-value="농업·푸드">농업·푸드</button>
+              <button type="button" class="choice-chip" data-value="문화·콘텐츠">문화·콘텐츠</button>
+              <button type="button" class="choice-chip" data-value="기타">기타</button>
+            </div>
+          </div>
+          <div class="field file-field">
+            <label>사업계획서 파일 (필수)</label>
+            <div class="file-drop">
+              <input type="file" id="s-file" accept=".pdf,.docx,.txt,.md" />
+              <div class="file-hint">PDF, DOCX, TXT, MD 첨부 필수</div>
+              <div class="file-status" id="s-file-status">아직 첨부된 사업계획서가 없습니다.</div>
+            </div>
+            <textarea id="s-text" hidden></textarea>
+          </div>
 
-        <button class="btn-run" id="s-run">가상 면접 시작 (80 토큰)</button>
+          <label class="voice-mode-card" for="s-voice-mode">
+            <input type="checkbox" id="s-voice-mode" />
+            <span>
+              <strong>리얼 음성 모드 <span class="free">무료 베타</span></strong>
+              질문과 꼬리질문이 말풍선 자막과 함께 자동 재생됩니다.
+            </span>
+          </label>
+
+          <button class="btn-run" id="s-run">가상 면접 시작 (80 토큰)</button>
+        </div>
       </div>
     </section>
   </div>
@@ -1965,6 +2104,7 @@ function setPlanFileStatus(message, state = "") {
   if (!el) return;
   el.textContent = message;
   el.className = `file-status${state ? ` is-${state}` : ""}`;
+  updateSetupSummary();
 }
 
 async function handlePlanFileChange(event) {
@@ -1998,10 +2138,58 @@ function syncStageMeta() {
   const stageField = document.getElementById("stage-field");
   if (stageTarget) stageTarget.textContent = target;
   if (stageField) stageField.textContent = `${field} 분야 사업계획서를 기준으로 예상 질문을 구성합니다.`;
+  updateChoiceButtons("s-target");
+  updateChoiceButtons("s-field");
+  updateSetupSummary();
 }
+
+function updateSetupSummary() {
+  const target = document.getElementById("s-target")?.value || "예비창업패키지";
+  const field = document.getElementById("s-field")?.value || "AI·딥테크";
+  const fileLabel = parsedPlanFile ? parsedPlanFile.name : "사업계획서 파일 필요";
+  const summary = document.getElementById("setup-summary");
+  if (summary) summary.textContent = `${target} · ${field} · ${fileLabel}`;
+}
+
+function setSetupCollapsed(collapsed) {
+  const drawer = document.getElementById("setup-drawer");
+  const toggle = document.getElementById("setup-toggle");
+  if (!drawer || !toggle) return;
+  drawer.classList.toggle("is-collapsed", Boolean(collapsed));
+  toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+}
+
+function updateChoiceButtons(selectId) {
+  const select = document.getElementById(selectId);
+  const grid = document.querySelector(`[data-choice-for="${selectId}"]`);
+  if (!select || !grid) return;
+  grid.querySelectorAll(".choice-chip").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.value === select.value);
+  });
+}
+
+function initChoiceGrids() {
+  document.querySelectorAll("[data-choice-for]").forEach(grid => {
+    const select = document.getElementById(grid.dataset.choiceFor);
+    if (!select) return;
+    grid.querySelectorAll(".choice-chip").forEach(button => {
+      button.addEventListener("click", () => {
+        select.value = button.dataset.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+    updateChoiceButtons(select.id);
+  });
+}
+
 document.getElementById("s-target")?.addEventListener("change", syncStageMeta);
 document.getElementById("s-field")?.addEventListener("change", syncStageMeta);
 document.getElementById("s-file")?.addEventListener("change", handlePlanFileChange);
+document.getElementById("setup-toggle")?.addEventListener("click", () => {
+  const drawer = document.getElementById("setup-drawer");
+  setSetupCollapsed(!drawer?.classList.contains("is-collapsed"));
+});
+initChoiceGrids();
 syncStageMeta();
 
 function buildInterviewQuestions(target, field, text, reviewContext = assessReviewEvidence(target, field, text)) {
@@ -2336,30 +2524,34 @@ function renderInterviewSession({ target, field, text, supportContext = null }) 
 function renderInterviewRound() {
   if (!activeInterviewSession) return;
   document.body.classList.add("sim-interview-active");
+  document.getElementById("setup-drawer")?.classList.add("is-hidden-during-interview");
   const { target, field, text, questions, answers, current, reviewContext } = activeInterviewSession;
   const item = questions[current];
   const meta = PERSONA_META[item.key];
   const panel = document.getElementById("result-area");
+  panel.classList.add("is-interview-live");
   const progress = questions.map((_, i) => `<span class="progress-dot ${i < current ? "is-done" : ""} ${i === current ? "is-active" : ""}"></span>`).join("");
   const isLast = current === questions.length - 1;
   const hasTurns = getRoundTurns(current).length > 0;
+  const isImmersive = document.body.classList.contains("sim-immersive");
   setActivePanelLabel(current);
   panel.innerHTML = `
-    ${renderReviewBrief(reviewContext)}
+    ${isImmersive ? "" : renderReviewBrief(reviewContext)}
     <div class="interview-room-card">
-      <div class="interview-room-head">
+      ${isImmersive ? "" : `<div class="interview-room-head">
         <div>
           <small>지원사업 심사 면접 진행 중</small>
           <h3>${escapeHtml(meta.name)}</h3>
         </div>
         <span class="round-chip">${current + 1} / ${questions.length}</span>
-      </div>
+      </div>`}
       <div class="interview-room-body">
-        <div class="interview-progress">${progress}</div>
-        <p class="chair-note">위원장 안내: 질문을 들은 뒤 1~2분 분량으로 핵심 근거를 답변하세요.</p>
+        ${isImmersive ? "" : `<div class="interview-progress">${progress}</div>
+        <p class="chair-note">위원장 안내: 질문을 들은 뒤 1~2분 분량으로 핵심 근거를 답변하세요.</p>`}
         <div class="bubble-row">
-          <div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.role)}</span></div>
+          ${isImmersive ? "" : `<div class="bubble-persona"><b>${meta.initial}</b><span>${escapeHtml(meta.role)}</span></div>`}
           <div class="speech-card" data-speech-card-index="${current}">
+            ${isImmersive ? `<small style="display:block;color:var(--sage-deep);font-weight:900;margin-bottom:6px;">${escapeHtml(meta.name)} · ${current + 1}/${questions.length}</small>` : ""}
             <p>${escapeHtml(item.question)}</p>
             ${renderConversationThread(current)}
             <div class="speech-tools">
@@ -2498,6 +2690,8 @@ document.getElementById("s-run").addEventListener("click", async () => {
   }
   const text = document.getElementById("s-text").value.trim();
   if(!parsedPlanFile || text.length < 100){
+    document.getElementById("setup-drawer")?.classList.remove("is-hidden-during-interview");
+    setSetupCollapsed(false);
     alert("사업계획서 문서 파일을 먼저 첨부해주세요. PDF, DOCX, TXT, MD 형식을 지원합니다.");
     return;
   }
@@ -2573,6 +2767,7 @@ async function runFinalEvaluation({ target, field, text, questions }) {
   stopVoiceAnswer();
   window.speechSynthesis?.cancel?.();
   document.body.classList.remove("sim-interview-active");
+  document.getElementById("result-area")?.classList.remove("is-interview-live");
   document.getElementById("result-area").innerHTML = `
     <div class="loading">
       <div>가상 심사위원단이 답변을 검토 중입니다.<span>준비도 점수, 적합 위험, 보완 우선순위를 계산하는 중...</span></div>
